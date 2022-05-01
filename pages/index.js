@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import Script from 'next/script'
 import styles from '../styles/Home.module.css'
 
 export default function Home() {
@@ -8,18 +9,7 @@ export default function Home() {
       <Head>
         <title>SPS By The Numbers</title>
         <meta name="Data-centric analyses and insights for Seattle Public Schools" />
-        <link rel="icon" href="/favicon.ico" />
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-	<script>
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){window.dataLayer.push(arguments);}
-	gtag('js', new Date());
-
-	gtag('config', '3535628717');
-	</script>
       </Head>
-
       <main className={styles.main}>
         <h1 className={styles.title}>
 	SPS By The Numbers
