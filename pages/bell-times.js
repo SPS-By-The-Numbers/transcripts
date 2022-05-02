@@ -1,14 +1,41 @@
 import React, { useMemo, useState }  from 'react'
 
+import styles from '../styles/Home.module.css'
 import Histogram from '../components/Histogram';
 import SchoolList from '../components/SchoolList';
+import ItemList from '../components/ItemList';
 
 import Schools from '../data/schools.json';
 import SurveyData from '../data/bell-survey.json';
 
-function calculateStats(survreyData, schools) {
+function h(a, b, c) {
+  const str = a + b + c;
+  let code = 31;
+  for (let i=0; i < str.length; i++) {
+    code += (str[i]*31)^(str.length - i);
+  }
+  return code;
+}
+
+function calculateStats(survreyData, schools, filters) {
   const activeSchools = new Set(schools.filter(({active}) => active).map(s => s.schoolId));
-  const activeData = survreyData.filter(
+
+  let filteredData = survreyData;
+  for (let f of filters) {
+    if (f.active === false) {
+      if (f.itemId === 'bus-eligible') {
+        filteredData = filteredData.filter(d => d.eligible !== true );
+      } else if (f.itemId === 'bus-ineligible') {
+        filteredData = filteredData.filter(d => d.eligible !== false );
+      } else if (f.itemId === 'plans-on-bus') {
+        filteredData = filteredData.filter(d => d.useIn2022 !== true );
+      } else if (f.itemId === 'no-plans-on-bus') {
+        filteredData = filteredData.filter(d => d.useIn2022 !== false );
+      }
+    }
+  }
+
+  const activeData = filteredData.filter(
       d => d.schools.split(',').filter(
         v => activeSchools.has(v)
       ).length !== 0 
@@ -23,6 +50,14 @@ function calculateStats(survreyData, schools) {
 
   // Count distance and service type.
 
+  let freeForm = activeData.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments}) => ({freeFormNoBusImpact: freeFormNoBusImpact.trim(), freeForm3TierImpact: freeForm3TierImpact.trim(), freeFormOtherComments: freeFormOtherComments.trim()}));
+  freeForm = freeForm.filter(f => f.freeFormNoBusImpact || f.freeForm3TierImpact || f.freeFormOtherComments);
+  freeForm = freeForm.map(f => ({
+  ...f,
+  hash: h(f.freeFormNoBusImpact, f.freeFormOtherComments, f.freeForm3TierImpact)
+  }));
+  freeForm.sort((a,b) => a.hash < b.hash);
+
   return {
     numEntries,
     numEligible,
@@ -30,21 +65,20 @@ function calculateStats(survreyData, schools) {
     numNeedHelp,
     numPreferCurrentBell,
     numSplitBellTime,
-    numChildCareChallenges
+    numChildCareChallenges,
+    freeForm
   };
 }
 
-export default function BellTimes({ survreyData, initialSchools }) {
+export default function BellTimes({ survreyData, initialSchools, initialFilters }) {
   const [schools, setSchools] = useState(initialSchools);
+  const [filters, setFilters] = useState(initialFilters);
 
   const stats = useMemo(
-    () => calculateStats(survreyData, schools),
-    [survreyData, schools]
+    () => calculateStats(survreyData, schools, filters),
+    [survreyData, schools, filters]
   );
 
-  const percentSeries = (num) => {
-    return [num / stats.numEntries * 100, (stats.numEntries-num)/stats.numEntries * 100];
-  }
   const numSeries = (num) => {
     return [num, stats.numEntries-num];
   }
@@ -57,10 +91,23 @@ export default function BellTimes({ survreyData, initialSchools }) {
         <p><strong>Key result:</strong> Even families still without bus service overwhelmingly prefer a 2-bell schedule.</p>
 
         <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenlly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over 1200 real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
+        <p>Some data slices still missing. Check back for updates. Email spsbelltimesurvey@gmail.com with questions.</p>
 
       </section>
       <section className="p-2 h-full w-full min-h-screen flex flex-row items-stretch justify-items-stretch bg-gray-300 space-x-1">
         <div className="w-1/8 flex flex-col items-stretch justify-start space-y-1">
+          <div className="flex-stretch">
+            <ItemList
+              items={filters}
+              toggleActive={(itemId)=>{
+                setFilters((oldFilters) =>
+                  oldFilters.map((f) =>
+                    f.itemId === itemId
+                        ? { ...f, active: !f.active }
+                        : { ...f }));
+              }}
+              />
+          </div>
           <div className="flex-stretch">
             <SchoolList
               schools={schools}
@@ -152,9 +199,32 @@ export default function BellTimes({ survreyData, initialSchools }) {
             />
           </div>
         </div>
+
+        <div className="flex-grow flex flex-col justify-start shadow-lg">
+          {
+            stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments}) =>
+            (
+              <div className='freeform-card'>
+               <h3>How would not having a bus service impact your family and student/s?</h3>
+               { freeFormNoBusImpact || '[no answer]' }
+
+               <h3>How would the proposed change to bell times impact your family and student/s?</h3>
+               { freeForm3TierImpact || '[no answer]'}
+
+               <h3>Any other comments?</h3>
+               { freeFormOtherComments || '[no answer]'}
+              </div>
+            ))
+          }
+          
+        </div>
       </section>
     </main>
   );
+}
+
+function makeItem(id, name, active, color) {
+  return {itemId: id, name, active, color};
 }
 
 export async function getStaticProps() {
@@ -168,6 +238,12 @@ export async function getStaticProps() {
     props: {
       survreyData: SurveyData,
       initialSchools: schoolListState,
+      initialFilters: [
+        makeItem('bus-eligible', 'Eligible For Bus', true, 'grey'),
+        makeItem('bus-ineligible', 'Not Eligible For Bus', true, 'grey'),
+        makeItem('plans-on-bus', 'Planning to Bus in 2022-2023', true, 'grey'),
+        makeItem('no-plans-on-bus', 'Not Planning to Bus in 2022-2023', true, 'grey'),
+      ],
     },
     revalidate: 1, // In seconds
   };

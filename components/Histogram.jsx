@@ -2,7 +2,6 @@ import React from 'react';
 import Highcharts from 'highcharts'
 import HighchartsExporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official'
-import ChartCard from './ChartCard'
 import Measure from 'react-measure'
 import _uniqueId from 'lodash/uniqueId';
 

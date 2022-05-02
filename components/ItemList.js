@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-const SchoolListItem = ({ schoolId, active, name, toggleActive, color }) => {
-  const handleChange = useCallback(() => toggleActive(schoolId), [schoolId, toggleActive]);
+const ListItem = ({ itemId, active, name, toggleActive, color }) => {
+  const handleChange = useCallback(() => toggleActive(itemId), [itemId, toggleActive]);
   return (
     <li
       className="flex items-stretch justify-items-stretch text-sm"
@@ -23,26 +23,17 @@ const SchoolListItem = ({ schoolId, active, name, toggleActive, color }) => {
   );
 };
 
-export default function SchoolList({
-  schools,
+export default function ItemList({
+  items,
   toggleActive,
-  setAllInactive,
 }) {
-  const handleSetAllInactive = useCallback(() => setAllInactive(), [setAllInactive]);
-
   return (
     <div className="space-y-1">
-      <button
-        onClick={handleSetAllInactive}
-        className="border-2 border-gray-600 rounded px-2 bg-gray-200"
-      >
-        Deselect all Schools
-      </button>
       <ul className="divide-y divide-white bg-gray-100 shadow-lg">
-        {Object.values(schools).map(({ schoolId, name, active, color }, i) => (
-          <SchoolListItem
-            key={schoolId}
-            schoolId={schoolId}
+        {Object.values(items).map(({ itemId, name, active, color }, i) => (
+          <ListItem
+            key={itemId}
+            itemId={itemId}
             name={name}
             active={active}
             toggleActive={toggleActive}
