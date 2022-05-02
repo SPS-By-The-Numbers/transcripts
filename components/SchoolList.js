@@ -24,7 +24,7 @@ const SchoolListItem = ({ schoolId, active, name, toggleActive, color }) => {
 };
 
 export default function SchoolList({
-  state: { schools },
+  schools,
   toggleActive,
   setAllInactive,
 }) {
