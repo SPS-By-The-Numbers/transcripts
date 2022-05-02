@@ -1,4 +1,4 @@
-import '../styles/globals.css'
+import styles from '../styles/globals.scss'
 
 import { useEffect } from 'react';
 import TagManager from 'react-gtm-module';
