@@ -49,7 +49,10 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        Powered by sleep-deprived parents.
+        <p>Powered by sleep-deprived parents.
+        <br />
+        <br />
+        Questions? email: awong dot dev at gmail dot com</p>
       </footer>
     </div>
   )

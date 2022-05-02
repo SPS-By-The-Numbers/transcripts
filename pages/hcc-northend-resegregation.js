@@ -50,6 +50,7 @@ export default function Cascadia({ hccRace }) {
         </p>
 
         <p> Because of the false assumption that HCC is more white, the HCC removal will re-segregate these students (about 180) and also assign more resources to whiter populations by about 2.5x-3x (assuming 1 new teacher per school)</p>
+        <p> See the <a href="https://medium.com/@awongawong/sps-misunderstands-its-own-gifted-program-1816665d86b">(not fully data centric) letter to the  board</a> here</p>
       </section>
       <section>
         <div className="flex-grow flex flex-row items-stretch justify-start shadow-lg">
