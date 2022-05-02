@@ -13,7 +13,7 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <h1 className={styles.title}>
-	SPS By The Numbers
+	<img width="100" height="100" src="/logo.png" />SPS By The Numbers
         </h1>
 
         <p className={styles.description}>

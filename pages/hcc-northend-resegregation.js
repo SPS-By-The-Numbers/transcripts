@@ -43,7 +43,7 @@ export default function Cascadia({ hccRace }) {
           <li> - Cascadia feeds from 24 neighborhood schools.</li>
           <li> - Cascadia is 54% white.</li>
           <li> - Only 9/24 schools have a lower percentage of white kids.</li>
-          <li> - In this cohort, only 7/24 schools have more than 10% black kids.</li>
+          <li> - In this cohort, only 7/24 schools have more than 10% black kids (1/2 the black students in cascadia come from these schools...verified with staff).</li>
           <li> - Of the remaining 17 schools, only 7 have a higher percentage of black kids -- but realistically they mostly have very similar numbers.</li>
           <li> - There are almost no native or island kids in these schools.</li>
         </ul>

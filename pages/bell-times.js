@@ -31,6 +31,22 @@ function calculateStats(survreyData, schools, filters) {
         filteredData = filteredData.filter(d => d.useIn2022 !== true );
       } else if (f.itemId === 'no-plans-on-bus') {
         filteredData = filteredData.filter(d => d.useIn2022 !== false );
+      } else if (f.itemId === 'prefers-2-bells') {
+        filteredData = filteredData.filter(d => d.preferCurrentBell !== true );
+      } else if (f.itemId === 'prefers-3-bells') {
+        filteredData = filteredData.filter(d => d.preferCurrentBell !== false );
+      } else if (f.itemId === 'need-transit-help') {
+        filteredData = filteredData.filter(d => d.needHelp !== true );
+      } else if (f.itemId === 'no-need-transit-help') {
+        filteredData = filteredData.filter(d => d.needHelp !== false );
+      } else if (f.itemId === 'split-bell-time') {
+        filteredData = filteredData.filter(d => d.splitBellTime !== true );
+      } else if (f.itemId === 'no-split-bell-time') {
+        filteredData = filteredData.filter(d => d.splitBellTime !== false );
+      } else if (f.itemId === 'childcare-challenges') {
+        filteredData = filteredData.filter(d => d.childcareChallenges !== true );
+      } else if (f.itemId === 'no-childcare-challenges') {
+        filteredData = filteredData.filter(d => d.childcareChallenges !== false );
       }
     }
   }
@@ -201,10 +217,11 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
         </div>
 
         <div className="flex-grow flex flex-col justify-start shadow-lg">
+          <div>Num Comments {stats.freeForm.length}</div>
           {
             stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, hash}) =>
             (
-              <div key={hash} className='freeform-card'>
+              <div className='freeform-card'>
                <h3>How would not having a bus service impact your family and student/s?</h3>
                { freeFormNoBusImpact || '[no answer]' }
 
@@ -243,6 +260,14 @@ export async function getStaticProps() {
         makeItem('bus-ineligible', 'Not Eligible For Bus', true, 'grey'),
         makeItem('plans-on-bus', 'Planning to Bus in 2022-2023', true, 'grey'),
         makeItem('no-plans-on-bus', 'Not Planning to Bus in 2022-2023', true, 'grey'),
+        makeItem('need-transit-help', 'W/o bus would need transit help', true, 'grey'),
+        makeItem('no-need-transit-help', 'W/o bus would NOT need transit help', true, 'grey'),
+        makeItem('prefers-2-bells', 'Prefers 2 bells', true, 'grey'),
+        makeItem('prefers-3-bells', 'Prefers 3 bells', true, 'grey'),
+        makeItem('split-bell-time', 'Split between tier 1 and 3', true, 'grey'),
+        makeItem('no-split-bell-time', 'Not split between tier 1 and 3', true, 'grey'),
+        makeItem('childcare-challenges', '3-bells = childcare challenges', true, 'grey'),
+        makeItem('no-childcare-childcare', '3-bells will not create childcare challenges', true, 'grey'),
       ],
     },
     revalidate: 1, // In seconds
