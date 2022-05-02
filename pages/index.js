@@ -21,7 +21,7 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
-          <Link href="/bell-times">
+          <Link href="/bell-times" passHref={true}>
             <div className={styles.card}>
               <h2>SPS Bell Time Survey Results</h2>
               <strong>Key results:</strong> <br /> Even families still without bus service overwhelmingly prefer a 2-bell schedule. Other data gathered is harder to analyze. Click through and read HAZARD at top.
@@ -29,7 +29,7 @@ export default function Home() {
           </Link>
           <a href="https://andrewbcooper.shinyapps.io/spsstarttimes/" className={styles.card}>
             <h2>SPS Start Times Exploration Tool</h2>
-            Andy Cooper (acooper at alumni.washington.edu)'s awesome tool for exploring the impact of the
+            Andy Cooper (acooper at alumni.washington.edu)&apos;s awesome tool for exploring the impact of the
             2022 proposed bell time changes by joining multiple government datasets at the census tract granularity.
             Includes Equity metrics.
           </a>
