@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import Image from 'next/image'
 import Script from 'next/script'
 import styles from '../styles/Home.module.css'
@@ -20,9 +21,23 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
-          <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#" className={styles.card}>
-            <h2>SPS Bell Time Survey Results -- Letter to the board</h2>
-            <p>More details coming soon. For now, here is the letter sent to the board</p>
+          <Link href="/bell-times">
+            <div className={styles.card}>
+              <h2>SPS Bell Time Survey Results</h2>
+              <strong>Key results:</strong> <br /> Even families still without bus service overwhelmingly prefer a 2-bell schedule. Other data gathered is harder to analyze. Click through and read HAZARD at top.
+            </div>
+          </Link>
+          <a href="https://andrewbcooper.shinyapps.io/spsstarttimes/" className={styles.card}>
+            <h2>SPS Start Times Exploration Tool</h2>
+            Andy Cooper (acooper at alumni.washington.edu)'s awesome tool for exploring the impact of the
+            2022 proposed bell time changes by joining multiple government datasets at the census tract granularity.
+            Includes Equity metrics.
+          </a>
+          <a href="https://sps-panorama.web.app/" className={styles.card}>
+            <h2>SPS Panorama Data Slicer (2019)</h2>
+            Tool for comparing SPS Panorama data for different schools, sorting them to find the most
+            distinguishing characteristics. Much more understandable than the Panorama site. Data for 2021
+            is not uploaded yet.
           </a>
         </div>
       </main>

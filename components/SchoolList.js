@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 const SchoolListItem = ({ schoolId, active, name, toggleActive, color }) => {
-  const handleChange = useCallback(() => toggleActive(schoolId), [schoolId]);
+  const handleChange = useCallback(() => toggleActive(schoolId), [schoolId, toggleActive]);
   return (
     <li
       className="flex items-stretch justify-items-stretch text-sm"
@@ -28,7 +28,7 @@ export default function SchoolList({
   toggleActive,
   setAllInactive,
 }) {
-  const handleSetAllInactive = useCallback(() => setAllInactive());
+  const handleSetAllInactive = useCallback(() => setAllInactive(), [setAllInactive]);
 
   return (
     <div className="space-y-1">

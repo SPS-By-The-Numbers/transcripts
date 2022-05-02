@@ -76,13 +76,12 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  max-width: 800px;
   margin-top: 3rem;
 }
 
 .card {
   margin: 1rem;
-  flex-basis: 100%;
+  flex-basis: 38%;
   padding: 1.5rem;
   text-align: left;
   color: inherit;

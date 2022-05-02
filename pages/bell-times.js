@@ -50,99 +50,109 @@ export default function BellTimes({ survreyData, initialSchools }) {
   }
 
   return (
-    <main className="p-2 h-full w-full min-h-screen flex flex-row items-stretch justify-items-stretch bg-gray-300 space-x-1">
-      <div className="w-1/8 flex flex-col items-stretch justify-start space-y-1">
-        <div className="flex-stretch">
-          <SchoolList
-            schools={schools}
-            toggleActive={(schoolId)=>{
-              setSchools((oldSchools) =>
-                oldSchools.map((s) =>
-                  s.schoolId === schoolId
-                      ? { ...s, active: !s.active }
-                      : { ...s }));
-            }}
-            setAllInactive={() =>
-              setSchools((oldSchools) =>
-                oldSchools.map((s) => {return {...s, active: false }}))
-            }
+    <main>
+      <section>
+        <p>Results from the April 2022 <a href="https://forms.gle/6siw5FAnQCqpToC46">Bell-time Survey</a>.</p>
+
+        <p><strong>Key result:</strong> Even families still without bus service overwhelmingly prefer a 2-bell schedule.</p>
+
+        <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenlly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over 1200 real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
+
+      </section>
+      <section className="p-2 h-full w-full min-h-screen flex flex-row items-stretch justify-items-stretch bg-gray-300 space-x-1">
+        <div className="w-1/8 flex flex-col items-stretch justify-start space-y-1">
+          <div className="flex-stretch">
+            <SchoolList
+              schools={schools}
+              toggleActive={(schoolId)=>{
+                setSchools((oldSchools) =>
+                  oldSchools.map((s) =>
+                    s.schoolId === schoolId
+                        ? { ...s, active: !s.active }
+                        : { ...s }));
+              }}
+              setAllInactive={() =>
+                setSchools((oldSchools) =>
+                  oldSchools.map((s) => {return {...s, active: false }}))
+              }
+              />
+          </div>
+        </div>
+
+
+
+        <div className="flex-grow flex flex-col items-stretch justify-start shadow-lg">
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Prefers 2-tier Bell Time (n=${stats.numEntries})`}
+              data={{
+                ylabel: 'families',
+                categories:[ "2-tier Bell", "3-tier Bell" ],
+                series: [{showInLegend:false, name: 'families', data: numSeries(stats.numPreferCurrentBell)}]
+              }}
             />
+          </div>
+
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Expects Childcare Challenges (n=${stats.numEntries})`}
+              data={{
+                ylabel: 'families',
+                categories:[ "Expects Challenges", "No Challenges" ],
+                series: [{showInLegend:false, name: 'families', data: numSeries(stats.numChildCareChallenges)}]
+              }}
+            />
+          </div>
+
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Has students with both 7:30 and 9:30 (n=${stats.numEntries})`}
+              data={{
+                ylabel: 'families',
+                categories:[ "Has 7:30/9:30 split", "Not split" ],
+                series: [{showInLegend:false, name: 'families', data: numSeries(stats.numSplitBellTime)}]
+              }}
+            />
+          </div>
+
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Eligible for Bus Service (n=${stats.numEntries})`}
+              data={{
+                ylabel: 'families',
+                categories: [ "Eligible", "Not Eligible" ],
+                series: [{showInLegend:false, name: 'families', data: numSeries(stats.numEligible)}]
+              }}
+            />
+          </div>
+
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Plans on Bussing in 2022-2023 (n=${stats.numEligible})`}
+              data={{
+                ylabel: 'families',
+                categories:[ "Eligible and will bus", "Eligible and will NOT bus" ],
+                series: [{
+                  showInLegend:false,
+                  name: 'families',
+                  data: [stats.numUseIn2022, stats.numEligible - stats.numUseIn2022]
+                  }]
+              }}
+            />
+          </div>
+
+          <div className="h-80 flex overflow-hidden">
+            <Histogram
+              title={`Needs Help Finding Transit w/o Bus (n=${stats.numEligible})`}
+              data={{
+                ylabel: 'families',
+                categories:[ "Needs Help", "Does Not Need Help" ],
+                series: [{showInLegend:false, name: 'families', data: [stats.numNeedHelp, stats.numEligible - stats.numNeedHelp]}]
+              }}
+            />
+          </div>
         </div>
-      </div>
-
-
-
-      <div className="flex-grow flex flex-col items-stretch justify-start shadow-lg">
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Prefers 2-tier Bell Time (n=${stats.numEntries})`}
-            data={{
-              ylabel: 'families',
-              categories:[ "2-tier Bell", "3-tier Bell" ],
-              series: [{showInLegend:false, name: 'families', data: numSeries(stats.numPreferCurrentBell)}]
-            }}
-          />
-        </div>
-
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Expects Childcare Challenges (n=${stats.numEntries})`}
-            data={{
-              ylabel: 'families',
-              categories:[ "Expects Challenges", "No Challenges" ],
-              series: [{showInLegend:false, name: 'families', data: numSeries(stats.numChildCareChallenges)}]
-            }}
-          />
-        </div>
-
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Has students with both 7:30 and 9:30 (n=${stats.numEntries})`}
-            data={{
-              ylabel: 'families',
-              categories:[ "Has 7:30/9:30 split", "Not split" ],
-              series: [{showInLegend:false, name: 'families', data: numSeries(stats.numSplitBellTime)}]
-            }}
-          />
-        </div>
-
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Eligible for Bus Service (n=${stats.numEntries})`}
-            data={{
-              ylabel: 'families',
-              categories: [ "Eligible", "Not Eligible" ],
-              series: [{showInLegend:false, name: 'families', data: numSeries(stats.numEligible)}]
-            }}
-          />
-        </div>
-
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Plans on Bussing in 2022-2023 (n=${stats.numEligible})`}
-            data={{
-              ylabel: 'families',
-              categories:[ "Eligible and will bus", "Eligible and will NOT bus" ],
-              series: [{
-                showInLegend:false,
-                name: 'families',
-                data: [stats.numUseIn2022, stats.numEligible - stats.numUseIn2022]
-                }]
-            }}
-          />
-        </div>
-
-        <div className="h-80 flex overflow-hidden">
-          <Histogram
-            title={`Needs Help Finding Transit w/o Bus (n=${stats.numEligible})`}
-            data={{
-              ylabel: 'families',
-              categories:[ "Needs Help", "Does Not Need Help" ],
-              series: [{showInLegend:false, name: 'families', data: [stats.numNeedHelp, stats.numEligible - stats.numNeedHelp]}]
-            }}
-          />
-        </div>
-      </div>
+      </section>
     </main>
   );
 }
