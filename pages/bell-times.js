@@ -202,9 +202,9 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
 
         <div className="flex-grow flex flex-col justify-start shadow-lg">
           {
-            stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments}) =>
+            stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, hash}) =>
             (
-              <div className='freeform-card'>
+              <div key={hash} className='freeform-card'>
                <h3>How would not having a bus service impact your family and student/s?</h3>
                { freeFormNoBusImpact || '[no answer]' }
 
