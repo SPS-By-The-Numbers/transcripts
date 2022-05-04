@@ -170,7 +170,7 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
 
         <p><strong>Key result:</strong> Even families still without bus service overwhelmingly prefer a 2-bell schedule.</p>
 
-        <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over 1200 real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
+        <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over {survreyData.length} real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
         <p>Some data slices still missing. Check back for updates. Email spsbelltimesurvey@gmail.com with questions.</p>
 
       </section>
