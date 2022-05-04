@@ -63,10 +63,25 @@ function calculateStats(survreyData, schools, filters) {
   const numPreferCurrentBell = activeData.filter(d => d.preferCurrentBell).length;
   const numSplitBellTime = activeData.filter(d => d.splitBellTime).length;
   const numChildCareChallenges = activeData.filter(d => d.childcareChallenges).length;
+  const currentService = activeData.reduce((acc, d) => {
+        for (const v of d.currentService) {
+          acc[v] = acc[v] + 1;
+        }
+        return acc;
+      },
+      [0, 0, 0, 0, 0, 0]);
+  const distance = activeData.reduce((acc, d) => {
+        for (const v of d.distance) {
+          acc[v] = acc[v] + 1;
+        }
+        return acc;
+      },
+      [0, 0, 0, 0]);
 
   // Count distance and service type.
 
-  let freeForm = activeData.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments}) => ({freeFormNoBusImpact: freeFormNoBusImpact.trim(), freeForm3TierImpact: freeForm3TierImpact.trim(), freeFormOtherComments: freeFormOtherComments.trim()}));
+  let freeForm = activeData.map(
+    ({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, freeformFingerprint}) => ({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, freeformFingerprint}));
   freeForm = freeForm.filter(f => f.freeFormNoBusImpact || f.freeForm3TierImpact || f.freeFormOtherComments);
   freeForm = freeForm.map(f => ({
   ...f,
@@ -82,6 +97,8 @@ function calculateStats(survreyData, schools, filters) {
     numPreferCurrentBell,
     numSplitBellTime,
     numChildCareChallenges,
+    currentService,
+    distance,
     freeForm
   };
 }
@@ -98,6 +115,14 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
   const numSeries = (num) => {
     return [num, stats.numEntries-num];
   }
+
+  const setFilterOption = (e) =>{
+    setFilters((oldFilters) =>
+        oldFilters.map((f) =>
+          f.itemId === e.target.name
+          ? { ...f, value: e.target.value }
+          : { ...f }));
+  };
 
   return (
     <main>
@@ -120,6 +145,14 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
                   oldFilters.map((f) =>
                     f.itemId === itemId
                         ? { ...f, active: !f.active }
+                        : { ...f }));
+              }}
+              onOption={(event)=>{
+                console.log(event.target.id);
+                setFilters((oldFilters) =>
+                  oldFilters.map((f) =>
+                    f.itemId === event.target.id
+                        ? { ...f, values: event.target.value }
                         : { ...f }));
               }}
               />
@@ -214,14 +247,58 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
               }}
             />
           </div>
+
+          <div className="h-90 flex overflow-hidden">
+            <Histogram
+              title={`As of April 2022, which of these best describes your student/s bus service? (n=${stats.numEligible})`}
+              data={{
+                ylabel: 'families',
+                categories:[ 
+                  'Bus route consistently on-time',
+                  'Bus route consistently late',
+                  'Bus route is running, but prefer other transportation options.',
+                  'Bus route is NOT running. Forced to use other transportation options.',
+                  'Bus route is NOT running. Would not use it even if it were.',
+                  'Not assigned a bus route in 2022 (eg, newly enrolled family).',
+               ],
+                series: [
+                  {
+                    showInLegend:false,
+                    name: 'families',
+                    data: stats.currentService
+                }]
+              }}
+            />
+          </div>
+
+          <div className="h-90 flex overflow-hidden">
+            <Histogram
+              title={`How far away from school do the student/s in your family live? (n=${stats.numEligible})`}
+              data={{
+                ylabel: 'families',
+                categories:[ 
+                  'Less than 1 mile',
+                  '1 to 3 miles',
+                  '3 to 5 miles',
+                  'Greater than 5 miles',
+               ],
+                series: [
+                  {
+                    showInLegend:false,
+                    name: 'families',
+                    data: stats.distance
+                }]
+              }}
+            />
+          </div>
         </div>
 
         <div className="flex-grow flex flex-col justify-start shadow-lg">
           <div>Num Comments {stats.freeForm.length}</div>
           {
-            stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, hash}) =>
+            stats.freeForm.map(({freeFormNoBusImpact, freeForm3TierImpact, freeFormOtherComments, freeformFingerprint}) =>
             (
-              <div className='freeform-card'>
+              <div key={freeformFingerprint} className='freeform-card'>
                <h3>How would not having a bus service impact your family and student/s?</h3>
                { freeFormNoBusImpact || '[no answer]' }
 
@@ -241,8 +318,13 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
 }
 
 function makeItem(id, name, active, color) {
-  return {itemId: id, name, active, color};
+  return {itemId: id, name, active, color, type: 'item'};
 }
+
+function makeOption(id, name, value, initial) {
+  return {itemId: id, name, initial, value, type: 'option'};
+}
+
 
 export async function getStaticProps() {
   const schoolListState = Schools.map( s => ({
@@ -268,6 +350,7 @@ export async function getStaticProps() {
         makeItem('no-split-bell-time', 'Not split between tier 1 and 3', true, 'grey'),
         makeItem('childcare-challenges', '3-bells = childcare challenges', true, 'grey'),
         makeItem('no-childcare-childcare', '3-bells will not create childcare challenges', true, 'grey'),
+        makeOption('eligible', 'Eligile For Bus', ['All', 'Yes', 'No'], 'All'),
       ],
     },
     revalidate: 1, // In seconds

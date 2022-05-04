@@ -23695,5 +23695,419 @@
     "freeForm3TierImpact": "Would be very challenging to wait for bus in dark before 7am",
     "freeFormOtherComments": "",
     "freeformFingerprint": "LJthnn4E2wgDO2qCVdeSPvvnWABMJMLkY6ExxdIy4zU="
+  },
+  {
+    "schools": "TOPS",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "3"
+    ],
+    "needHelp": true,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "Major barrier to our work schedules for both parents. We do not have flexibility, which makes me wonder if the three tier system is equitable for parents without flexible hours.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "vZRv7z91ETmL3+DwDrCAV/IBcVijvgO/2x6SsiWsXbc="
+  },
+  {
+    "schools": "Thorton Creek,View Ridge",
+    "eligible": true,
+    "useIn2022": false,
+    "currentService": [
+      "4"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": false,
+    "splitBellTime": true,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "Not applicable",
+    "freeForm3TierImpact": "I would start work earlier or later",
+    "freeFormOtherComments": "I am a remote software tech worker. This set up make not work for families that are not remote and have kids in multiple grade levels going to different locations. That is something to consider.",
+    "freeformFingerprint": "lKDJIydiZa5NaeIKF/OPqCYeuofkxumxohPi7tnr1l4="
+  },
+  {
+    "schools": "Salmon Bay",
+    "eligible": true,
+    "useIn2022": false,
+    "currentService": [
+      "2"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "HPr/9tUaA2Yrhbk9w0F/UWhwNLqaRmgvUyglfv9xM+0="
+  },
+  {
+    "schools": "Loyal Heights",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "0"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": false,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "More time driving, less time working (I work part-time)",
+    "freeForm3TierImpact": "Having to wake up my child earlier, resulting in loss of sleep",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "7A+XN9yMOFKuBxKPeCrl50v7nuDgarD/lkfK7wcVHtw="
+  },
+  {
+    "schools": "B.F. Day,Hamilton,Lincoln",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": false,
+    "distance": [
+      "0",
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "Later start times should be for high school students, not K-8s. Early start should be for elementary schools. We should not put the logistics of bussing ahead of the needs of adolescent development. We KNOW that teens need to sleep later. I was proud of SPS for adjusting start times a few years ago to protect the varying sleep needs of different ages. These proposed changes are a huge step backwards.",
+    "freeFormOtherComments": "The questions on this survey are completely focused on bussing, which is only part of what's impacted by shifting bell times. These are NOT the only questions we should be asking.",
+    "freeformFingerprint": "HPq1vK1tj7F3vRQXQ9wITAp63h96ghAJFiExzlgt3J0="
+  },
+  {
+    "schools": "John Hay",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "0"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": false,
+    "splitBellTime": false,
+    "childcareChallenges": false,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "Positive change switching to 3 bell times.",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "PD/G26fOPYAFq6mWSDOVV8re0eM7MOtgq1y/1lphn6o="
+  },
+  {
+    "schools": "Hazel Wolf",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": true,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "None at this time",
+    "freeForm3TierImpact": "My daughter would miss out on after-school activities and potentially be spending time alone in the morning as both parents work. She may miss more days of school due to lack of accountability. Alternatively, one of us may need to quit our jobs and or potentially move so we can afford the time and financial stability of this shift.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "Iu1+JRBjGj1i3GL7R4lhK2f0srMDMMC+WOd851JIVlw="
+  },
+  {
+    "schools": "Salmon Bay",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "CV6qCc020fHnqWPJrWGO2rE/RmiCyQJ6uB/8GLDrcn4="
+  },
+  {
+    "schools": "McDonald",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "3"
+    ],
+    "freeFormNoBusImpact": "It will not affect our family as we don't take a bus.",
+    "freeForm3TierImpact": "We live 20 - 30 minutes away from school, and with the new 7:30 bell time, we will need to leave home at 7. We also have a toddler whose preschool is about 5 minutes away from school and it starts at 9, so there will be a 90 munite gap between elementary and preschool. This will be a very long wait for a 4 year old. We try to save gas and also be environmental conscious, we won't want to drive back home to spend 30 minutes at home then have to go back to driving to preschool. This change will make a huge negative impact for our family and also our children's sleep patterns.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "MRtvIUAAkLhelpo5olKce3VE7jK0uWrTCCJShJkQmhg="
+  },
+  {
+    "schools": "Thorton Creek",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "3"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "my kids would be walking zombies from lack of sleep.  it would negatively impact their after school activities.  would increase the cost of child care.  cannot say how it would negatively impact their mental health as a professional but as a mom I can say it would greatly impact them waking up so early to catch the AM bus.",
+    "freeFormOtherComments": "I believe that one of the issues not called out is the time at which a student catches the buss.  For a 7:55AM start time the original bus pick up time was 6:25.  I can only guess that a 7:30AM start time would mean that the bus would be a 6AM pick up.  This is totally ridiculous.",
+    "freeformFingerprint": "+he9q9y32QoAo5S7+0J2y8TzF8sf+w67RVY6GJ69a6k="
+  },
+  {
+    "schools": "B.F. Day",
+    "eligible": true,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "It would not impact my family.",
+    "freeForm3TierImpact": "I don't understand exactly what this means for my family. That my child needs to be at school earlier but come back the same time? In other words, I would see my child less hours during the day??",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "538qQIYCvCKlFAefNAkvm2WBmnEPd208nOV2fvkvBlo="
+  },
+  {
+    "schools": "McDonald",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "bWKqS1IHHjnwZKkw0ZC4WrMn6xpQRagFCsU4Zm7nZco="
+  },
+  {
+    "schools": "Thorton Creek",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": true,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "It wouldn’t impact us as we don’t use the bus.",
+    "freeForm3TierImpact": "My student would have to get up earlier, which would also mean going to bed earlier and reducing family time.",
+    "freeFormOtherComments": "My children and I are not morning people and getting up and being ready earlier will likely be more stressful for us. However, I understand that there are many needs beyond our own and that we will likely be able to adjust if earlier start times benefit the majority.",
+    "freeformFingerprint": "pajYCXT2Bl8wy+cgeqafODTy94xGZ2khHIiGmvESZ8M="
+  },
+  {
+    "schools": "Cedar Park",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "3"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "3UlHewuXDd4m1YYGOEz+3Q3FdAtxm//AZELn2UmEnes="
+  },
+  {
+    "schools": "Gatewood",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": false,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "No",
+    "freeForm3TierImpact": "Earlier wake up",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "Y6/EKWLqcZ4O2JvGN6u3a2vf2JqgUA9398NKJKVIYHM="
+  },
+  {
+    "schools": "Leschi",
+    "eligible": true,
+    "useIn2022": false,
+    "currentService": [
+      "2"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": false,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "No matter that our child does not use bus service, starting school at 7:30 is alarmingly early.",
+    "freeFormOtherComments": "I would love a way to “opt out” of bus service to aid in this issue. My child never rides, and yet we see it on our street (often late!) every day.",
+    "freeformFingerprint": "IN/DvU4I1FDqnArFW2jHvEkxcVLzfB/69xcABkJKcLw="
+  },
+  {
+    "schools": "Thorton Creek",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "It wouldn’t. We drive to and from school now and will continue to do so",
+    "freeForm3TierImpact": "It will require much earlier start time to our day; it will mean more hours in aftercare and fighting to maintain a place in an aftercare program that is already operating at a limited capacity.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "C3K/RVN2qswGt3j9ILZd3E2eXXDPLgxZs+oGxe4lYS8="
+  },
+  {
+    "schools": "Hazel Wolf",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "3"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": false,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "2"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "BA/lVctPVFlUfuHaYkBAsAKgErI69E/5AF5ZAFt+Yqw="
+  },
+  {
+    "schools": "Adams Elemetary,Salmon Bay",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "3"
+    ],
+    "needHelp": true,
+    "preferCurrentBell": true,
+    "splitBellTime": true,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "If it changes to a 3 tier I will have to change jobs as a SPS employee because I’d have to be to work at 7am but my kids wouldn’t start school until 9:30. They would have to get out the door and catch a bus without help. They are on an IEP and this isn’t safe.",
+    "freeForm3TierImpact": "I’d have to quit my current position and look for a new job that matched my kids school day.",
+    "freeFormOtherComments": "There are several teachers in the same Focus classroom that will have to quit our classroom and move schools if the bell times change to a 3 tier start.",
+    "freeformFingerprint": "Uo17vMwsABLLHeoZpcgF5lRYY8zJEXAQmPx3Lt7YcN0="
+  },
+  {
+    "schools": "View Ridge",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "BUZUK5DHbVCz+EgLizMIZfjl8qBiKg3Jw9bVdGzXKhM="
+  },
+  {
+    "schools": "B.F. Day",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "We don't need bus service, and we understand the need to make bus service to every student as much as possible.",
+    "freeForm3TierImpact": "Starting at 7:30 is adding 30min sleep deficit to the student.  Also means dark morning start from Nov to Jan, and can potentially create traffic problems/incidents.",
+    "freeFormOtherComments": "1) I found many neighboring school districts (Bellevue, Lake Washington, Shoreline) have elementary school students start at 9am and middle/high school students start earlier (8am or 8:30am). What is the rationale for the inverse order in Seattle school district?  2) Has the school district considered this 3-tier bell time to be ONLY temporary, aiming to return to 2-tier bell time once a better solution is found?",
+    "freeformFingerprint": "+8wuU45kgY782gX6O0pnhBkp7Y7ZV7Xw9zyRKZwPxr8="
+  },
+  {
+    "schools": "Dearborn Park",
+    "eligible": false,
+    "useIn2022": false,
+    "currentService": [],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "",
+    "freeForm3TierImpact": "My partner and I both start work at 8am. I would've been fine with a later 9:30a start time if SPS had arranged reliable before school care! We've already signed up for after school care based off of 2021-2022 bell times. The timing and gaps around this announcement are incredibly frustrating. The district says they will save $5 million by moving to the 3 tier system--USE THAT MONEY TO SECURE BEFORE SCHOOL CARE.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "uCizNeBeYe8YlqPsWtxfZQ83pTeVoZDb8tMP5Q9z5V4="
+  },
+  {
+    "schools": "Meany,Montlake",
+    "eligible": true,
+    "useIn2022": true,
+    "currentService": [
+      "2"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": true,
+    "childcareChallenges": true,
+    "distance": [
+      "1"
+    ],
+    "freeFormNoBusImpact": "Maybe",
+    "freeForm3TierImpact": "Really tough - 7:30 is going to be tough for the Little ones.",
+    "freeFormOtherComments": "7:30-9:30 is ridiculous",
+    "freeformFingerprint": "fFE6S84iClJdjU79GeyaHltnMn8paLAI2iuEGtJPPQU="
   }
 ]
