@@ -24109,5 +24109,24 @@
     "freeForm3TierImpact": "Really tough - 7:30 is going to be tough for the Little ones.",
     "freeFormOtherComments": "7:30-9:30 is ridiculous",
     "freeformFingerprint": "fFE6S84iClJdjU79GeyaHltnMn8paLAI2iuEGtJPPQU="
+  },
+  {
+    "schools": "B.F. Day",
+    "eligible": true,
+    "useIn2022": false,
+    "currentService": [
+      "2"
+    ],
+    "needHelp": false,
+    "preferCurrentBell": true,
+    "splitBellTime": false,
+    "childcareChallenges": true,
+    "distance": [
+      "0"
+    ],
+    "freeFormNoBusImpact": "We already walk to school. Bus route requires a longer walk from our house than walking directly to school.\nThe only bus we rely on is for after school care at Wallingford Boys and Girls Club.",
+    "freeForm3TierImpact": "Additional after school care time needed. Pick-up and drop-off schedule time differences for older and younger sibling in preschool that affects work schedule.",
+    "freeFormOtherComments": "",
+    "freeformFingerprint": "34t2DaAnh/mjOM9ht2Rug4BtLCcZdQXfTJzG1uBA7j8="
   }
 ]

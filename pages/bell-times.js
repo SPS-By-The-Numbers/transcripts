@@ -7,6 +7,7 @@ import ItemList from '../components/ItemList';
 
 import Schools from '../data/schools.json';
 import SurveyData from '../data/bell-survey.json';
+const SchoolsSet = new Set(Schools);
 
 function h(a, b, c) {
   const str = a + b + c;
@@ -48,13 +49,51 @@ function calculateStats(survreyData, schools, filters) {
       } else if (f.itemId === 'no-childcare-challenges') {
         filteredData = filteredData.filter(d => d.childcareChallenges !== false );
       }
+    } else if (f.itemId === 'distance') {
+      const selectedValues = new Set(f.value.map(({value}) => value));
+      filteredData = filteredData.filter(d => {
+        for (const val of d.distance) {
+          if (selectedValues.has(val)) {
+            return true;
+          }
+        }
+        return false;
+      });
+    } else if (f.itemId === 'service') {
+      const selectedValues = new Set(f.value.map(({value}) => value));
+      filteredData = filteredData.filter(d => {
+        // Handle no-response
+        if (selectedValues.has("99") && d.currentService.length === 0) {
+          return true;
+        }
+        for (const val of d.currentService) {
+          if (selectedValues.has(val)) {
+            return true;
+          }
+        }
+        console.log(d);
+        return false;
+      });
     }
   }
 
   const activeData = filteredData.filter(
-      d => d.schools.split(',').filter(
-        v => activeSchools.has(v)
-      ).length !== 0 
+      d => {
+        const splitSchools = d.schools.split(',');
+        if (splitSchools.filter(
+            v => activeSchools.has(v)
+            ).length !== 0) {
+          return true;
+        }
+
+        // Check for unknown schools.
+        if (activeSchools.has('Unknown')) {
+          if (splitSchools.filter(s => !SchoolsSet.has(s)).length !==0) {
+           return true;
+          }
+        }
+        return false;
+      }
     );
   const numEntries = activeData.length;
   const numEligible = activeData.filter(d => d.eligible).length;
@@ -131,7 +170,7 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
 
         <p><strong>Key result:</strong> Even families still without bus service overwhelmingly prefer a 2-bell schedule.</p>
 
-        <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenlly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over 1200 real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
+        <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over 1200 real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
         <p>Some data slices still missing. Check back for updates. Email spsbelltimesurvey@gmail.com with questions.</p>
 
       </section>
@@ -147,12 +186,11 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
                         ? { ...f, active: !f.active }
                         : { ...f }));
               }}
-              onOption={(event)=>{
-                console.log(event.target.id);
+              onOption={(itemId, newValue)=>{
                 setFilters((oldFilters) =>
                   oldFilters.map((f) =>
-                    f.itemId === event.target.id
-                        ? { ...f, values: event.target.value }
+                    f.itemId === itemId
+                        ? { ...f, value: newValue }
                         : { ...f }));
               }}
               />
@@ -321,8 +359,8 @@ function makeItem(id, name, active, color) {
   return {itemId: id, name, active, color, type: 'item'};
 }
 
-function makeOption(id, name, value, initial) {
-  return {itemId: id, name, initial, value, type: 'option'};
+function makeOption(id, name, options, value) {
+  return {itemId: id, name, options, value, type: 'option'};
 }
 
 
@@ -333,6 +371,24 @@ export async function getStaticProps() {
       active: true,
       color: 'grey'
     }));
+  const DistanceOptions = [
+    { value: "0", label: "Less than 1 mile" },
+    { value: "1", label: "1-3 miles" },
+    { value: "2", label: "3-5 miles" },
+    { value: "3", label: "Greater than 5 miles" },
+  ];
+
+  const ServiceOptions = [
+    { value: "99", label: "[No Response]" },
+    { value: "0", label: "Consistently on time" },
+    { value: "1", label: "Consistently late" },
+    { value: "2", label: "Running but prefers other options" },
+    { value: "3", label: "NOT Running. Forced to alternates." },
+    { value: "4", label: "NOT Running but would not use" },
+    { value: "5", label: "Not Assigned" },
+  ];
+
+
   return {
     props: {
       survreyData: SurveyData,
@@ -350,7 +406,8 @@ export async function getStaticProps() {
         makeItem('no-split-bell-time', 'Not split between tier 1 and 3', true, 'grey'),
         makeItem('childcare-challenges', '3-bells = childcare challenges', true, 'grey'),
         makeItem('no-childcare-childcare', '3-bells will not create childcare challenges', true, 'grey'),
-        makeOption('eligible', 'Eligile For Bus', ['All', 'Yes', 'No'], 'All'),
+        makeOption('distance', 'Distance From School', DistanceOptions, DistanceOptions),
+        makeOption('service', 'Bus Route Service', ServiceOptions, ServiceOptions),
       ],
     },
     revalidate: 1, // In seconds

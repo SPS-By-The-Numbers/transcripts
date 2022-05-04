@@ -32,20 +32,6 @@ export default function ItemList({
   return (
     <div className="space-y-1">
       <ul className="divide-y divide-white bg-gray-100 shadow-lg">
-        {Object.values(items).filter(d => d.type === 'option').map(({ itemId, name, value}, i) => (
-          <div>
-            <label htmlFor={itemId}>{name}</label>
-            <select multiple={true}
-              key={itemId}
-              id={itemId}
-              onChange={onOption}
-              value={value}
-              >
-              {value.map(v => (<option value={v}>{v}</option>))}
-
-            </select>
-          </div>
-        ))}
         {Object.values(items).filter(d => d.type === 'item').map(({ itemId, name, active, color }, i) => (
           <ListItem
             key={itemId}
@@ -55,6 +41,19 @@ export default function ItemList({
             toggleActive={toggleActive}
             color={active ? color : undefined}
           />
+        ))}
+        {Object.values(items).filter(d => d.type === 'option').map(({itemId, name, options, value}, i) => (
+          <div style={{ background: 'cyan' }}>
+            <label htmlFor={itemId}>{name}</label>
+            <Select
+              isMulti={true}
+              className="filter-select"
+              key={itemId}
+              onChange={newValue => onOption(itemId, newValue)}
+              options={options}
+              value={value}
+              />
+          </div>
         ))}
       </ul>
     </div>
