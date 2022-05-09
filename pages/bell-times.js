@@ -171,7 +171,8 @@ export default function BellTimes({ survreyData, initialSchools, initialFilters 
         <p><strong>Key result:</strong> Even families still without bus service overwhelmingly prefer a 2-bell schedule.</p>
 
         <p><strong style={{color:"red"}}>HAZARD:</strong> This survey method was very biased! It does NOT evenly represent many schools, especially title-1, ELL, etc. It would be wrong to interpret it as representing the whole district. However, it does represent over {survreyData.length} real families so it would be equally wrong to dismiss it.  Read the <a href="https://docs.google.com/document/d/1rrpHXLxn2ajhg9V3L5rnhnA0S7K-fLPEJvNfudgVpHg/edit?#">executive summary</a> that was sent to the board for suggested interpretation.</p>
-        <p>Some data slices still missing. Check back for updates. Email spsbelltimesurvey@gmail.com with questions.</p>
+        <p>Other Context: Analysis from <a href="https://onedrive.live.com/?authkey=%21AFarbtJ1Y%2DHzy5g&cid=3381BB53AB7DC835&id=3381BB53AB7DC835%213827&parId=3381BB53AB7DC835%213778&o=OneUp&fbclid=IwAR3zazXgIDGVlWel3xXxxjqibEClcvt6gNNBIf7ZTihIm%2DX4apoXIQYDWvM">D2 Director Lisa Rivera Smith</a>, and <a href="https://docs.google.com/document/d/1KFhRiRM702CDIUMuwg5YT5ztYvmkLFcSKEw30Kpj_S0/edit?fbclid=IwAR15WA1sa2mn32aNQtZpMElG0aIVbsz9EwWfOXmORorLn7lk4qD7pnLf1j0">D4 Director Vivian Song Maritz</a>.  Also vid meetings with <a href="https://www.youtube.com/watch?v=UwPz2djmtZU">D2,D3,D4 Lisa Rivera Smith, Chandra Hampson, and Vivian Song Maritz)</a> and <a href="https://www.youtube.com/watch?v=4BkX9iiLF5Y">D1 diredtor Liza Rankin</a>.</p>
+        <p>Email spsbelltimesurvey@gmail.com with questions.</p>
 
       </section>
       <section className="p-2 h-full w-full min-h-screen flex flex-row items-stretch justify-items-stretch bg-gray-300 space-x-1">
