@@ -39,13 +39,11 @@ class Histogram extends React.Component {
 
   render() {
     return (
-      <figure className="flex-1 flex flex-col bg-gray-100 histogram">
-        <div className="flex-1 flex relative">
+      <figure className="p-2 m-1 flex flex-col w-full bg-gray-100 histogram">
           <HighchartsReact
             highcharts={Highcharts}
             options={this.getChartOptions()}
           />
-        </div>
       </figure>
     );
   }
