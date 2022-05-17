@@ -19,7 +19,21 @@
 
 async function loadPage(w, url) {
   w.location.replace(url);
-  await new Promise(r => setTimeout(r, 2000));
+  await new Promise(r => setTimeout(r, 100));
+}
+
+async function retry_internal(f, expire_ts, done) {
+  const result = f();
+  if (!result && Date.now() < expire_ts) {
+    setTimeout(() => retry_internal(f, expire_ts, done), 100);
+    return;
+  }
+  return done(result);
+}
+
+function retry(f, timeout = 3000) {
+  const expire_ts = Date.now() + timeout;
+  return new Promise(done => retry_internal(f, expire_ts, done));
 }
 
 async function scrape(w, schoolId) {
@@ -27,16 +41,26 @@ async function scrape(w, schoolId) {
     console.log(`[scrape] going to ${url}`);
 
     await loadPage(w, `https://secure.panoramaed.com/seattle/understand/${schoolId}/summary`);
-    const questionEl = w.document.evaluate("//a[contains(text(), 'View all questions')]",
-        w.document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    const questionEl = await retry(
+        () =>  {
+          return w.document.evaluate("//a[contains(text(), 'View all questions')]",
+              w.document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        });
 
     if (!questionEl) {
       return null;
     }
     
     await loadPage(w, questionEl.href);
-    const result = Object.assign({}, w.gon);
-    result.reportData = JSON.parse(result.reportData);
+    const result = await retry(
+        () =>  {
+          if (w.gon !== undefined && w.gon.reportData !== undefined) {
+            return Object.assign({}, w.gon);
+          }
+          return undefined;
+        }, 5000);
+    if (result)
+      result.reportData = JSON.parse(result.reportData);
     return result;
 }
 
