@@ -146,7 +146,7 @@ class App extends React.Component {
           <h4 className="p-2 font-bold">Seattle Public Schools Panorama Comparison Tool, 2022 data (<a href="https://sps-panorama.web.app/">2019 here</a>)</h4>
           <section className="p-2 whitespace-normal tracking-normal space-x-1">
               <p>Data taken scraped using <a href="https://github.com/awong-dev/sps-by-the-numbers/blob/main/tools/scrape-panorama.js">a javascript blob</a> run on Panorama data viewer portal linked from the 
-              <a href="https://www.seattleschools.org/departments/rea/district-surveys/">SPS District Survey</a> page.  There are missing schools! Trying to fix...
+              <a href="https://www.seattleschools.org/departments/rea/district-surveys/">SPS District Survey</a> page.  Note in 2022, not every survey had a lot of responses. Hover over bar graphs to check "n".
               </p>
               <p>Graphs are in pecentages. Hover over data series for population size. When multiple series are selected, graphs are sorted to show questions with *most different* responses first. <a target="_blank" href="https://github.com/awong-dev/sps-by-the-numbers">[source]</a> <a target="_blank" href="https://github.com/awong-dev/sps-by-the-numbers/issues">[submit bug/feedback]</a>
               </p>
