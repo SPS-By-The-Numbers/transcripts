@@ -33,7 +33,12 @@ class Histogram extends React.Component {
         title: { text: this.props.data.ylabel },
         max: this.props.data.ymax
       },
-      series: this.props.data.series.map(d => Object.assign({ type: "column" }, d))
+      series: this.props.data.series.map(d => Object.assign({ type: "column" }, d)),
+      plotOptions: {
+        column: {
+          stacking: "normal",
+        }
+      },
     };
   }
 

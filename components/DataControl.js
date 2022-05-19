@@ -1,7 +1,7 @@
 import React from 'react';
 import Highcharts from 'highcharts'
 
-function DataControl({data, report_type, survey, subjects, onChange}) {
+function DataControl({data, report_type, survey, groupStrong, subjects, onChange}) {
   if (!data) {
     return (<div>Loading Data</div>);
   }
@@ -49,6 +49,8 @@ function DataControl({data, report_type, survey, subjects, onChange}) {
       <select name="survey" value={survey} data-type="survey" onChange={onChange}>
           {survey_options}
       </select>
+      <input type="checkbox" name="group-strong" checked={groupStrong} data-type="group-strong" onChange={onChange} />
+      <label htmlFor="group-strong">Group Strong Agree/Disagree:</label>
       <br />
       {subject_choices}
     </section>

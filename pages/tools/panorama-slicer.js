@@ -5,6 +5,23 @@ import Histogram from '../../components/Histogram'
 import data2019 from '../../data/panorama/2019.json'
 import data2022 from '../../data/panorama/2022.json'
 
+
+const GroupingMap = {
+              "Strongly disagree": "Disagree",
+              "Disagree": "Disagree",
+              "Kind of disagree": "Disagree",
+
+              "Kind of agree": "Agree",
+              "Agree": "Agree",
+              "Strongly agree": "Agree",
+
+              "Very negative": "Negative",
+              "Somewhat negative": "Negative",
+              "Neutral": "Neutral",
+              "Somewhat positive": "Positive",
+              "Very positive": "Positive"
+        };
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -33,6 +50,10 @@ class App extends React.Component {
       this.setState({
         selected_survey: target.value,
         selected_subjects: this.initial_selected_subjects
+      });
+    } else if (type === "group-strong") {
+      this.setState({
+        groupStrong: target.checked
       });
     } else if (type === "subject") {
       const selected_subjects = [...this.state.selected_subjects];
@@ -94,12 +115,26 @@ class App extends React.Component {
 
           // Calculate percents.
           const total_respondents = responses.answer_respondents.reduce((a, n) => a+n, 0);
+          let categories = responses.answers;
+          let can_group = false;
+
+          if (this.state.groupStrong) {
+            can_group = true;
+            categories = Array.from(new Set(categories.map(c => {
+              const new_cat = GroupingMap[c];
+              if (new_cat) {
+                return new_cat;
+              }
+              can_group = false;
+              return c;
+            })));
+          }
 
           // Set the data.
           let data = all_question_data[question];
           if (data === undefined) {
             data = {
-              categories: responses.answers,
+              categories,
               xlabel: 'Rating',
               ylabel: '%',
               series: []
@@ -107,13 +142,34 @@ class App extends React.Component {
 
             all_question_data[question] = data;
           }
-          data.series.push({
-            name: school,
-            data: responses.answer_respondents.map(v => Math.round(v * 1000 / total_respondents)/10),
-            tooltip: {
-              footerFormat: `n = ${total_respondents}`
-            }
-          });
+          if (can_group) {
+            // For each answer response, name = category, stack is school, data is bucketed.
+            // TODO(ajwong): ^^^ Implement above.
+            data.series.push(...responses.answer_respondents.reverse().map((response, idx) => {
+                const data = categories.map(_ => 0);
+                const orig_category = responses.answers[idx];
+                const new_category = GroupingMap[orig_category];
+                const category_ordinal = categories.findIndex((e) => e === new_category);
+                data[category_ordinal] = Math.round(response * 1000 / total_respondents)/10;
+
+                return {
+                  name: `${school}-${orig_category}`,
+                  stack: school,
+                  data,
+                  tooltip: {
+                    footerFormat: `n = ${total_respondents}`
+                  }
+                }
+            }));
+          } else {
+            data.series.push({
+                name: school,
+                data: responses.answer_respondents.map(v => Math.round(v * 1000 / total_respondents)/10),
+                tooltip: {
+                  footerFormat: `n = ${total_respondents}`
+                }
+              });
+          }
         });
       });
 
@@ -156,6 +212,7 @@ class App extends React.Component {
             data={this.state.reports}
             report_type={this.state.selected_report_type}
             survey={this.state.selected_survey}
+            groupStrong={this.state.groupStrong}
             subjects={this.state.selected_subjects}
             onChange={this.handleChange}
           />
