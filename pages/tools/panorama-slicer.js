@@ -145,7 +145,7 @@ class App extends React.Component {
           if (can_group) {
             // For each answer response, name = category, stack is school, data is bucketed.
             // TODO(ajwong): ^^^ Implement above.
-            data.series.push(...responses.answer_respondents.reverse().map((response, idx) => {
+            data.series = responses.answer_respondents.map((response, idx) => {
                 const data = categories.map(_ => 0);
                 const orig_category = responses.answers[idx];
                 const new_category = GroupingMap[orig_category];
@@ -160,7 +160,11 @@ class App extends React.Component {
                     footerFormat: `n = ${total_respondents}`
                   }
                 }
+<<<<<<< HEAD
             }));
+=======
+            });
+>>>>>>> 8e12578 (Attempt to allow for grouping agree/disagree options.)
           } else {
             data.series.push({
                 name: school,
