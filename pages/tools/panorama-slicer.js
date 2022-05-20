@@ -13,22 +13,27 @@ import data2022 from '../../data/panorama/2022.json'
 // also double as the mix/max of the graph. The exact value of other
 // numbers in the middle don't matter other than the sign.
 const AnswerSortOrder = {
-  "Strongly disagree": -100,
+  "Strongly disagree": -1,
   "Disagree": -2,
-  "Kind of disagree": -1,
-  "Kind of agree": 1,
+  "Kind of disagree": -100,
+  "Kind of agree": 100,
   "Agree": 2,
-  "Strongly agree": 100,
+  "Strongly agree": 1,
 
-  "Yes": 100,
+  "Yes": 1,
+  "I don't know": 100,
   "No": -100,
-  "I don't know": 1,
 
-  "Very Negatively": -100,
-  "Somewhat Negatively": -1,
+  "Very Negatively": -1,
+  "Somewhat Negatively": -100,
   "No Change": 1,
   "Somewhat Positively": 2,
   "Very Positively": 100,
+
+  "Never": -1,
+  "Sometimes": 100,
+  "Often": 2,
+  "Always": 1,
 };
 
 class App extends React.Component {
@@ -177,19 +182,26 @@ class App extends React.Component {
                 arr.data.push(d.data[idx]);
             });
           });
+                                   if (q.question.search("OSPI") !== -1) {
+                 console.log("wut");
+                 debugger;
+               }
 
           // Now we have all the data. Sort the buckets and center on 0.
           const sortOrderMap = {};
           let shouldCenterOnZero = false;
           Object.entries(series_by_response).forEach(([key, value], idx) => {
-            const sortPos = AnswerSortOrder[key] || idx;
-            shouldCenterOnZero = shouldCenterOnZero || (sortPos != idx);
+            let sortPos = idx;
+            if (key in AnswerSortOrder) {
+               sortPos = AnswerSortOrder[key];
+               shouldCenterOnZero = true;
+            }
             sortOrderMap[sortPos] = key;
             if (sortPos < 0) {
               value.data = value.data.map(d => -d);
             }
           });
-          const sortOrder = Object.keys(sortOrderMap).sort();
+          const sortOrder = Object.keys(sortOrderMap).sort((a,b) => sortOrderMap[a] < sortOrderMap[b]);
 
           const options = {
             title: { text: title },
