@@ -39,11 +39,10 @@ export default function Home() {
               <strong>Key results:</strong> <br /> Cascadia is less white 2/3s of the schools it draws from. Instead of removing a segregationist program, we have actaully resegreggated Districts 1, 2, and 4.
             </div>
           </Link>
-          <a href="https://sps-panorama.web.app/" className={styles.card}>
-            <h2>SPS Panorama Data Slicer (2019)</h2>
+          <a href="/tools/panorama-slicer" className={styles.card}>
+            <h2>SPS Panorama Data Slicer (2022)</h2>
             Tool for comparing SPS Panorama data for different schools, sorting them to find the most
-            distinguishing characteristics. Much more understandable than the Panorama site. Data for 2021
-            is not uploaded yet.
+            distinguishing characteristics. Much more understandable than the Panorama site.
           </a>
         </div>
       </main>
