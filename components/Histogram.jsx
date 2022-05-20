@@ -2,21 +2,14 @@ import React from 'react';
 import Highcharts from 'highcharts'
 import HighchartsExporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official'
-import Measure from 'react-measure'
-import _uniqueId from 'lodash/uniqueId';
 
 if (typeof Highcharts === 'object') {
     HighchartsExporting(Highcharts)
 }
 
-function getTitle(category) {
-  return `${category} Ratings Histogram`;
-}
-
 class Histogram extends React.Component {
   constructor(props) {
     super(props);
-    this.id = _uniqueId('histogram-');
 
     this.getChartOptions = this.getChartOptions.bind(this);
   }
@@ -34,11 +27,6 @@ class Histogram extends React.Component {
         max: this.props.data.ymax
       },
       series: this.props.data.series.map(d => Object.assign({ type: "column" }, d)),
-      plotOptions: {
-        column: {
-          stacking: "normal",
-        }
-      },
     };
   }
 
