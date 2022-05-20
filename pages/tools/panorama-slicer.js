@@ -38,7 +38,7 @@ class App extends React.Component {
     this.initial_selected_subjects = ["Adams", "Cascadia", "", ""];
     this.state = {
       reports: null,
-      stacked: true,
+      stacked: false,
       selected_report_type: "",
       selected_survey: "",
       selected_subjects: this.initial_selected_subjects
