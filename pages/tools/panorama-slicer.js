@@ -9,6 +9,28 @@ import Histogram from '../../components/Histogram'
 import data2019 from '../../data/panorama/2019.json'
 import data2022 from '../../data/panorama/2022.json'
 
+// This specifies the sort order for answers. The min and max values
+// also double as the mix/max of the graph. The exact value of other
+// numbers in the middle don't matter other than the sign.
+const AnswerSortOrder = {
+  "Strongly disagree": -100,
+  "Disagree": -2,
+  "Kind of disagree": -1,
+  "Kind of agree": 1,
+  "Agree": 2,
+  "Strongly agree": 100,
+
+  "Yes": 100,
+  "No": -100,
+  "I don't know": 1,
+
+  "Very Negatively": -100,
+  "Somewhat Negatively": -1,
+  "No Change": 1,
+  "Somewhat Positively": 2,
+  "Very Positively": 100,
+};
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -16,6 +38,7 @@ class App extends React.Component {
     this.initial_selected_subjects = ["Adams", "Cascadia", "", ""];
     this.state = {
       reports: null,
+      stacked: true,
       selected_report_type: "",
       selected_survey: "",
       selected_subjects: this.initial_selected_subjects
@@ -154,6 +177,19 @@ class App extends React.Component {
             });
           });
 
+          // Now we have all the data. Sort the buckets and center on 0.
+          const sortOrderMap = {};
+          let shouldCenterOnZero = false;
+          Object.entries(series_by_response).forEach(([key, value], idx) => {
+            const sortPos = AnswerSortOrder[key] || idx;
+            shouldCenterOnZero = shouldCenterOnZero || (sortPos != idx);
+            sortOrderMap[sortPos] = key;
+            if (sortPos < 0) {
+              value.data = value.data.map(d => -d);
+            }
+          });
+          const sortOrder = Object.keys(sortOrderMap).sort();
+
           const options = {
             title: { text: title },
             xAxis: {
@@ -162,15 +198,26 @@ class App extends React.Component {
             },
             yAxis: {
               title: { text: q.data.ylabel },
-              max: q.data.ymax
+              plotLines: [{
+                color: 'black', // Color value
+                value: 0, // Value of where the line will appear
+                width: 3 // Width of the line
+              }],
             },
             plotOptions: {
               series: {
                 stacking: 'normal'
               }
             },
-            series: Object.values(series_by_response),
+            series: sortOrder.map(v => series_by_response[sortOrderMap[v]]),
           };
+
+          // HACK! Detect if the value was mapped frim AnswerSortOrder.
+          if (shouldCenterOnZero) {
+            options.yAxis.min = -80;
+            options.yAxis.max = 80;
+          }
+
           graphs.push(
             <div className="h-90 flex overflow-hidden">
               <figure className="p-2 m-1 flex flex-col w-full bg-gray-100 histogram">
