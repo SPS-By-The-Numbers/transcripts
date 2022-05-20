@@ -166,6 +166,7 @@ class App extends React.Component {
           const schools = [];
           q.data.series.forEach(d => {
             schools.push(d.name);
+            // TODO(awong): Incorrect calculation of N.
             q.data.categories.forEach((a,idx) => {
                 const arr = series_by_response[a] = series_by_response[a] || {
                   name: a,
