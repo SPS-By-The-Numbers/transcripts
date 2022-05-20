@@ -38,7 +38,7 @@ class App extends React.Component {
     this.initial_selected_subjects = ["Adams", "Cascadia", "", ""];
     this.state = {
       reports: null,
-      stacked: true,
+      stacked: false,
       selected_report_type: "",
       selected_survey: "",
       selected_subjects: this.initial_selected_subjects
@@ -166,6 +166,7 @@ class App extends React.Component {
           const schools = [];
           q.data.series.forEach(d => {
             schools.push(d.name);
+            // TODO(awong): Incorrect calculation of N.
             q.data.categories.forEach((a,idx) => {
                 const arr = series_by_response[a] = series_by_response[a] || {
                   name: a,
