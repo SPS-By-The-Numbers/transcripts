@@ -11,9 +11,9 @@
   "devDependencies": {
     "@mdx-js/loader": "^2.1.1",
     "@next/mdx": "^12.1.6",
-    "@types/react": "^17.0.44",
-    "@types/react-dom": "^17.0.16",
-    "@visx/visx": "^2.9.2",
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "@visx/visx": "^2.12.2",
     "accessibility": "^3.0.15",
     "autoprefixer": "^10.4.6",
     "csv-reader": "^1.0.8",
@@ -21,7 +21,7 @@
     "eslint": "8.14.0",
     "eslint-config-next": "12.1.5",
     "firebase": "^9.7.0",
-    "firebase-tools": "^10.7.2",
+    "firebase-tools": "^11.8.0",
     "highcharts": "^10.1.0",
     "highcharts-react-official": "^3.1.0",
     "jstat": "^1.9.5",
@@ -34,8 +34,8 @@
     "tailwindcss": "^3.0.24"
   },
   "dependencies": {
-    "next": "^12.1.5",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "next": "^12.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
