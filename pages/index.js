@@ -21,6 +21,16 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
+          <Link href="/posts/hampson-2022-strike" passHref={true}>
+            <div className={styles.card}>
+              <h2>Notes from Conv w/ Director Hampson on 2022 Strike</h2>
+              Someone posted deatiled notes from a conversation with Director Hampson about the 2022
+              strike. It contains a lot of information about one directors thought. Almost no other
+              info about SPS admin's or board's beliefs had been shared prior. It was deleted for
+              some reason. Preserving it so everyone has equal access to information.
+            </div>
+          </Link>
+
           <Link href="/bell-times" passHref={true}>
             <div className={styles.card}>
               <h2>SPS Bell Time Survey Results</h2>

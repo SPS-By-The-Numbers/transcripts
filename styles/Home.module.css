@@ -16,6 +16,11 @@
   align-items: center;
 }
 
+.main h2 {
+  font-weight: bold;
+  font-size: larger;
+}
+
 .footer {
   width: 100%;
   height: 100px;
@@ -49,7 +54,7 @@
 .title {
   margin: 0;
   line-height: 1.15;
-  font-size: 4rem;
+  font-size: 2.5rem;
 }
 
 .title,
@@ -111,6 +116,27 @@
 
 .logo {
   height: 1em;
+}
+
+.card p {
+  line-height: 1.1;
+  margin: 1ex;
+}
+
+.archivecard {
+
+  background-color: #8c8c8c;
+  width: 95%;
+  height: 100%;
+
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+.archiveiframe {
+  flex-grow: 1;
+  width: 100%;
+  margin: auto;
+  min-height: 600px;
 }
 
 @media (max-width: 600px) {
