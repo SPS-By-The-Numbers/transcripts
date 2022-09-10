@@ -126,15 +126,17 @@
 .archivecard {
 
   background-color: #8c8c8c;
-  width: 95%;
+  width: 95vw;
   height: 100%;
-
+  word-break: break-all;
   padding: 1rem 1rem 1rem 1rem;
+  overflow: scroll;
 }
 
 .archiveiframe {
   flex-grow: 1;
   width: 100%;
+  min-width: 800px;
   margin: auto;
   min-height: 600px;
 }
