@@ -21,6 +21,17 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
+          <Link href="/posts/state-underfunding-open-letter" passHref={true}>
+            <div className={styles.card}>
+              <h2>Email and Responses to Open Letter on State Underfunding of SPS</h2>
+              This post publishes the open letter sent to State Legistlators showing
+              that the current legislation so severely underfunds SPS -- especially
+              in light of Seattle's significantly higher cost of living -- that
+              absent a legislative fix, teacher strikes and service degredations are
+              inevitable.
+            </div>
+          </Link>
+
           <Link href="/posts/hampson-2022-strike" passHref={true}>
             <div className={styles.card}>
               <h2>Notes from Conv w/ Director Hampson on 2022 Strike</h2>

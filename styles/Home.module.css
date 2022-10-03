@@ -109,22 +109,21 @@
 }
 
 .card p {
-  margin: 0;
+  margin: 1ex;
   font-size: 1.25rem;
-  line-height: 1.5;
+  line-height: 1.15;
 }
 
 .logo {
   height: 1em;
 }
 
-.card p {
-  line-height: 1.15;
-  margin: 1ex;
+.orderedlist {
+  padding-left: 2em;
+  list-style-type: initial;
 }
 
 .archivecard {
-
   background-color: #8c8c8c;
   width: 95vw;
   height: 100%;
@@ -146,4 +145,54 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.paragraphcard {
+  background-color: #efefef;
+  max-width: 800px;
+  margin: 1rem auto 1rem auto;
+
+  flex-basis: 38%;
+  padding: 1.5rem;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.paragraphcard hr {
+  border: none;
+  height: 1px;
+  /* Set the hr color */
+  color: #333; /* old IE */
+  background-color: #333; /* Modern Browsers */
+}
+
+.letter {
+  padding: 0.4rem;
+  background-color: white;
+  line-height: normal;
+  font-family: serif;
+  font-size: 14pt;
+}
+
+.letter p {
+  padding: 0.6rem;
+}
+
+.smallheader {
+  font-size: 8pt;
+  line-height: 1;
+}
+
+.smallheader p {
+  padding: 0.2rem;
+  padding-left: 3ex;
+  text-indent: -3ex ;
+}
+
+.largeheader p {
+  background-color: lightyellow;
 }
