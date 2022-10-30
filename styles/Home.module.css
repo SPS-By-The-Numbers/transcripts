@@ -127,7 +127,7 @@
   background-color: #8c8c8c;
   width: 95vw;
   height: 100%;
-  word-break: break-all;
+  word-break: break-word;
   padding: 1rem 1rem 1rem 1rem;
   overflow: scroll;
 }
@@ -173,6 +173,7 @@
 .letter {
   padding: 0.4rem;
   background-color: white;
+  word-break: break-word;
   line-height: normal;
   font-family: serif;
   font-size: 14pt;
