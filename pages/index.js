@@ -21,6 +21,16 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
+          <Link href="/transcripts/17-oct-2023-board-special-meeting" passHref={true}>
+            <div className={styles.card}>
+              <h2>Oct 17, 2023 Special Board Working Session Transcript</h2>
+              Test of publishing transcription of Board Working Session. This use pyannote
+              and whisper and allows folks to search for what SPS directors and admin say.
+
+              Click words in text to jump to that point in the video.
+            </div>
+          </Link>
+
           <Link href="/posts/state-underfunding-open-letter" passHref={true}>
             <div className={styles.card}>
               <h2>Email and Responses to Open Letter on State Underfunding of SPS</h2>
