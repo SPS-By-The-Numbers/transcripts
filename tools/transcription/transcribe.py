@@ -5,6 +5,10 @@ from pyannote.audio import Pipeline
 from pydub import AudioSegment
 #import whisper
 
+# Verbose logging from onnx
+#import onnxruntime as ort
+#ort.set_default_logger_severity(0)
+
 import json
 import os
 import re
@@ -16,7 +20,7 @@ data_dir = 'scratch'
 #input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
 prepped_audio_file = os.path.join(data_dir, 'input_prep.%s' % tempaudio_format)
 #input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
-input_file = 'test.wav'
+input_file = 'short.mp3'
 diarization_file = os.path.join(data_dir, 'diarization.txt')
 diarization_rttm_file = os.path.join(data_dir, 'diarization.rttm')
 txt_output = os.path.join(data_dir, 'capspeaker.txt')
@@ -40,7 +44,8 @@ def diarize(torch_device):
     # Do the diarization and save it somewhere durable.
     print("Diarizing")
     diarization = pretrained_pipeline(prepped_audio_file)
-    diarization.write_rttm(diarization_rttm_file)
+    with open(diarization_rttm_file, "w") as rttm_file:
+        diarization.write_rttm(rttm_file)
     with open(diarization_file, "w") as text_file:
         text_file.write(str(diarization))
 
@@ -171,7 +176,7 @@ def create_captions():
         file.write(s)
 
 if __name__ == '__main__':
-    #prep_audio()
+    prep_audio()
     torch_device = torch.device("cuda:0")
     diarize(torch_device)
 #    groups = lines_by_speaker()
