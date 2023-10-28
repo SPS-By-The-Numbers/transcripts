@@ -29,4 +29,5 @@ echo "Mounting completed."
 # to be equal to the cores available.
 # Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
 #exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+exec python download_yt_audio.py
 # [END cloudrun_fuse_script]

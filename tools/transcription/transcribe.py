@@ -3,19 +3,24 @@
 from datetime import timedelta
 from pyannote.audio import Pipeline
 from pydub import AudioSegment
-import whisper
+#import whisper
 
 import json
+import os
 import re
 import torch
 
 tempaudio_format = 'wav'
-prepped_audio_file = 'input_prep.%s' % tempaudio_format
-data_dir = '/mnt/gcs/sps-by-the-numbers/test'
-input_file = os.join(data_dir, 'short-audio.mp3')
-diarization_file = os.join(data_dir, 'diarization.txt')
-txt_output = os.join(data_dir, 'capspeaker.txt')
-html_output = os.join(data_dir, 'capspeaker.html')
+#data_dir = 'board-meetings/ZA2VWHITcV0/'
+data_dir = 'scratch'
+#input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
+prepped_audio_file = os.path.join(data_dir, 'input_prep.%s' % tempaudio_format)
+#input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
+input_file = 'test.wav'
+diarization_file = os.path.join(data_dir, 'diarization.txt')
+diarization_rttm_file = os.path.join(data_dir, 'diarization.rttm')
+txt_output = os.path.join(data_dir, 'capspeaker.txt')
+html_output = os.path.join(data_dir, 'capspeaker.html')
 
 # Munge audio to prepend 2000ms of noise since that sometimes gets skipped during diarization.
 def prep_audio():
@@ -35,6 +40,7 @@ def diarize(torch_device):
     # Do the diarization and save it somewhere durable.
     print("Diarizing")
     diarization = pretrained_pipeline(prepped_audio_file)
+    diarization.write_rttm(diarization_rttm_file)
     with open(diarization_file, "w") as text_file:
         text_file.write(str(diarization))
 
@@ -165,9 +171,9 @@ def create_captions():
         file.write(s)
 
 if __name__ == '__main__':
-    prep_audio()
-    torch_device = torch.device("cuda")
+    #prep_audio()
+    torch_device = torch.device("cuda:0")
     diarize(torch_device)
-    groups = lines_by_speaker()
-    split_audio_by_diarization(groups)
-    transcribe_groups(groups, torch_device)
+#    groups = lines_by_speaker()
+#    split_audio_by_diarization(groups)
+#    transcribe_groups(groups, torch_device)

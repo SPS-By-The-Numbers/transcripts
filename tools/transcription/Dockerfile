@@ -42,9 +42,6 @@ COPY . ./
 # Install production dependencies.
 RUN pip install -r requirements.txt
 
-# Cache the models.
-RUN python load_models.py
-
 # Ensure the script is executable
 RUN chmod +x /app/run.sh
 
