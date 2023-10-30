@@ -2,11 +2,12 @@
 
 from datetime import timedelta
 from pyannote.audio import Pipeline
+from pyannote.audio.pipelines.utils.hook import ProgressHook
 from pydub import AudioSegment
 #import whisper
 
 # Verbose logging from onnx
-#import onnxruntime as ort
+import onnxruntime as ort
 #ort.set_default_logger_severity(0)
 
 import json
@@ -16,11 +17,10 @@ import torch
 
 tempaudio_format = 'wav'
 #data_dir = 'board-meetings/ZA2VWHITcV0/'
+#input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
 data_dir = 'scratch'
-#input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
+input_file = '1hr.wav'
 prepped_audio_file = os.path.join(data_dir, 'input_prep.%s' % tempaudio_format)
-#input_file = os.path.join(data_dir, 'Seattle Schools Board Meeting Oct  11 2023.mp4')
-input_file = 'short.mp3'
 diarization_file = os.path.join(data_dir, 'diarization.txt')
 diarization_rttm_file = os.path.join(data_dir, 'diarization.rttm')
 txt_output = os.path.join(data_dir, 'capspeaker.txt')
@@ -38,16 +38,18 @@ def prep_audio():
 def diarize(torch_device):
     print("Loading model")
     # Setup the diarization pipeline.
-    pretrained_pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.0", use_auth_token="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")
-    pretrained_pipeline.to(torch_device)
+    print(ort.get_device())
+    with ProgressHook() as hook:
+        pretrained_pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.0", use_auth_token="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")
+        pretrained_pipeline.to(torch_device)
 
-    # Do the diarization and save it somewhere durable.
-    print("Diarizing")
-    diarization = pretrained_pipeline(prepped_audio_file)
-    with open(diarization_rttm_file, "w") as rttm_file:
-        diarization.write_rttm(rttm_file)
-    with open(diarization_file, "w") as text_file:
-        text_file.write(str(diarization))
+        # Do the diarization and save it somewhere durable.
+        print("Diarizing")
+        diarization = pretrained_pipeline(prepped_audio_file)
+        with open(diarization_rttm_file, "w") as rttm_file:
+            diarization.write_rttm(rttm_file)
+        with open(diarization_file, "w") as text_file:
+            text_file.write(str(diarization))
 
 # Parse a hh:mm:ss.nnn string into milliseconds.
 def millisec(timeStr):
@@ -177,7 +179,7 @@ def create_captions():
 
 if __name__ == '__main__':
     prep_audio()
-    torch_device = torch.device("cuda:0")
+    torch_device = torch.device("cuda")
     diarize(torch_device)
 #    groups = lines_by_speaker()
 #    split_audio_by_diarization(groups)
