@@ -24,7 +24,7 @@ export default function Home() {
           <Link href="/transcripts/17-oct-2023-board-special-meeting" passHref={true}>
             <div className={styles.card}>
               <h2>Oct 17, 2023 Special Board Working Session Transcript</h2>
-              Test of publishing transcription of Board Working Session. This use pyannote
+              Test of publishing transcription of Board Working Session. This uses pyannote
               and whisper and allows folks to search for what SPS directors and admin say.
 
               Click words in text to jump to that point in the video.
@@ -34,10 +34,10 @@ export default function Home() {
           <Link href="/posts/state-underfunding-open-letter" passHref={true}>
             <div className={styles.card}>
               <h2>Email and Responses to Open Letter on State Underfunding of SPS</h2>
-              This post publishes the open letter sent to State Legistlators showing
+              This post publishes the open letter sent to State Legislators showing
               that the current legislation so severely underfunds SPS -- especially
-              in light of Seattle's significantly higher cost of living -- that
-              absent a legislative fix, teacher strikes and service degredations are
+              in light of Seattle&apos;s significantly higher cost of living -- that
+              absent a legislative fix, teacher strikes and service degradations are
               inevitable.
             </div>
           </Link>
@@ -45,9 +45,9 @@ export default function Home() {
           <Link href="/posts/hampson-2022-strike" passHref={true}>
             <div className={styles.card}>
               <h2>Notes from Conv w/ Director Hampson on 2022 Strike</h2>
-              Someone posted deatiled notes from a conversation with Director Hampson about the 2022
-              strike. It contains a lot of information about one directors thought. Almost no other
-              info about SPS admin's or board's beliefs had been shared prior. It was deleted for
+              Someone posted detailed notes from a conversation with Director Hampson about the 2022
+              strike. It contains a lot of information about one director&apos;s thoughts. Almost no other
+              info about SPS admin&apos;s or board&apos;s beliefs had been shared prior. It was deleted for
               some reason. Preserving it so everyone has equal access to information.
             </div>
           </Link>
@@ -67,7 +67,7 @@ export default function Home() {
           <Link href="/hcc-northend-resegregation" passHref={true}>
             <div className={styles.card}>
               <h2>HCC Dismantling Resegregates North End</h2>
-              <strong>Key results:</strong> <br /> Cascadia is less white 2/3s of the schools it draws from. Instead of removing a segregationist program, we have actaully resegreggated Districts 1, 2, and 4.
+              <strong>Key results:</strong> <br /> Cascadia is less white than 2/3 of the schools it draws from. Instead of removing a segregationist program, we have actaully resegregated Districts 1, 2, and 4.
             </div>
           </Link>
           <a href="/tools/panorama-slicer" className={styles.card}>
