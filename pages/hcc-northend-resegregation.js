@@ -2,6 +2,7 @@ import React, { useMemo, useState }  from 'react'
 
 import Histogram from '../components/Histogram';
 import HccRace from '../data/hcc-northend-resegregation.json';
+import styles from '../styles/Home.module.css'
 
 export default function Cascadia({ hccRace }) {
   const raceData = {
@@ -31,15 +32,14 @@ export default function Cascadia({ hccRace }) {
   raceData.island.sort((a,b) => a[1] - b[1]);
   raceData.multiple.sort((a,b) => a[1] - b[1]);
   raceData.white.sort((a,b) => a[1] - b[1]);
-  console.log(raceData.white);
 
   return (
     <main>
       <section>
         <p>HCC is commonly called a white, segregationist, program. However, visiting Cascadia, it becomes obvious the students look far more diverse than most of the 29 schools it pulls from.</p> 
 
-        <p><strong>Highlights:</strong>
-        <ul className="points">
+        <p><strong>Highlights:</strong></p>
+        <ul className={styles.points}>
           <li> - Cascadia feeds from 29 schools.</li>
           <li> - Cascadia is 54% white.</li>
           <li> - Only 11/29 schools have a lower percentage of white kids.</li>
@@ -47,7 +47,6 @@ export default function Cascadia({ hccRace }) {
           <li> - Of the remaining 23 schools, 13 have a higher percentage of black kids -- but realistically they mostly have very similar low numbers.</li>
           <li> - There are almost no native or island kids in these schools.</li>
         </ul>
-        </p>
 
         <p> Because of the false assumption that HCC is more white, the HCC removal will re-segregate these
         students. If we imagined a world where all of the existing students of color were sent back to their neighborhood schools, about 180 / 234 would end up in schools with equal of fewer peers that identify with the same race. (All Asians end up more isolated in any other school. Most multi-racial students too. 1/2 the Black students are in schools of similar or lower number numbers. Very few end up "better off".).
