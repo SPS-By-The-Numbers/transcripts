@@ -410,7 +410,6 @@ export async function getStaticProps() {
         makeOption('distance', 'Distance From School', DistanceOptions, DistanceOptions),
         makeOption('service', 'Bus Route Service', ServiceOptions, ServiceOptions),
       ],
-    },
-    revalidate: 1, // In seconds
+    }
   };
 }

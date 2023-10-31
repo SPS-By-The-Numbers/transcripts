@@ -1,4 +1,4 @@
-import React, { useMemo, useState }  from 'react'
+import React from 'react'
 
 import Histogram from '../components/Histogram';
 import HccRace from '../data/hcc-northend-resegregation.json';
@@ -149,7 +149,6 @@ export async function getStaticProps() {
   return {
     props: {
       hccRace: HccRace,
-    },
-    revalidate: 1, // In seconds
+    }
   };
 }
