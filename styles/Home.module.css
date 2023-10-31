@@ -85,7 +85,6 @@
 }
 
 .card {
-  display: flex;
   margin: 1rem;
   flex-basis: 38%;
   padding: 1.5rem;
