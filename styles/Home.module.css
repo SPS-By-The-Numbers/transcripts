@@ -115,6 +115,10 @@
   line-height: 1.15;
 }
 
+.card a {
+text-decoration: none;
+}
+
 .logo {
   height: 1em;
 }

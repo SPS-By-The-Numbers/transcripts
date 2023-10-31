@@ -10,16 +10,31 @@ class SpecialBoardMeeting extends React.Component {
     this.onReady = this.onReady.bind(this);
     this.ytComponent = null;
     this.jumpToTime = this.jumpToTime.bind(this);
+    this.jumpToTimeInternal = this.jumpToTimeInternal.bind(this);
   } 
 
   onReady(event) {
     this.ytComponent = event.target;
+    if (window.location.hash) {
+      const selString = `a[href="${window.location.hash}"]`;
+      const el = document.querySelector(selString);
+      if (el) {
+        el.scrollIntoViewIfNeeded();
+        this.jumpToTimeInternal(el.id);
+      }
+    }
+  }
+
+  jumpToTimeInternal(id) {
+    if (this.ytComponent) {
+      this.ytComponent.seekTo(id);
+      this.ytComponent.playVideo();
+    }
   }
 
   jumpToTime(event) {
-    this.ytComponent.seekTo(event.target.id);
-    this.ytComponent.playVideo();
-    history.pushState(null, null, `#${event.target.id}`);
+    history.pushState(null, null, event.target.href);
+    this.jumpToTimeInternal(event.target.id);
   }
 
   render = () => {

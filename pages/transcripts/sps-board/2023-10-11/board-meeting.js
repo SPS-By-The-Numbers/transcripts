@@ -12,7 +12,7 @@ function toTimeAnchor(seconds) {
   return '';
 }
 
-const palette = distinctColors({count: 50, lightMin: 60, chromaMax: 200});
+const palette = distinctColors({count: 42, lightMin: 70, chromaMax: 200});
 const speakerNames = {
   'SPEAKER_00':'Chris Jackins',
   'SPEAKER_01':'Andrew Raitter',
@@ -71,16 +71,31 @@ class BoardMeeting extends React.Component {
     this.onReady = this.onReady.bind(this);
     this.ytComponent = null;
     this.jumpToTime = this.jumpToTime.bind(this);
+    this.jumpToTimeInternal = this.jumpToTimeInternal.bind(this);
   } 
 
   onReady(event) {
     this.ytComponent = event.target;
+    if (window.location.hash) {
+      const selString = `a[name="${window.location.hash.substr(1)}"]`;
+      const el = document.querySelector(selString);
+      if (el) {
+        el.scrollIntoViewIfNeeded();
+        this.jumpToTimeInternal(el.id);
+      }
+    }
+  }
+
+  jumpToTimeInternal(id) {
+    if (this.ytComponent) {
+      this.ytComponent.seekTo(id);
+      this.ytComponent.playVideo();
+    }
   }
 
   jumpToTime(event) {
-    this.ytComponent.seekTo(event.target.id);
-    this.ytComponent.playVideo();
-    history.pushState(null, null, `#${event.target.id}`);
+    history.pushState(null, null, event.target.href);
+    this.jumpToTimeInternal(event.target.id);
   }
 
   render = () => {
@@ -133,7 +148,7 @@ class BoardMeeting extends React.Component {
 
       for (const word of segment['words']) {
         curWordAnchors.push(
-          <a href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</a>
+          <a name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</a>
         );
       }
       
