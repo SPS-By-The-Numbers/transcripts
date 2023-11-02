@@ -47,7 +47,7 @@ export default function Index(props) {
     const { category, transcripts } = props;
 
     const transcriptLinks = transcripts.map(
-        transcript => <li><Link href={path.join('/', 'transcripts', 'category', transcript)}>{transcript}</Link></li>
+        transcript => <li><Link href={path.join('/', 'transcripts', category, transcript)}>{transcript}</Link></li>
     )
 
     return (
