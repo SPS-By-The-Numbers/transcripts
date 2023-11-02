@@ -1,0 +1,28 @@
+.l {
+color: #050;
+}
+
+.s {
+display: inline-block;
+}
+
+.c {
+display: inline-block;
+}
+
+.e {
+  /*background-color: white; Changing background color */
+  border-radius: 10px;
+  /* Making border radius */
+  width: 50%;
+  /* Making auto-sizable width */
+  padding: 0 0 0 0;
+  /* Making space around letters */
+  font-size: 14px;
+  /* Changing font size */
+  margin-bottom: 0;
+}
+
+.t {
+display: inline-block;
+}
