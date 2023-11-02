@@ -39,7 +39,8 @@ const speakerNames = {
 
 function getSpeakerAttributes(speaker) {
   let name = speakerNames[speaker];
-  const color = palette[speaker.split('_')[1]];
+  const speakerNum = Number(speaker.split('_')[1]);
+  const color = palette[speakerNum];
   if (!name) {
     name = speaker;
   }
