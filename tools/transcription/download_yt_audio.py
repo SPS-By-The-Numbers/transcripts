@@ -51,9 +51,6 @@ def is_json_file(path):
     except:
             return False
 
-# Get city council videos from the Seattle Channel's playlist.
-#playlist = Playlist("https://www.youtube.com/playlist?list=PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f")
-
 parser = argparse.ArgumentParser(
         prog='Youtube Audio Download',
         description='Downloads audio from youtube videos in a channel or playlist')
@@ -92,8 +89,7 @@ for v in playlist.videos:
             # Ensure the files are there.
             outfile_name = '%s.mp4' % video_id
             outfile_dir = os.path.dirname(outfile_base)
-            if not os.path.exists(outfile_dir):
-                os.makedirs(outfile_dir)
+            os.makedirs(outfile_dir, exist_ok=True)
 
             # Do the download, always overwriting. The parseable metadata file is the
             # completion flag.

@@ -2,6 +2,7 @@
 set -x
 echo "Install gcloud cli and vim"
 ssh -p $2 $1 <<HEREDOC
+   # Install gcloud for access to the data in google cloud storage buckets.
    echo "deb https://packages.cloud.google.com/apt cloud-sdk main" > /etc/apt/sources.list.d/google-cloud-sdk.list
    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
    apt-get update 
@@ -9,13 +10,17 @@ ssh -p $2 $1 <<HEREDOC
 HEREDOC
 
 echo "Deploy the gcloud storage key + worker scripts"
-scp -P $2 gcloud-storage-key.json start_worker.sh transcribe_worker.py "$1:"
+scp -P $2 gcloud-storage-key.json transcribe_worker.py "$1:"
 
 echo "Auth gcloud. Install setup whisperx in conda. Fix onnxruntime speed issue"
+
 ssh -p $2 $1 <<HEREDOC
   set -x
   gcloud auth activate-service-account --key-file=gcloud-storage-key.json
 
+  conda init bash
+
+  # inline copy-pasta of the conda init entry in .bashrc.
   __conda_setup="$('/opt/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
   if [ $? -eq 0 ]; then
       eval "$__conda_setup"
@@ -28,12 +33,15 @@ ssh -p $2 $1 <<HEREDOC
   fi
   unset __conda_setup
 
-  grep -q whisperx .conda/environments.txt || {yes | conda create --name whisperx python=3.10}
-  conda activate whisperx
+  # Create the environment if it doesn't exist.
+  if ! grep -q whisperx .conda/environments.txt; then
+     conda create -y --name whisperx python=3.10
+  fi
+
 
   conda install -y pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia
-  yes | pip install git+https://github.com/m-bain/whisperx.git
-  yes | pip install pyannote.audio==3.0.1
-  pip uninstall -y onnxruntime
-  yes | pip install --force-reinstall onnxruntime-gpu
+  conda run --name whisperx pip install git+https://github.com/m-bain/whisperx.git
+  conda run --name whisperx pip install pyannote.audio==3.0.1
+  conda run --name whisperx pip uninstall -y onnxruntime
+  conda run --name whisperx pip install --force-reinstall onnxruntime-gpu
 HEREDOC
