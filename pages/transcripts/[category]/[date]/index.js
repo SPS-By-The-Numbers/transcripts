@@ -1,36 +1,27 @@
-import { readdir } from 'fs/promises';
-import path from 'path';
+import { formatISO, parseISO, intlFormat } from 'date-fns';
+import Link from 'next/link'
+import { getAllCategories, getAllMetadataForPublishDate, getDatesForCategory } from '../../../../utilities/metadata-utils';
+import { parseDateFromPath, formatDateForPath, getTranscriptPath } from '../../../../utilities/path-utils';
 
 export async function getStaticPaths(context) {
-    const categoryFileEntries = await readdir(
-        path.join(process.cwd(), 'data', 'transcripts'),
-        { withFileTypes: true }
-    );
+    const categories = await getAllCategories();
 
-    const categories = categoryFileEntries
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name);
-
-    const categoriesWithNestedTranscripts = await Promise.all(categories.map(
-        category => readdir(
-            path.join(process.cwd(), 'data', 'transcripts', category),
-            { withFileTypes: true }
-        ).then(transcriptFileEntries => ({
-            category,
-            transcriptFileEntries
-        }))
-    ));
-
-    const paths = categoriesWithNestedTranscripts
-        .flatMap(categoryEntry => categoryEntry.transcriptFileEntries
-            .filter(entry => entry.isFile() && entry.name.endsWith('.json'))
-            .map(entry => entry.name.substring(0, entry.name.indexOf('.json')))
-            .map(date => ({
-                params: {
-                    category: categoryEntry.category,
-                    date
-                }
+    const categoriesWithDates = (await Promise.all(categories.map(
+        category => getDatesForCategory(category).then(
+            dates => dates.map(date => ({
+                category,
+                date
             }))
+        )
+    ))).flat();
+
+    const paths = categoriesWithDates.map(
+        entry => ({
+            params: {
+                category: entry.category,
+                date: formatDateForPath(entry.date)
+            }
+        })
     );
 
     return {
@@ -39,17 +30,35 @@ export async function getStaticPaths(context) {
     };
 }
 
-export function getStaticProps(context) {
+export async function getStaticProps(context) {
+    const date = parseDateFromPath(context.params.date);
+
+    const metadata = await getAllMetadataForPublishDate(context.params.category, date);
+
     return {
         props: {
             category: context.params.category,
-            date: context.params.date
+            date: formatISO(date),
+            fileMetadata: metadata
         }
-    }
+    };
 }
 
 export default function Index(props) {
+    const { category, fileMetadata } = props;
+    const date = parseISO(props.date);
+
+    console.log(fileMetadata);
+
+    const fileLinks = fileMetadata.map(
+        fileEntry => <li><Link href={ getTranscriptPath(category, date, fileEntry.title) }>{ fileEntry.title }</Link></li>
+    )
     return (
-        <main>Transcript for {props.category} on {props.date} goes here</main>
+        <main>
+            <header>Transcripts for { props.category } on { intlFormat(date) }</header>
+            <ul>
+                { fileLinks }
+            </ul>
+        </main>
     );
 }

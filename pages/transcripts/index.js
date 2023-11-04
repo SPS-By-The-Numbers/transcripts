@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { readdir } from 'fs/promises';
 import path from 'path';
+import { getAllCategories } from '../../utilities/metadata-utils';
+import { getCategoryPath } from '../../utilities/path-utils';
 
 export async function getStaticProps(context) {
     const entries = await readdir(
@@ -8,9 +10,7 @@ export async function getStaticProps(context) {
         { withFileTypes: true }
     );
 
-    const categories = entries
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name);
+    const categories = await getAllCategories();
 
     return {
         props: {
@@ -23,13 +23,13 @@ export default function Index(props) {
     const { categories } = props;
 
     const categoryLinks = categories.map(
-        category => <li><Link href={path.join('/', 'transcripts', category)}>{category}</Link></li>
+        category => <li><Link href={ getCategoryPath(category) }>{category}</Link></li>
     );
 
     return (
         <main>
             <ul>
-            {categoryLinks}
+                {categoryLinks}
             </ul>
         </main>
     );

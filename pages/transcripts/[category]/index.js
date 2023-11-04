@@ -1,37 +1,10 @@
-import { readdir } from 'fs/promises';
-import path from 'path';
 import Link from 'next/link'
-
-export async function getStaticProps(context) {
-    console.log(context);
-    const category = context.params.category;
-
-    const entries = await readdir(
-        path.join(process.cwd(), 'data', 'transcripts', category),
-        { withFileTypes: true }
-    );
-
-    const transcripts = entries
-        .filter(entry => entry.isFile() && entry.name.endsWith('.json'))
-        .map(entry => entry.name.substring(0, entry.name.indexOf('.json')));
-
-    return {
-        props: {
-            category,
-            transcripts
-        }
-    }
-}
+import { getAllCategories, getDatesForCategory } from '../../../utilities/metadata-utils';
+import { getDatePath } from '../../../utilities/path-utils';
+import { formatISO, parseISO } from 'date-fns';
 
 export async function getStaticPaths() {
-    const entries = await readdir(
-        path.join(process.cwd(), 'data', 'transcripts'),
-        { withFileTypes: true }
-    );
-
-    const categories = entries
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name);
+    const categories = await getAllCategories();
 
     return {
         paths: categories.map(category => ({
@@ -43,17 +16,30 @@ export async function getStaticPaths() {
     };
 }
 
-export default function Index(props) {
-    const { category, transcripts } = props;
+export async function getStaticProps(context) {
+    const category = context.params.category;
+    const dates = await getDatesForCategory(category);
 
-    const transcriptLinks = transcripts.map(
-        transcript => <li><Link href={path.join('/', 'transcripts', category, transcript)}>{transcript}</Link></li>
+    return {
+        props: {
+            category,
+            dates: dates.map(formatISO)
+        }
+    }
+}
+
+export default function Index(props) {
+    const { category } = props;
+    const dates = props.dates.map(parseISO);
+
+    const dateLinks = dates.map(
+        date => <li><Link href={ getDatePath(category, date) }>{ date.toLocaleDateString('en-US') }</Link></li>
     )
 
     return (
         <main>
             <ul>
-                {transcriptLinks}
+                { dateLinks }
             </ul>
         </main>
     );
