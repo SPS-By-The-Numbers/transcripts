@@ -1,7 +1,7 @@
 import path from 'path';
 import { readdir, readFile } from 'fs/promises';
 import * as fs from 'fs';
-import { isEqual, parseJSON, startOfDay } from 'date-fns';
+import { isEqual, parseISO, startOfDay } from 'date-fns';
 
 function buildTranscriptFolderPath(category, id) {
     return path.join(process.cwd(), 'data', 'transcripts', category, id[0]);
@@ -78,7 +78,7 @@ export async function getDatesForCategory(category) {
     const allVideos = await getAllVideosForCategory(category);
 
     return [... new Set(allVideos.map(
-        video => parseJSON(video.date)
+        video => parseISO(video.date)
     ))].sort((a,b) => b-a);
 }
 
@@ -87,8 +87,8 @@ export async function getAllVideosForPublishDate(category, date) {
 
     return categoryVideos
         .filter(video => {
-            const publishDate = startOfDay(parseJSON(video.date));
-            return isEqual(publishDate, date);
+            const publishDate = startOfDay(parseISO(video.date));
+            return isEqual(publishDate, startOfDay(date));
         });
 }
 

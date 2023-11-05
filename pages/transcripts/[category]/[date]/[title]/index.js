@@ -1,4 +1,4 @@
-import { parseJSON } from "date-fns";
+import { parseISO } from "date-fns";
 import { getAllCategories, getAllVideosForCategory, getVideoForDateAndTitle, getSpeakerMapping, getTranscript } from "../../../../../utilities/metadata-utils";
 import { formatDateForPath, parseDateFromPath } from "../../../../../utilities/path-utils";
 import { BoardMeeting } from '../../../../../components/BoardMeeting';
@@ -19,7 +19,7 @@ export async function getStaticPaths() {
 
     const nativeParams = categoriesWithMetadata.map(({category, video}) => ({
         category: category,
-        date: parseJSON(video.date),
+        date: parseISO(video.date),
         title: video.metadata.title || 'Unknown Video'
     }));
 

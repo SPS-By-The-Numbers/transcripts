@@ -34,6 +34,7 @@ export async function getStaticProps(context) {
     const date = parseDateFromPath(context.params.date);
 
     const videos = await getAllVideosForPublishDate(context.params.category, date);
+    console.log(videos);
 
     return {
         props: {
@@ -47,7 +48,6 @@ export async function getStaticProps(context) {
 export default function Index(props) {
     const { category, videos } = props;
     const date = parseISO(props.date);
-
 
     const videoLinks = videos.map(
         video => <li className="mx-3 list-disc"><Link key={video.metadata.videoId} href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
