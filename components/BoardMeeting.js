@@ -99,7 +99,7 @@ export class BoardMeeting extends React.Component {
 
         for (const [i, segment] of Object.values(this.transcript.segments).entries()) {
             // If speaker changed, push the div and reset curWordAnchors.
-            if (curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
+            if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
                 const { name, color } = this.getSpeakerAttributes(curSpeaker);
                 dialogDivs.push(
                     <div className={styles.e} style={{ backgroundColor: color }}>
