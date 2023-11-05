@@ -19,6 +19,7 @@ export async function getStaticPaths() {
 export async function getStaticProps(context) {
     const category = context.params.category;
     const dates = await getDatesForCategory(category);
+    console.log(dates);
 
     return {
         props: {

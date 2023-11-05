@@ -1,5 +1,6 @@
 import path from 'path';
 import { readdir, readFile } from 'fs/promises';
+import * as fs from 'fs';
 import { isEqual, parseJSON, startOfDay } from 'date-fns';
 
 function buildTranscriptFolderPath(category, id) {
@@ -17,7 +18,7 @@ export async function getAllCategories() {
         .map(entry => entry.name);
 }
 
-export async function getAllMetadataForCategory(category) {
+export async function getAllVideosForCategory(category) {
     const prefixDirectoryEntries = await readdir(
         path.join(process.cwd(), 'data', 'transcripts', category),
         {
@@ -29,10 +30,10 @@ export async function getAllMetadataForCategory(category) {
         .filter(entry => entry.isDirectory())
         .map(entry => path.join(entry.path, entry.name));
 
-    const allMetadata = [];
+    const allVideos = [];
 
     // Inspect directories sequentially to limit the number of concurrently open files
-    for (let prefixPath of prefixPaths) {
+    for (const prefixPath of prefixPaths) {
         const metadataEntries = await readdir(
             prefixPath,
             {
@@ -40,42 +41,61 @@ export async function getAllMetadataForCategory(category) {
             }
         );
 
-        const metadataFiles = metadataEntries
-            .filter(entry => entry.isFile() && entry.name.endsWith('.metadata.json'));
+        // Files are usually videoId.mp4, videoId.json, videoId.metadata.json,
+        // and optionally videoId.props.json.
+        //
+        // Look for videoId.json as that determines if the transcription is available.
+        const videoIds = metadataEntries
+            .filter(entry => entry.isFile())
+            .filter(entry => entry.name.endsWith('.json'))
+            .filter(entry => ! entry.name.endsWith('.metadata.json'))
+            .map(entry => entry.name.split('.')[0]);
 
-        const curPrefixMetadata = await Promise.all(metadataFiles.map(entry =>
-            readFile(path.join(entry.path, entry.name))
-                .then(contents => JSON.parse(contents))
-        ));
+        for (const videoId of videoIds) {
+            const videoData = {};
+            videoData.metadata = JSON.parse(
+                await readFile(path.join(prefixPath, `${videoId}.metadata.json`)));
 
-        allMetadata.push(...curPrefixMetadata);
+            const propFilePath = path.join(prefixPath, `${videoId}.props.json`);
+            if (fs.existsSync(propFilePath)) {
+                videoData.props = JSON.parse(
+                    await readFile(path.join(prefixPath, `${videoId}.props.json`)));
+            } else {
+              videoData.props = {};
+            }
+
+            videoData.date = videoData.props.date || videoData.metadata.publish_date;
+            videoData.transcription_path = path.join(prefixPath, `${videoId}.json`);
+
+            allVideos.push(videoData);
+        }
     }
 
-    return allMetadata;
+    return allVideos;
 }
 
 export async function getDatesForCategory(category) {
-    const metadata = await getAllMetadataForCategory(category);
+    const allVideos = await getAllVideosForCategory(category);
 
-    return [... new Set(metadata.map(
-        metadata => parseJSON(metadata.publish_date)
-    ))];
+    return [... new Set(allVideos.map(
+        video => parseJSON(video.date)
+    ))].sort((a,b) => b-a);
 }
 
-export async function getAllMetadataForPublishDate(category, date) {
-    const categoryMetadata = await getAllMetadataForCategory(category);
+export async function getAllVideosForPublishDate(category, date) {
+    const categoryVideos = await getAllVideosForCategory(category);
 
-    return categoryMetadata
-        .filter(metadata => {
-            const publishDate = startOfDay(parseJSON(metadata.publish_date));
+    return categoryVideos
+        .filter(video => {
+            const publishDate = startOfDay(parseJSON(video.date));
             return isEqual(publishDate, date);
         });
 }
 
-export async function getMetadataForDateAndTitle(category, date, title) {
-    const allMetadataForDate = await getAllMetadataForPublishDate(category, date);
+export async function getVideoForDateAndTitle(category, date, title) {
+    const allVideosForDate = await getAllVideosForPublishDate(category, date);
 
-    return allMetadataForDate.find(metadata => metadata.title === title);
+    return allVideosForDate.find(video => video.metadata.title === title);
 }
 
 export async function getTranscript(category, id) {

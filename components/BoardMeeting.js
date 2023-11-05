@@ -19,13 +19,14 @@ export class BoardMeeting extends React.Component {
 
         this.videoId = videoId;
         this.transcript = transcript;
-        this.speakerNames = speakerNames;
+        this.speakerNames = speakerNames || {};
 
         // Binding method
         this.onReady = this.onReady.bind(this);
         this.ytComponent = null;
         this.jumpToTime = this.jumpToTime.bind(this);
         this.jumpToTimeInternal = this.jumpToTimeInternal.bind(this);
+        this.getSpeakerAttributes = this.getSpeakerAttributes.bind(this);
     }
 
     onReady(event) {
@@ -98,7 +99,7 @@ export class BoardMeeting extends React.Component {
         for (const segment of Object.values(this.transcript.segments)) {
             // If speaker changed, push the div and reset curWordAnchors.
             if (curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
-                const { name, color } = getSpeakerAttributes(curSpeaker);
+                const { name, color } = this.getSpeakerAttributes(curSpeaker);
                 dialogDivs.push(
                     // <div className={styles.e} style={{ backgroundColor: color }}>
                     <div className='e' style={{ backgroundColor: color }}>
@@ -117,6 +118,8 @@ export class BoardMeeting extends React.Component {
                 );
             }
         }
+
+    console.log(this.videoId);
 
 
         return (

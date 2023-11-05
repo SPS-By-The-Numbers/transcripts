@@ -1,6 +1,6 @@
 import { formatISO, parseISO, intlFormat } from 'date-fns';
 import Link from 'next/link'
-import { getAllCategories, getAllMetadataForPublishDate, getDatesForCategory } from '../../../../utilities/metadata-utils';
+import { getAllCategories, getAllVideosForPublishDate, getDatesForCategory } from '../../../../utilities/metadata-utils';
 import { parseDateFromPath, formatDateForPath, getTranscriptPath } from '../../../../utilities/path-utils';
 
 export async function getStaticPaths(context) {
@@ -33,31 +33,30 @@ export async function getStaticPaths(context) {
 export async function getStaticProps(context) {
     const date = parseDateFromPath(context.params.date);
 
-    const metadata = await getAllMetadataForPublishDate(context.params.category, date);
+    const videos = await getAllVideosForPublishDate(context.params.category, date);
 
     return {
         props: {
             category: context.params.category,
             date: formatISO(date),
-            fileMetadata: metadata
+            videos: videos
         }
     };
 }
 
 export default function Index(props) {
-    const { category, fileMetadata } = props;
+    const { category, videos } = props;
     const date = parseISO(props.date);
 
-    console.log(fileMetadata);
 
-    const fileLinks = fileMetadata.map(
-        fileEntry => <li><Link href={ getTranscriptPath(category, date, fileEntry.title) }>{ fileEntry.title }</Link></li>
-    )
+    const videoLinks = videos.map(
+        video => <li><Link key={video.metadata.videoId} href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
+    );
     return (
         <main>
             <header>Transcripts for { props.category } on { intlFormat(date) }</header>
             <ul>
-                { fileLinks }
+                { videoLinks }
             </ul>
         </main>
     );
