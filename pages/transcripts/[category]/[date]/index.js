@@ -50,12 +50,15 @@ export default function Index(props) {
 
 
     const videoLinks = videos.map(
-        video => <li><Link key={video.metadata.videoId} href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
+        video => <li className="mx-3 list-disc"><Link key={video.metadata.videoId} href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
     );
     return (
-        <main>
-            <header>Transcripts for { props.category } on { intlFormat(date) }</header>
-            <ul>
+        <main className="mx-5 my-5">
+          <h2 className="my-4 text-lg">
+            Meetings that we have transcripts for.
+            Transcripts for { props.category } on { intlFormat(date) }
+          </h2>
+            <ul className="flex flex-col flex-wrap h-screen">
                 { videoLinks }
             </ul>
         </main>

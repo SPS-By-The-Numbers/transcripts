@@ -23,12 +23,15 @@ export default function Index(props) {
     const { categories } = props;
 
     const categoryLinks = categories.map(
-        category => <li><Link href={ getCategoryPath(category) }>{category}</Link></li>
+        category => <li className="mx-3 list-disc text-lg"><Link href={ getCategoryPath(category) }>{category}</Link></li>
     );
 
     return (
-        <main>
-            <ul>
+        <main className="mx-5 my-5">
+          <h2 className="my-4 text-lg">
+            Meetings that we have transcripts for.
+          </h2>
+          <ul className="flex flex-col flex-wrap h-screen">
                 {categoryLinks}
             </ul>
         </main>
