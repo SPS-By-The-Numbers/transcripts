@@ -1,6 +1,6 @@
 import React from 'react'
 import YouTube from 'react-youtube'
-// import styles from './BoardMeeting.css'
+import styles from '../styles/BoardMeeting.module.css'
 import distinctColors from 'distinct-colors'
 
 function toTimeAnchor(seconds) {
@@ -11,15 +11,15 @@ function toTimeAnchor(seconds) {
     return '';
 }
 
-const palette = distinctColors({ count: 42, lightMin: 70, chromaMax: 200 });
+const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
 
 export class BoardMeeting extends React.Component {
-    constructor({ videoId, transcript, speakerNames }) {
+    constructor({ video, transcript, speakers }) {
         super();
 
-        this.videoId = videoId;
+        this.video = video;
         this.transcript = transcript;
-        this.speakerNames = speakerNames || {};
+        this.speakers = speakers || {};
 
         // Binding method
         this.onReady = this.onReady.bind(this);
@@ -42,8 +42,9 @@ export class BoardMeeting extends React.Component {
     }
 
     getSpeakerAttributes(speaker) {
-        let name = this.speakerNames[speaker];
-        const color = palette[speaker.split('_')[1]];
+        let name = this.speakers[speaker];
+        const speakerNum = Number(speaker.split('_')[1]);
+        const color = palette[speakerNum];
         if (!name) {
             name = speaker;
         }
@@ -96,13 +97,12 @@ export class BoardMeeting extends React.Component {
         let curSpeaker = null;
         let curWordAnchors = []
 
-        for (const segment of Object.values(this.transcript.segments)) {
+        for (const [i, segment] of Object.values(this.transcript.segments).entries()) {
             // If speaker changed, push the div and reset curWordAnchors.
             if (curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
                 const { name, color } = this.getSpeakerAttributes(curSpeaker);
                 dialogDivs.push(
-                    // <div className={styles.e} style={{ backgroundColor: color }}>
-                    <div className='e' style={{ backgroundColor: color }}>
+                    <div className={styles.e} style={{ backgroundColor: color }}>
                         <p style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
                             <span style={{ color: 'black', fontWeight: 'bold' }}>{name}</span><br />
                             {curWordAnchors}
@@ -119,16 +119,13 @@ export class BoardMeeting extends React.Component {
             }
         }
 
-    console.log(this.videoId);
-
-
         return (
             <main style={mainStyle}>
-                <h2>SPS Board Meeting</h2>
-                <h3><i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
-                    bar<br /><br /></i></h3>
+                <h2>{ this.video.metadata.title }</h2>
+                <p><i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
+                    bar<br /><br /></i></p>
                 <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '40%' }}>
-                    <YouTube style={ytplayerStyle} videoId={ this.videoId } opts={youtubeOpts} onReady={this.onReady} />
+                    <YouTube style={ytplayerStyle} videoId={ this.video.metadata.video_id } opts={youtubeOpts} onReady={this.onReady} />
                 </div>
                 {dialogDivs}
             </main>

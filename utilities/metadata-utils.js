@@ -116,14 +116,9 @@ export async function getSpeakerMapping(category, id) {
     const speakerPath = path.join(buildTranscriptFolderPath(category, id), `${id}.speakers.json`);
 
     // Not all transcripts are expected to be mapped, so handle missing files by returning an empty object
-    return await readFile(speakerPath).then(
-        JSON.parse
-    ).catch((err) => {
-        if (err.code === 'ENOENT') {
-            return {}
-        }
-        else {
-            return Promise.reject(err);
-        }
-    });
+    if (!fs.existsSync(speakerPath)) {
+        return {};
+    }
+
+    return JSON.parse(await readFile(speakerPath));
 }

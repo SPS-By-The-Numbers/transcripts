@@ -20,7 +20,7 @@ display: inline-block;
   /* Making space around letters */
   font-size: 14px;
   /* Changing font size */
-  margin-bottom: 0;
+  margin-bottom: 1ex;
 }
 
 .t {
