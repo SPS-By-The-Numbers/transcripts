@@ -34,7 +34,6 @@ export async function getStaticProps(context) {
     const date = parseDateFromPath(context.params.date);
 
     const videos = await getAllVideosForPublishDate(context.params.category, date);
-    console.log(videos);
 
     return {
         props: {
