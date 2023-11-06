@@ -77,9 +77,12 @@ export async function getAllVideosForCategory(category) {
 export async function getDatesForCategory(category) {
     const allVideos = await getAllVideosForCategory(category);
 
-    return [... new Set(allVideos.map(
-        video => parseISO(video.date)
-    ))].sort((a,b) => b-a);
+    // https://stackoverflow.com/a/44906207
+    const uniqueDates = allVideos.map(video => parseISO(video.date))
+      .filter((date, i, self) => 
+          self.findIndex(d => d.getTime() === date.getTime()) === i
+          );
+    return uniqueDates.sort((a,b) => b-a);
 }
 
 export async function getAllVideosForPublishDate(category, date) {

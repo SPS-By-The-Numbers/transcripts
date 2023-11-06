@@ -33,9 +33,10 @@ export default function Index(props) {
     const { category } = props;
     const dates = props.dates.map(parseISO);
 
-    const dateLinks = dates.map(
-        date => <li className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date.toLocaleDateString('en-US') }</Link></li>
-    )
+    const dateLinks = [];
+    for (const [i, date] of dates.entries()) {
+      dateLinks.push(<li key={`li-${i}`} className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date.toLocaleDateString('en-US') }</Link></li>);
+    }
 
     return (
         <main className="mx-5 my-5">

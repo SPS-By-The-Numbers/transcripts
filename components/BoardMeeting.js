@@ -103,7 +103,7 @@ export class BoardMeeting extends React.Component {
             if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
                 const { name, color } = this.getSpeakerAttributes(curSpeaker);
                 dialogDivs.push(
-                    <div className={styles.e} style={{ backgroundColor: color }}>
+                    <div key={`segment-${i}`} className={styles.e} style={{ backgroundColor: color }}>
                         <p style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
                             <span style={{ color: 'black', fontWeight: 'bold' }}>{name}</span><br />
                             {curWordAnchors}
@@ -113,9 +113,9 @@ export class BoardMeeting extends React.Component {
             }
             curSpeaker = segment['speaker']
 
-            for (const word of segment['words']) {
+            for (const [j, word] of segment['words'].entries()) {
                 curWordAnchors.push(
-                    <Link name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</Link>
+                    <Link key={`word-${i}-${j}`} name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</Link>
                 );
             }
         }
