@@ -52,12 +52,13 @@ export async function getStaticProps(context) {
     return {
         props: {
             video,
+            category,
             transcript,
             speakers
         }
     }
 }
 
-export default function Index({ video, transcript, speakers }) {
-    return <BoardMeeting video={ video } transcript={ transcript } speakers={ speakers } />
+export default function Index({ video, category, transcript, speakers }) {
+    return <BoardMeeting video={ video } category={ category } transcript={ transcript } speakers={ speakers } />
 }

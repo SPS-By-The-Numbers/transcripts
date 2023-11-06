@@ -23,7 +23,7 @@ export default function Index(props) {
     const { categories } = props;
 
     const categoryLinks = categories.map(
-        category => <li className="mx-3 list-disc text-lg"><Link href={ getCategoryPath(category) }>{category}</Link></li>
+        category => <li key={category} className="mx-3 list-disc text-lg"><Link href={ getCategoryPath(category) }>{category}</Link></li>
     );
 
     return (

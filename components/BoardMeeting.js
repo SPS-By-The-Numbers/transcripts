@@ -12,15 +12,20 @@ function toTimeAnchor(seconds) {
     return '';
 }
 
+function cloudDownloadURL(category, videoId, ext) {
+    return `https://storage.googleapis.com/sps-by-the-numbers.appspot.com/transcription/${category}/${videoId[0]}/${videoId}.${ext}`
+}
+
 const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
 
 export class BoardMeeting extends React.Component {
-    constructor({ video, transcript, speakers }) {
+    constructor({ video, category, transcript, speakers }) {
         super();
 
         this.video = video;
         this.transcript = transcript;
         this.speakers = speakers || {};
+        this.category = category;
 
         // Binding method
         this.onReady = this.onReady.bind(this);
@@ -122,16 +127,36 @@ export class BoardMeeting extends React.Component {
 
         return (
             <main style={mainStyle}>
-                <div className="p-2 bg-slate-50 my-2 border-dashed border-2 border-black">
-                  <h2>{ this.video.metadata.title }</h2>
-                  <p><i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
-                      bar<br /><br /></i></p>
-                  <p>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">Majdoddin's collab example</Link></p>
+                <div className={"flex"}>
+                    <div className={"flex-auto"}>
+                        <b>Data Files:</b>
+                        <Link className={"px-1"} href={cloudDownloadURL(this.category, this.video.metadata.video_id, 'json')}>json</Link>
+                        <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(this.category, this.video.metadata.video_id, 'tsv')}>tsv</Link>
+                        <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(this.category, this.video.metadata.video_id, 'txt')}>txt</Link>
+                        <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(this.category, this.video.metadata.video_id, 'srt')}>srt</Link>
+                        <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(this.category, this.video.metadata.video_id, 'vtt')}>vtt</Link>
+                    </div>
+                    <div className={"flex-auto text-right"}>
+                        <i>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">Majdoddin's collab example</Link></i>
+                    </div>
                 </div>
+
+                <div>
+                    <div className="p-2 bg-slate-50 my-2 border-dashed border-2 border-black">
+                        <h2>{ this.video.metadata.title }</h2>
+                        <p>{ this.video.metadata.description }</p>
+                        <p></p>
+                        <p><b>Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</b></p>
+                    </div>
+                </div>
+
                 <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '45%' }}>
                     <YouTube style={ytplayerStyle} videoId={ this.video.metadata.video_id } opts={youtubeOpts} onReady={this.onReady} />
                 </div>
-                {dialogDivs}
+
+                <div className="dialogs">
+                    {dialogDivs}
+                </div>
             </main>
         );
     }
