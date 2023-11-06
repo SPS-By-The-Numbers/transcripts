@@ -61,7 +61,7 @@ export default function Nav() {
       <div className="sm:hidden" id="mobile-menu">
         <div className="px-2 pt-2 pb-3 space-y-1">
           {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-          <a href="/" className="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">Home</a>
+          <a href="/transcripts" className="text-gray-300 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">SPS Board Transcripts</a>
 
           <a href="/bell-times" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Bell-Time Survey Results</a>
 
@@ -69,6 +69,7 @@ export default function Nav() {
 
           <a target="_blank" href="https://andrewbcooper.shinyapps.io/spsstarttimes/" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Andy's Start-Times Tool ⧉</a>
           <a href="/hcc-northend-resegregation" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">HCC Removal Resegregates Northend</a>
+          <a href="/about" className="text-gray-300 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">About</a>
         </div>
       </div>
     </nav>
