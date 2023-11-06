@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 import YouTube from 'react-youtube'
 import styles from '../styles/BoardMeeting.module.css'
 import distinctColors from 'distinct-colors'
@@ -114,17 +115,20 @@ export class BoardMeeting extends React.Component {
 
             for (const word of segment['words']) {
                 curWordAnchors.push(
-                    <a name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</a>
+                    <Link name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={this.jumpToTime}> {word['word']}</Link>
                 );
             }
         }
 
         return (
             <main style={mainStyle}>
-                <h2>{ this.video.metadata.title }</h2>
-                <p><i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
-                    bar<br /><br /></i></p>
-                <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '40%' }}>
+                <div className="p-2 bg-slate-50 my-2 border-dashed border-2 border-black">
+                  <h2>{ this.video.metadata.title }</h2>
+                  <p><i>Click on a part of the transcription, to jump to its portion of audio, and get an anchor to it in the address bar
+                      bar<br /><br /></i></p>
+                  <p>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">Majdoddin's collab example</Link></p>
+                </div>
+                <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '45%' }}>
                     <YouTube style={ytplayerStyle} videoId={ this.video.metadata.video_id } opts={youtubeOpts} onReady={this.onReady} />
                 </div>
                 {dialogDivs}

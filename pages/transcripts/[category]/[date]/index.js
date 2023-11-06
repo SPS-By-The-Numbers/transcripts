@@ -49,7 +49,7 @@ export default function Index(props) {
     const date = parseISO(props.date);
 
     const videoLinks = videos.map(
-        video => <li className="mx-3 list-disc"><Link key={video.metadata.videoId} href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
+        video => <li key={video.metadata.videoId} className="mx-3 list-disc"><Link href={ getTranscriptPath(category, date, video.metadata.title) }>{ video.metadata.title || 'Unknown Video' }</Link></li>
     );
     return (
         <main className="mx-5 my-5">

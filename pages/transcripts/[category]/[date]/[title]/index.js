@@ -27,7 +27,8 @@ export async function getStaticPaths() {
         params: {
             category: entry.category,
             date: formatDateForPath(entry.date),
-            title: entry.title
+            // HACK: See getTranscriptPath() for explanation.
+            title: encodeURIComponent(entry.title)
         }
     }));
 
