@@ -35,6 +35,19 @@ export default function Home() {
           </div>
 
           <div className={styles.card}>
+            <Link href="/transcripts/sps-board/2023-10-11/board-meeting" passHref={true}>
+              <h2>Oct 11, 2023 Board Meeting Transcript</h2>
+              Board meeting with parent testimony about massive 50 elementary school reshuffle
+              followed by board discussion of the financial policy adoption.
+
+              This is the 2nd use of pyannote and whisper to create searchable transcription.
+              Uses WhisperX, speech-diarization-3.0 and large-v2 transcription model.
+
+              Click words in text to jump to that point in the video.
+            </Link>
+          </div>
+
+          <div className={styles.card}>
             <Link href="/transcripts/sps-board/2023-10-17/board-special-meeting" passHref={true}>
               <h2>Oct 17, 2023 Special Board Working Session Transcript</h2>
               Test of publishing transcription of Board Working Session. This uses pyannote
