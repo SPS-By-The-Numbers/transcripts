@@ -22,6 +22,20 @@ export default function Home() {
 
         <div className={styles.grid}>
           <div className={styles.card}>
+            <Link href="/posts/election-2023-candidate-letters" passHref={true}>
+              <h2>Candidate responses on HCC and school consolidations</h2>
+On Nov 5th/6th, one of the parents on HCC Seattle Elementary Schools FB group started getting respones from schoolboard candidates about their views on HCC. To avoid having information trapped inside a FB group, am reposting on this website.  Permission was granted to repost as long as all responses are published together. Displayed in order posted.
+            </Link>
+          </div>
+
+          <div className={styles.card}>
+            <Link href="https://experience.arcgis.com/experience/a52ef1e7b30c4130bf8ac3d59970650b/" passHref={true}>
+              <h2>Beth Day's Neighborhood Elementary School Data map</h2>
+              Use the linked map to explore enrollment, building capacity, and building condition for neighborhood attendance area elementary schools in the Seattle Public Schools system. Layers showing percentages of student populations of special interest are also available (including non-white, Black/African-American, English Language Learners, highly mobile, homeless, low income, Section 504, and disabled). Also included are layers derived from the 2020 USA Census data.
+            </Link>
+          </div>
+
+          <div className={styles.card}>
             <Link href="/transcripts/sps-board/2023-10-11/board-meeting" passHref={true}>
               <h2>Oct 11, 2023 Board Meeting Transcript</h2>
               Board meeting with parent testimony about massive 50 elementary school reshuffle
