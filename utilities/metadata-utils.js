@@ -95,10 +95,10 @@ export async function getAllVideosForPublishDate(category, date) {
         });
 }
 
-export async function getVideoForDateAndTitle(category, date, title) {
+export async function getVideoForDateAndId(category, date, videoId) {
     const allVideosForDate = await getAllVideosForPublishDate(category, date);
 
-    return allVideosForDate.find(video => video.metadata.title === title);
+    return allVideosForDate.find(video => video.metadata.video_id === videoId);
 }
 
 export async function getTranscript(category, id) {

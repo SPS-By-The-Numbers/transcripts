@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { getAllCategories, getAllVideosForCategory, getVideoForDateAndTitle, getSpeakerMapping, getTranscript } from "../../../../../utilities/metadata-utils";
+import { getAllCategories, getAllVideosForCategory, getVideoForDateAndId, getSpeakerMapping, getTranscript } from "../../../../../utilities/metadata-utils";
 import { formatDateForPath, parseDateFromPath } from "../../../../../utilities/path-utils";
 import { BoardMeeting } from '../../../../../components/BoardMeeting';
 
@@ -20,15 +20,14 @@ export async function getStaticPaths() {
     const nativeParams = categoriesWithMetadata.map(({category, video}) => ({
         category: category,
         date: parseISO(video.date),
-        title: video.metadata.title || 'Unknown Video'
+        videoId: video.metadata.video_id
     }));
 
     const paths = nativeParams.map(entry => ({
         params: {
             category: entry.category,
             date: formatDateForPath(entry.date),
-            // HACK: See getTranscriptPath() for explanation.
-            title: encodeURIComponent(entry.title)
+            videoId: entry.videoId
         }
     }));
 
@@ -41,11 +40,10 @@ export async function getStaticPaths() {
 export async function getStaticProps(context) {
     const category = context.params.category;
     const date = parseDateFromPath(context.params.date);
-    const title = decodeURIComponent(context.params.title);
+    const videoId = context.params.videoId;
 
-    const video = await getVideoForDateAndTitle(category, date, title);
+    const video = await getVideoForDateAndId(category, date, videoId);
 
-    const videoId = video.metadata.video_id;
     const transcript = await getTranscript(category, videoId);
     const speakers = await getSpeakerMapping(category, videoId);
 
