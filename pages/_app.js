@@ -1,3 +1,4 @@
+import styles from '../styles/globals.scss'
 import Head from 'next/head'
 import Nav from '../components/Nav'
 
