@@ -1,7 +1,7 @@
 import { formatISO, parseISO, intlFormat } from 'date-fns';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link'
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 import { VideoData, getAllCategories, getAllVideosForPublishDate, getDatesForCategory } from '../../../../utilities/metadata-utils';
 import { parseDateFromPath, formatDateForPath, getTranscriptPath } from '../../../../utilities/path-utils';
 
@@ -21,9 +21,8 @@ type VideoProps = {
     title: string
 }
 
-export const getStaticPaths = (async () => {
+export const getStaticPaths: GetStaticPaths<DateParams> = async () => {
     const categories: string[] = await getAllCategories();
-
 
     const categoriesWithDates: Array<{ category: string, date: Date }> = [];
 
@@ -46,9 +45,9 @@ export const getStaticPaths = (async () => {
             })),
         fallback: false
     };
-}) satisfies GetStaticPaths<DateParams>;
+};
 
-export const getStaticProps = (async (context) => {
+export const getStaticProps: GetStaticProps<DateProps, DateParams> = async (context) => {
     const date = parseDateFromPath(context.params.date);
     const videos: VideoData[] = await getAllVideosForPublishDate(context.params.category, date);
 
@@ -62,13 +61,13 @@ export const getStaticProps = (async (context) => {
             }))
         }
     };
-}) satisfies GetStaticProps<DateProps, DateParams>;
+};
 
-export default function Index(props: DateProps): ReactElement {
+const Index: NextPage<DateProps> = (props: DateProps): ReactNode => {
     const { category, videos } = props;
     const date = parseISO(props.date);
 
-    const videoLinks = videos.map(
+    const videoLinks: ReactNode[] = videos.map(
         video => <li key={video.videoId} className="mx-3 list-disc"><Link href={getTranscriptPath(category, date, video.videoId)}>{video.title}</Link></li>
     );
 
@@ -84,3 +83,5 @@ export default function Index(props: DateProps): ReactElement {
         </main>
     );
 }
+
+export default Index;

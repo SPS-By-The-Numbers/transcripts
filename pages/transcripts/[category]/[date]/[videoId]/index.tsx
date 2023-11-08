@@ -1,9 +1,8 @@
-import { parseISO } from "date-fns";
 import { getAllCategories, getAllVideosForCategory, getVideoForDateAndId, getSpeakerMapping, getTranscript, VideoData } from "../../../../../utilities/metadata-utils";
 import { formatDateForPath, parseDateFromPath } from "../../../../../utilities/path-utils";
 import { BoardMeeting } from '../../../../../components/BoardMeeting';
-import { GetStaticPaths, GetStaticProps } from "next";
-import { ReactElement } from "react";
+import { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import { ReactNode } from "react";
 
 type VideoParams = {
     category: string,
@@ -18,7 +17,7 @@ type VideoProps = {
     speakers: any
 };
 
-export const getStaticPaths = (async () => {
+export const getStaticPaths: GetStaticPaths<VideoParams> = async () => {
     const categories: string[] = await getAllCategories();
 
     const categoriesWithVideos: Array<{ category: string, video: VideoData }> = [];
@@ -48,9 +47,9 @@ export const getStaticPaths = (async () => {
         })),
         fallback: false
     };
-}) satisfies GetStaticPaths<VideoParams>;
+};
 
-export const getStaticProps = (async (context) => {
+export const getStaticProps: GetStaticProps<VideoProps, VideoParams> = async (context) => {
     const category = context.params.category;
     const date = parseDateFromPath(context.params.date);
     const videoId = context.params.videoId;
@@ -68,8 +67,10 @@ export const getStaticProps = (async (context) => {
             speakers
         }
     };
-}) satisfies GetStaticProps<VideoProps, VideoParams>;
+};
 
-export default function Index({ metadata, category, transcript, speakers }): ReactElement {
+const Index: NextPage<VideoProps> = ({ metadata, category, transcript, speakers }): ReactNode => {
     return <BoardMeeting metadata={ metadata } category={ category } transcript={ transcript } speakers={ speakers } />
 }
+
+export default Index;

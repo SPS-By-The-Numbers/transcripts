@@ -108,7 +108,6 @@ export async function getAllVideosForPublishDate(category: string, date: Date): 
         });
 }
 
-
 export async function getVideoForDateAndId(category: string, date: Date, videoId: string): Promise<VideoData> {
     const allVideosForDate: VideoData[] = await getAllVideosForPublishDate(category, date);
 

@@ -1,10 +1,9 @@
 import { formatISO, parseISO } from 'date-fns';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 import { getAllCategories, getDatesForCategory } from '../../../utilities/metadata-utils';
 import { getDatePath } from '../../../utilities/path-utils';
-import styles from '../../../styles/Home.module.css';
 
 type CategoryParams = {
     category: string,
@@ -15,7 +14,7 @@ type CategoryProps = {
     dates: string[]
 }
 
-export const getStaticPaths = (async () => {
+export const getStaticPaths: GetStaticPaths<CategoryParams> = async () => {
     const categories = await getAllCategories();
 
     return {
@@ -26,9 +25,9 @@ export const getStaticPaths = (async () => {
         })),
         fallback: false
     };
-}) satisfies GetStaticPaths<CategoryParams>;
+};
 
-export const getStaticProps = (async (context) => {
+export const getStaticProps: GetStaticProps<CategoryProps, CategoryParams> = async (context) => {
     const category = context.params.category;
     const dates = await getDatesForCategory(category);
 
@@ -38,14 +37,14 @@ export const getStaticProps = (async (context) => {
             dates: dates.map((date: Date): string => formatISO(date))
         }
     };
-}) satisfies GetStaticProps<CategoryProps, CategoryParams>;
+};
 
-export default function Index(props: CategoryProps): ReactElement {
+const Index: NextPage<CategoryProps> = (props: CategoryProps): ReactNode => {
     const { category } = props;
     const dates = props.dates.map((dateString: string): Date => parseISO(dateString));
 
-    const dateLinks = dates.map((date: Date, i: number): ReactElement => (
-        <li key={`li-${i}`} className="mx-3 list-disc"><Link href={getDatePath(category, date)}>{date.toLocaleDateString('en-US')}</Link></li>
+    const dateLinks = dates.map((date: Date, i: number): ReactNode => (
+        <li key={`li-${i}`} className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date.toLocaleDateString('en-US') }</Link></li>
     ))
 
     return (
@@ -59,3 +58,5 @@ export default function Index(props: CategoryProps): ReactElement {
         </main>
     );
 }
+
+export default Index;
