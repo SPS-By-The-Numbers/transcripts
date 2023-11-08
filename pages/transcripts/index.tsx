@@ -1,10 +1,16 @@
-import Link from 'next/link'
+import { GetStaticProps } from 'next';
+import Link from 'next/link';
 import { readdir } from 'fs/promises';
 import path from 'path';
 import { getAllCategories } from '../../utilities/metadata-utils';
 import { getCategoryPath } from '../../utilities/path-utils';
+import { ReactNode } from 'react';
 
-export async function getStaticProps(context) {
+type TranscriptsProps = {
+    categories: string[]
+};
+
+export const getStaticProps = (async (context) => {
     const entries = await readdir(
         path.join(process.cwd(), 'data', 'transcripts'),
         { withFileTypes: true }
@@ -17,9 +23,9 @@ export async function getStaticProps(context) {
             categories
         }
     }
-}
+}) satisfies GetStaticProps<TranscriptsProps>;
 
-export default function Index(props) {
+export default function Index(props: TranscriptsProps): ReactNode {
     const { categories } = props;
 
     const categoryLinks = categories.map(
