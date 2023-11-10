@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "sps-by-the-numbers"
-  }
+  },
+  "targets": {
+    "sps-by-the-numbers": {
+      "hosting": {
+        "transcriptions": [
+          "transcripts-sps-by-the-numbers"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

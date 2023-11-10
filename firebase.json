@@ -6,6 +6,7 @@
     ]
   },
   "hosting": {
+    "target": "transcripts",
     "public": "out",
     "ignore": [
       "firebase.json",
