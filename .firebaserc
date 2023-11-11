@@ -5,7 +5,7 @@
   "targets": {
     "sps-by-the-numbers": {
       "hosting": {
-        "transcriptions": [
+        "transcripts": [
           "transcripts-sps-by-the-numbers"
         ]
       }

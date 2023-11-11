@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "postbuild": "next-sitemap",
-    "start": "next start",
+    "deploy": "firebase deploy --only hosting:transcripts",
+    "dev": "next dev",
     "lint": "next lint",
-    "deploy": "firebase deploy --only hosting:transcripts"
+    "postbuild": "next-sitemap",
+    "syncData": "bash syncdata.sh",
+    "setupFirebase": "firebase target:apply hosting transcripts transcripts-sps-by-the-numbers",
+    "start": "next start"
   },
   "devDependencies": {
     "@mdx-js/loader": "^2.1.1",
