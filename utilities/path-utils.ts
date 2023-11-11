@@ -11,13 +11,13 @@ export function parseDateFromPath(dateString: string): Date {
 }
 
 export function getCategoryPath(category: string): string {
-    return `/transcripts/${category}`;
+    return `/${category}`;
 }
 
 export function getDatePath(category: string, date: Date): string {
     return `${getCategoryPath(category)}/${formatDateForPath(date)}`;
 }
 
-export function getTranscriptPath(category: string, date: Date, videoId: string): string {
-    return `${getDatePath(category, date)}/${videoId}`;
+export function getVideoPath(category: string, videoId: string): string {
+    return `${getCategoryPath(category)}/v/${videoId.substr(0,2).toUpperCase()}/${videoId}`;
 }

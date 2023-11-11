@@ -128,6 +128,20 @@ export async function getTranscript(category: string, id: string): Promise<any> 
     });
 }
 
+export async function getMetadata(category: string, id: string): Promise<any> {
+    const metadataPath = path.join(buildTranscriptFolderPath(category, id), `${id}.metadata.json`);
+    return await readFile(metadataPath, { encoding: 'utf8' }).then(
+        JSON.parse
+    ).catch((err) => {
+        if (err.code === 'ENOENT') {
+            return {};
+        }
+        else {
+            return Promise.reject(err);
+        }
+    });
+}
+
 export async function getSpeakerMapping(category: string, id: string): Promise<any> {
     const speakerPath: string = path.join(buildTranscriptFolderPath(category, id), `${id}.speakers.json`);
 

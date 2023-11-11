@@ -3,7 +3,7 @@ import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link'
 import { ReactNode } from 'react';
 import { VideoData, getAllCategories, getAllVideosForPublishDate, getDatesForCategory } from '../../../utilities/metadata-utils';
-import { parseDateFromPath, formatDateForPath, getTranscriptPath } from '../../../utilities/path-utils';
+import { parseDateFromPath, formatDateForPath, getVideoPath } from '../../../utilities/path-utils';
 
 type DateParams = {
     category: string,
@@ -68,8 +68,13 @@ const Index: NextPage<DateProps> = (props: DateProps): ReactNode => {
     const date = parseISO(props.date);
 
     const videoLinks: ReactNode[] = videos.map(
-        video => <li key={video.videoId} className="mx-3 list-disc"><Link href={getTranscriptPath(category, date, video.videoId)}>{video.title}</Link></li>
-    );
+        video => (
+            <li key={video.videoId} className="mx-3 list-disc">
+                <Link href={getVideoPath(category, video.videoId)}>
+                    {video.title}
+                </Link>
+            </li>
+    ));
 
     return (
         <main className="mx-5 my-5">
