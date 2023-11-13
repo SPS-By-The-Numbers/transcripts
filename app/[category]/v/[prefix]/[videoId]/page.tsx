@@ -1,13 +1,33 @@
 import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, getTranscript, VideoData } from "utilities/metadata-utils";
 import { formatDateForPath, parseDateFromPath } from "utilities/path-utils";
 import BoardMeeting from 'components/BoardMeeting';
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import { Metadata, ResolvingMetadata } from "next";
 import { ReactNode } from "react";
+
+type Props = {
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
 
 type VideoParams = {
     category: string,
     prefix: string,
     videoId: string,
+}
+
+export async function generateMetadata(
+    { params, searchParams }: Props,
+    parent: ResolvingMetadata): Promise<Metadata> {
+
+  const videoMetadata = await getMetadata(params.category, params.videoId);
+
+  // fetch data
+  const parentMetadata = await parent;
+
+  return {
+    title: `Transcript of ${params.category} -  ${videoMetadata.title}`,
+    description: `Transcript of ${params.category} - ${videoMetadata.title}`
+  }
 }
 
 export async function generateStaticParams(): GenerateStaticParams<VideoParams> {
