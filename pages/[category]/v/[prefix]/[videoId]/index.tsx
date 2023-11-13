@@ -1,6 +1,6 @@
 import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, getTranscript, VideoData } from "../../../../../utilities/metadata-utils";
 import { formatDateForPath, parseDateFromPath } from "../../../../../utilities/path-utils";
-import { BoardMeeting } from '../../../../../components/BoardMeeting';
+import BoardMeeting from '../../../../../components/BoardMeeting';
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { ReactNode } from "react";
 
@@ -14,7 +14,7 @@ type VideoProps = {
     metadata: any,
     category: string,
     transcript: any,
-    speakers: any
+    speakerInfo: any
 };
 
 export const getStaticPaths: GetStaticPaths<VideoParams> = async () => {
@@ -52,20 +52,20 @@ export const getStaticProps: GetStaticProps<VideoProps, VideoParams> = async (co
 
     const metadata = await getMetadata(category, videoId);
     const transcript = await getTranscript(category, videoId);
-    const speakers = await getSpeakerMapping(category, videoId);
+    const speakerInfo = await getSpeakerMapping(category, videoId);
 
     return {
         props: {
             metadata,
             category,
             transcript,
-            speakers
+            speakerInfo
         }
     };
 };
 
-const Index: NextPage<VideoProps> = ({ metadata, category, transcript, speakers }): ReactNode => {
-    return <BoardMeeting metadata={ metadata } category={ category } transcript={ transcript } speakers={ speakers } />
+const Index: NextPage<VideoProps> = ({ metadata, category, transcript, speakerInfo }): ReactNode => {
+    return <BoardMeeting metadata={ metadata } category={ category } transcript={ transcript } speakerInfo={ speakerInfo } />
 }
 
 export default Index;
