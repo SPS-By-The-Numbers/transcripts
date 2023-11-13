@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react';
 import Link from 'next/link'
 import YouTube from 'react-youtube'
@@ -130,12 +132,12 @@ export default function BoardMeeting({ metadata, category, transcript, speakerIn
         if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
             const { name, color } = getSpeakerAttributes(curSpeaker);
             dialogDivs.push(
-                <div key={`segment-${i}`} className={styles.e} style={{ backgroundColor: color }}>
-                    <p style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
+                <section key={`segment-${i}`} className={styles.e} style={{ backgroundColor: color }}>
+                    <div style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
                         <span data-speaker={curSpeaker} style={{ color: 'black', fontWeight: 'bold' }}>{name}</span><br />
                         {curWordAnchors}
-                    </p>
-                </div>);
+                    </div>
+                </section>);
             curWordAnchors = [];
         }
         curSpeaker = segment['speaker']
@@ -154,13 +156,11 @@ export default function BoardMeeting({ metadata, category, transcript, speakerIn
     for (const s of [...speakers.values()].sort()) {
         const { name, color } = getSpeakerAttributes(s);
         speakerLabelInputs.push(
-          <>
-              <li className="py-1" style={{backgroundColor: color}}>
-                  <label className="px-2">{s}
-                      <input className="px-2 shadow speaker-label" name={s} type="text" defaultValue={name} onChange={handleLabelChange} />
-                  </label>
-              </li>
-          </>
+            <li key={`li-${name}`} className="py-1" style={{backgroundColor: color}}>
+                <label className="px-2">{s}
+                    <input className="px-2 shadow speaker-label" name={s} type="text" defaultValue={name} onChange={handleLabelChange} />
+                </label>
+            </li>
         );
     }
 

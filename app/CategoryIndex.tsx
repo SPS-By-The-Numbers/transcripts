@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { ReactNode } from 'react';
 import { getCategoryPath } from '../utilities/path-utils';
 
-type CategoryIndexProps = {
+type Props = {
     categories: string[]
 };
 
-export default function CategoryIndex(props: CategoryIndexProps): ReactNode {
+export default function CategoryIndex(props: Props): ReactNode {
     const { categories } = props;
 
     const categoryLinks = categories.map(
