@@ -1,15 +1,14 @@
 import DateIndex from './DateIndex';
-import { GenerateStaticParams, Metadata, ResolvingMetadata } from 'next';
-import { ReactNode } from 'react';
+import { Metadata, ResolvingMetadata } from 'next';
 import { getAllCategories, getDatesForCategory } from 'utilities/metadata-utils';
-
-type Props = {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
 
 type CategoryParams = {
     category: string,
+};
+
+type Props = {
+  params: CategoryParams
+  searchParams: { [key: string]: string | string[] | undefined }
 };
 
 export async function generateMetadata(
@@ -25,12 +24,12 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams(): GenerateStaticParams<CategoryParams> {
+export async function generateStaticParams() {
     const categories = await getAllCategories();
 
     return categories.map(category => ({category}));
 }
 
-export default async function Index({params}: CategoryParams): ReactNode {
+export default async function Index({params}: {params: CategoryParams}) {
     return <DateIndex category={params.category} dates={await getDatesForCategory(params.category)} />
 }

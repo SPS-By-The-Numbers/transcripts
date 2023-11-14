@@ -140,7 +140,7 @@ export default function BoardMeeting({ metadata, category, transcript, speakerIn
                 </section>);
             curWordAnchors = [];
         }
-        curSpeaker = segment['speaker']
+        curSpeaker = segment['speaker'] || 'SPEAKER_9999';
         speakers.add(curSpeaker);
 
         const wordsInSegment = [];
@@ -153,7 +153,7 @@ export default function BoardMeeting({ metadata, category, transcript, speakerIn
     }
 
     const speakerLabelInputs = [];
-    for (const s of [...speakers.values()].sort()) {
+    for (const s of Array.from(speakers).sort()) {
         const { name, color } = getSpeakerAttributes(s);
         speakerLabelInputs.push(
             <li key={`li-${name}`} className="py-1" style={{backgroundColor: color}}>

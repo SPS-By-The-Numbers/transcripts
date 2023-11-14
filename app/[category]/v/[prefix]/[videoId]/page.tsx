@@ -4,16 +4,16 @@ import BoardMeeting from 'components/BoardMeeting';
 import { Metadata, ResolvingMetadata } from "next";
 import { ReactNode } from "react";
 
-type Props = {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
 type VideoParams = {
     category: string,
     prefix: string,
     videoId: string,
-}
+};
+
+type Props = {
+  params: VideoParams
+  searchParams: { [key: string]: string | string[] | undefined }
+};
 
 export async function generateMetadata(
     { params, searchParams }: Props,
@@ -30,7 +30,7 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams(): GenerateStaticParams<VideoParams> {
+export async function generateStaticParams() {
     const categories: string[] = await getAllCategories();
 
     const categoriesWithVideos: Array<{ category: string, video: VideoData }> = [];
@@ -51,7 +51,7 @@ export async function generateStaticParams(): GenerateStaticParams<VideoParams> 
     }));
 }
 
-export default async function Index({params}: VideoParams): ReactNode {
+export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
     const transcript = await getTranscript(params.category, params.videoId);
     const speakerInfo = await getSpeakerMapping(params.category, params.videoId);

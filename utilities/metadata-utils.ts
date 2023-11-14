@@ -111,7 +111,12 @@ export async function getAllVideosForPublishDate(category: string, date: Date): 
 export async function getVideoForDateAndId(category: string, date: Date, videoId: string): Promise<VideoData> {
     const allVideosForDate: VideoData[] = await getAllVideosForPublishDate(category, date);
 
-    return allVideosForDate.find(video => video.metadata.video_id === videoId);
+    const video = allVideosForDate.find(video => video.metadata.video_id === videoId);
+    if (!video) {
+        throw `Missing video ${videoId}`;
+    }
+
+    return video;
 }
 
 export async function getTranscript(category: string, id: string): Promise<any> {
