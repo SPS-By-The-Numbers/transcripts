@@ -1,4 +1,4 @@
 {
   "extends": "next/core-web-vitals",
-  "react/jsx-key": 0
+  "ignorePatterns": ["pages/**"]
 }

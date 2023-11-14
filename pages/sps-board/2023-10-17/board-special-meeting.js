@@ -1895,7 +1895,7 @@ class SpecialBoardMeeting extends React.Component {
                                   <a href="#00:15:008.14" id="908.2" style={ltStyle} onClick={this.jumpToTime}> plus.</a>
                                   <a href="#00:15:009.36" id="909.4" style={ltStyle} onClick={this.jumpToTime}> Yes,</a>
                                   <a href="#00:15:009.62" id="909.6" style={ltStyle} onClick={this.jumpToTime}> ma</a>
-                                  <a href="#00:15:009.70" id="909.8" style={ltStyle} onClick={this.jumpToTime}>'am.</a>
+                                  <a href="#00:15:009.70" id="909.8" style={ltStyle} onClick={this.jumpToTime}>{"'am."}</a>
                                   </p>
   </div>
   <div className={styles.e} style={{backgroundColor: 'white'}}>
@@ -14056,7 +14056,7 @@ class SpecialBoardMeeting extends React.Component {
                                   <a href="#01:33:054.04" id="5634.0" style={ltStyle} onClick={this.jumpToTime}> have</a>
                                   <a href="#01:33:054.18" id="5634.2" style={ltStyle} onClick={this.jumpToTime}> six</a>
                                   <a href="#01:33:054.38" id="5634.4" style={ltStyle} onClick={this.jumpToTime}> o</a>
-                                  <a href="#01:33:054.56" id="5634.6" style={ltStyle} onClick={this.jumpToTime}>'clock</a>
+                                  <a href="#01:33:054.56" id="5634.6" style={ltStyle} onClick={this.jumpToTime}>{"'clock"}</a>
                                   <a href="#01:33:054.70" id="5634.6" style={ltStyle} onClick={this.jumpToTime}> and</a>
                                   <a href="#01:33:054.88" id="5634.8" style={ltStyle} onClick={this.jumpToTime}> we</a>
                                   <a href="#01:33:054.98" id="5635.0" style={ltStyle} onClick={this.jumpToTime}> only</a>
@@ -14365,7 +14365,7 @@ class SpecialBoardMeeting extends React.Component {
                                   <a href="#01:35:042.46" id="5742.4" style={ltStyle} onClick={this.jumpToTime}> the</a>
                                   <a href="#01:35:042.66" id="5742.6" style={ltStyle} onClick={this.jumpToTime}> 6</a>
                                   <a href="#01:35:042.86" id="5742.8" style={ltStyle} onClick={this.jumpToTime}> o</a>
-                                  <a href="#01:35:043.00" id="5743.0" style={ltStyle} onClick={this.jumpToTime}>'clock</a>
+                                  <a href="#01:35:043.00" id="5743.0" style={ltStyle} onClick={this.jumpToTime}>{"'clock"}</a>
                                   <a href="#01:35:043.18" id="5743.2" style={ltStyle} onClick={this.jumpToTime}> and</a>
                                   <a href="#01:35:043.38" id="5743.4" style={ltStyle} onClick={this.jumpToTime}> I</a>
                                   <a href="#01:35:043.86" id="5743.8" style={ltStyle} onClick={this.jumpToTime}> can't</a>

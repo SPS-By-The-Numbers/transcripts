@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function Nav() {
   return (
     <nav className="bg-gray-800">
@@ -34,8 +36,8 @@ export default function Nav() {
                          <div className="flex space-x-1 items-center">
                          <a href="//sps-by-the-numbers.com" className="text-gray-300 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">
                              <div className="flex-shrink-0 flex">
-                             <img className="block lg:hidden h-10 w-auto" src="/logo.png" alt="SPS By The Numbers Logo" />
-                             <img className="hidden lg:block h-10 w-auto" src="/logo.png" alt="SPS By The Numbers Logo" />
+                             <Image className="block lg:hidden h-10 w-auto" src="/logo.png" alt="SPS By The Numbers Logo" />
+                             <Image className="hidden lg:block h-10 w-auto" src="/logo.png" alt="SPS By The Numbers Logo" />
                              </div>
                          </a>
                              <a href="/sps-board" className="text-gray-300 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">SPS Board Transcripts</a>

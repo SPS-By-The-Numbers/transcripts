@@ -176,7 +176,7 @@ export default function BoardMeeting({ metadata, category, transcript, speakerIn
                     <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, metadata.video_id, 'vtt')}>vtt</Link>
                 </div>
                 <div className={"flex-auto text-right"}>
-                    <i>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">Majdoddin's collab example</Link></i>
+                    <i>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">{"Majdoddin's collab example"}</Link></i>
                 </div>
             </div>
 
