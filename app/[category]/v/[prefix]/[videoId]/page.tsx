@@ -54,11 +54,17 @@ export async function generateStaticParams() {
 export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
     const transcript = await getTranscript(params.category, params.videoId);
-    const speakerInfo = await getSpeakerMapping(params.category, params.videoId);
+    const speakerMapping = await getSpeakerMapping(params.category, params.videoId);
+    let speakerInfo = {};
+    if (speakerMapping) {
+        for (const [k,n] of Object.entries(speakerMapping)) {
+            speakerInfo[k] = {'name': n, 'tags': new Set() }
+        }
+    }
 
     return <BoardMeeting
         metadata={ metadata }
         category={ params.category }
         transcript={ transcript }
-        speakerInfo={ speakerInfo } />
+        initialSpeakerInfo={ speakerInfo } />
 }
