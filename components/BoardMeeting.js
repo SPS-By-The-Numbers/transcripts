@@ -59,7 +59,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
   let curSpeaker = null;
   let curWordAnchors = []
   const speakerSuggestion = [];
-  const speakers = new Set();
+  const speakerKeys = new Set();
 
   function onReady(event) {
     setYtComponent(event.target);
@@ -75,7 +75,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
 
   function getSpeakerAttributes(speaker) {
     // TODO: Make this all go into speakerInfo.
-    const origLabel = speakers[speaker];
+    const origLabel = speakerKeys[speaker];
     const overrideLabel = speakerInfo[speaker];
     const name = overrideLabel?.name || origLabel || speaker;
     const speakerNum = Number(speaker.split('_')[1]);
@@ -113,7 +113,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
   async function handleOnClick(event) {
     shouldSubmit = false;
     for (const [s, l] of Object.entries(speakerInfo)) {
-      if (speakers[s] === l.name) {
+      if (speakerKeys[s] === l.name) {
         shouldSubmit = true;
         break;
       }
@@ -154,7 +154,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
       curWordAnchors = [];
     }
     curSpeaker = segment['speaker'] || 'SPEAKER_9999';
-    speakers.add(curSpeaker);
+    speakerKeys.add(curSpeaker);
 
     const wordsInSegment = [];
     for (const [j, word] of segment['words'].entries()) {
@@ -193,7 +193,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
               <YouTube style={ytplayerStyle} videoId={ metadata.video_id } opts={youtubeOpts} onReady={onReady} />
               <div className="px-2 border border-2 border-black rounded">
                   <SpeakerInfo
-                      speakers={speakers}
+                      speakerKeys={speakerKeys}
                       videoId={videoId}
                       initialSpeakerInfo={initialSpeakerInfo} />
               </div>
