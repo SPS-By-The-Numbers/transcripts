@@ -46,7 +46,7 @@ export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfo
   const speakerNum = Number(speaker.split('_')[1]);
   const color = palette[speakerNum];
 
-  return { name, color, tags };
+  return { name, color: color ? color.name() : 'grey', tags };
 }
 
 // speakerInfo has the name, tags, etc.
@@ -124,11 +124,17 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
       if (!ignore && data && data.speakerInfo) {
-        const newSpeakerInfo = {};
+        const newSpeakerInfo = Object.assign({}, speakerInfo);
         for (const [k,v] of Object.entries(data.speakerInfo)) {
           const entry = v as DbInfoEntry;
-
-          newSpeakerInfo[k] = {name: entry.name, tags: new Set<string>(entry.tags)};
+          const n = entry?.name;
+          const t = entry?.tags;
+          if (n) {
+            newSpeakerInfo[k].name = n;
+          }
+          if (t) {
+            newSpeakerInfo[k].tags = new Set<string>(t);
+          }
         }
         setSpeakerInfo(newSpeakerInfo);
       }
@@ -181,7 +187,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
-        <li key={`li-${s}`} className="py-1 flex" style={{backgroundColor: color.name()}}>
+        <li key={`li-${s}`} className="py-1 flex" style={{backgroundColor: color}}>
           <div className="pl-2 pr-1 basis-1/2">
             <CreatableSelect
                 id={`cs-name-${name}`}
