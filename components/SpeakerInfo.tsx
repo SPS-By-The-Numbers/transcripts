@@ -103,7 +103,7 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
     const database = getDatabase(app);
     const path = `transcripts/v/${videoId}`;
     const videoRef = ref(database, `transcripts/v/${videoId}`);
-    const existingRef = ref(database, `exisiting`);
+    const existingRef = ref(database, `existing`);
 
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
