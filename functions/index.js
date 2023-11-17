@@ -1,9 +1,7 @@
-//const functions = require("firebase-functions");
+const functions = require('@google-cloud/functions-framework');
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Register an HTTP function with the Functions Framework that will be executed
+// when you make an HTTP request to the deployed function's endpoint.
+functions.http('helloGET', (req, res) => {
+  res.send('Hello World!');
+});
