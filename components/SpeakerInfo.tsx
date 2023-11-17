@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { getDatabase, ref, onValue } from "firebase/database"
+import { getDatabase, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app"
 import { useEffect, useState } from 'react'
 import { Color } from "chroma-js"
@@ -53,8 +53,9 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   function handleNameChange(curSpeaker : string, selectedOption : OptionType) {
     const newSpeakerInfo = {...speakerInfo};
     const newName = selectedOption?.value;
+    const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
     if (newName) {
-      newSpeakerInfo[curSpeaker].name = newName;
+      info.name = newName;
       setSpeakerInfo(newSpeakerInfo);
       if (!existingNames.has(newName)) {
         const newExistingNames = new Set(existingNames);
@@ -67,10 +68,14 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   function handleTagsChange(curSpeaker, newTagOptions) {
     const newSpeakerInfo = {...speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
+
+    const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
+    const newTags = new Set<string>();
     for (const option of newTagOptions) {
-      newSpeakerInfo[curSpeaker].tags.add(option.value);
+      newTags.add(option.value);
       newExistingTags.add(option.value);
     }
+    info.tags = newTags;
     setSpeakerInfo(newSpeakerInfo);
 
     if (existingTags.size !== newExistingTags.size) {
@@ -87,14 +92,18 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
           Object.entries(speakerInfo).map(
             ([k,v], i) => [
               k,
-              { name: v.name, tags: Array.from(v.tags) }
+              { name: v.name, tags: (v.tags ? Array.from(v.tags) : []) }
             ]))
     };
 
     fetch(
-      'https://nodejs-http-function-rdcihhc4la-wl.a.run.app/speakerinfo',
+      'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
       {
         method: "POST",
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(data)
       });
   }
@@ -104,16 +113,17 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     let ignore = false;
     const database = getDatabase(app);
     const categoryRoot = ref(database, `transcripts/${category}`);
-    const videoRef = categoryRoot.child(`v/${videoId}`);
-    const existingRef = categoryRoot.child('existing');
+    const videoRef = child(categoryRoot, `v/${videoId}`);
+    const existingRef = child(categoryRoot, 'existing');
 
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
-      if (!ignore && data) {
+      if (!ignore && data && data.speakerInfo) {
         const newSpeakerInfo = {};
-        for (const [k,v] of data.speakerKeys) {
+        for (const [k,v] of Object.entries(data.speakerInfo)) {
           newSpeakerInfo[k] = {...v, tags: new Set(v.tags)};
         }
+        console.log(newSpeakerInfo);
         setSpeakerInfo(newSpeakerInfo);
       }
     });
@@ -163,6 +173,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     for (const s of allSpeakers) {
       const { name, color, tags } = getSpeakerAttributes(s, speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
+      const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
         <li key={`li-${s}`} className="py-1 flex" style={{backgroundColor: color.name()}}>
           <div className="pl-2 pr-1 basis-1/2">
@@ -179,6 +190,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
                 id={`cs-tag-${name}`}
                 isClearable
                 isMulti
+                value={curTags}
                 options={tagOptions}
                 placeholder={`Tags for ${name}`}
                 onChange={newValue => handleTagsChange(s, newValue)} />

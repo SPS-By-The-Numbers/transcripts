@@ -1,8 +1,6 @@
 'use strict';
 
-//const functions = require('@google-cloud/functions-framework');
 const {onRequest} = require("firebase-functions/v2/https");
-//const {logger} = require("firebase-functions");
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -13,7 +11,7 @@ admin.initializeApp();
 //    "speakerInfo": { "SPEAKER_00": { "name": "some name", "tags": [ "parent", "ptsa" ] }
 // }
 exports.speakerinfo = onRequest(
-  { cors: ["*"], region: ["us-west1"] },
+  { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
        return res.status(400).send("Expects POST");
@@ -52,20 +50,21 @@ exports.speakerinfo = onRequest(
     const allNames = new Set();
     for (const [speaker, info] of Object.entries(speakerInfo)) {
       const name = info.name;
-      if (!name) {
-        return res.status(400).send("Expect name");
+      if (name) {
+        allNames.add(name);
       }
-      allNames.add(name);
 
       const tags = info.tags;
-      if (!tags || !Array.isArray(tags)) {
-        return res.status(400).send("Expect tags to be an array");
-      }
-      for (const tag of tags) {
-        if (typeof(tag) !== 'string') {
-          return res.status(400).send("Expect tags to be strings");
+      if (tags) {
+        if (!Array.isArray(tags)) {
+          return res.status(400).send("Expect tags to be an array");
         }
-        allTags.add(tag);
+        for (const tag of tags) {
+          if (typeof(tag) !== 'string') {
+            return res.status(400).send("Expect tags to be strings");
+          }
+          allTags.add(tag);
+        }
       }
     }
 
@@ -86,7 +85,7 @@ exports.speakerinfo = onRequest(
         body: req.body,
         });
 
-      const videoRef = dbRoot.child(`v/${videoId}`);
+      const videoRef = dbRoot.child(`v/${videoId}/speakerInfo`);
       videoRef.set(speakerInfo);
 
       // Update the database stuff.
