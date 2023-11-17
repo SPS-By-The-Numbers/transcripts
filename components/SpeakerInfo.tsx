@@ -63,18 +63,17 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
     }
   }
 
-  function handleTagsChange(curSpeaker, newValue) {
+  function handleTagsChange(curSpeaker, newTagOptions) {
     const newSpeakerInfo = {...speakerInfo};
-    const newTag = newValue?.value;
-    if (newTag) {
-      newSpeakerInfo[curSpeaker].tags.add(newTag);
-      setSpeakerInfo(newSpeakerInfo);
+    const newExistingTags = new Set<string>(existingTags);
+    for (const option of newTagOptions) {
+      newSpeakerInfo[curSpeaker].tags.add(option.value);
+      newExistingTags.add(option.value);
+    }
+    setSpeakerInfo(newSpeakerInfo);
 
-      if (!existingTags.has(newTag)) {
-        const newExistingTags = new Set(existingTags);
-        newExistingTags.add(newTag);
-        setExistingNames(newExistingTags);
-      }
+    if (existingTags.size !== newExistingTags.size) {
+      setExistingTags(newExistingTags);
     }
   }
 
@@ -156,7 +155,7 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
   }
 
   return (
-    <>
+    <div style={{overflowY: "scroll", height: "40vh"}}>
       Speaker List
       <ul className="list-style-none">
         { speakerLabelInputs }
@@ -166,6 +165,6 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
         onClick={handleOnClick}>
           Submit Label Suggestion
       </button>
-    </>
+    </div>
   );
 }

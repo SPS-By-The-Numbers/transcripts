@@ -96,48 +96,6 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     jumpToTimeInternal(event.target.id);
   }
 
-  function handleLabelChange(event) {
-    const speaker = event.target.name;
-    const newSpeakerInfo = {...speakerInfo};
-    newSpeakerInfo[speaker].name = event.target.value;
-    setSpeakerInfo(newSpeakerInfo);
-  }
-
-  function handleNameChange(event) {
-    const speaker = event.target.name;
-    const newSpeakerInfo = {...speakerInfo};
-    newSpeakerInfo[speaker].name = event.target.value;
-    setSpeakerInfo(newSpeakerInfo);
-  }
-
-  async function handleOnClick(event) {
-    shouldSubmit = false;
-    for (const [s, l] of Object.entries(speakerInfo)) {
-      if (speakerKeys[s] === l.name) {
-        shouldSubmit = true;
-        break;
-      }
-    }
-
-    // Now submit.
-    if (shouldSubmit) {
-      // TODO: realtime db + recaptcha stuff.
-      const request = { videoId: video.metadata.video_id };
-      request.speakerInfo = speakerInfo;
-      fetch("CLOUD_API FUCNTION",
-        {
-          method: "POST",
-          cache: "no-cache",
-          credentials: "omit",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          redirect: "follow", // manual, *follow, error
-          referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-          body: JSON.stringify(data), // body data type must match "Content-Type" header
-        });
-    }
-}
 
   // Merge all segments from the same speaker to produce speaking divs.
   for (const [i, segment] of Object.values(transcript.segments).entries()) {
