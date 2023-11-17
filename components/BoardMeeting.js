@@ -3,10 +3,8 @@
 import Link from 'next/link'
 import SpeakerInfo, { getSpeakerAttributes } from 'components/SpeakerInfo'
 import YouTube from 'react-youtube'
-import distinctColors from 'distinct-colors'
 import styles from '../styles/BoardMeeting.module.css'
 import { useState } from 'react'
-import Creatable from 'react-select/creatable'
 
 function toTimeAnchor(seconds) {
     if (seconds) {
@@ -19,8 +17,6 @@ function toTimeAnchor(seconds) {
 function cloudDownloadURL(category, videoId, ext) {
     return `https://storage.googleapis.com/sps-by-the-numbers.appspot.com/transcription/${category}/${videoId[0]}/${videoId}.${ext}`
 }
-
-const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
 
 const mainStyle = {
     fontFamily: 'sans-serif',

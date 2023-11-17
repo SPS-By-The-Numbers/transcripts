@@ -77,7 +77,24 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
     }
   }
 
-  async function handleOnClick(event) {
+  function handleOnClick(event) {
+    const data = {
+      auth: 'SPSSoSekure',
+      videoId,
+      speakerInfo: Object.fromEntries(
+          Object.entries(speakerInfo).map(
+            ([k,v], i) => [
+              k,
+              { name: v.name, tags: Array.from(v.tags) }
+            ]))
+    };
+
+    fetch(
+      'https://nodejs-http-function-rdcihhc4la-wl.a.run.app/speakerinfo',
+      {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
   }
 
   // Load from the database.
@@ -172,7 +189,7 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
       <button
         className="px-4 py-2 m-2 bg-red-500 rounded"
         onClick={handleOnClick}>
-          Submit Label Suggestion
+          Submit Changes
       </button>
     </div>
   );
