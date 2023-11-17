@@ -9,6 +9,11 @@ import { Color } from "chroma-js"
 import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
 
+type DbInfoEntry ={
+  name : string;
+  tags : Array<string>;
+};
+
 type SpeakerInfoData = {
   [key: string] : {name: string, tags: Set<string>, color: string};
 };
@@ -121,9 +126,10 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
       if (!ignore && data && data.speakerInfo) {
         const newSpeakerInfo = {};
         for (const [k,v] of Object.entries(data.speakerInfo)) {
-          newSpeakerInfo[k] = {...v, tags: new Set(v.tags)};
+          const entry = v as DbInfoEntry;
+
+          newSpeakerInfo[k] = {name: entry.name, tags: new Set<string>(entry.tags)};
         }
-        console.log(newSpeakerInfo);
         setSpeakerInfo(newSpeakerInfo);
       }
     });
@@ -137,7 +143,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     });
 
     return () => { ignore = true; };
-  }, [videoId, setSpeakerInfo, setExistingNames, setExistingTags]);
+  }, [videoId, category, setSpeakerInfo, setExistingNames, setExistingTags]);
 
   // Must be deleted once
   // https://github.com/JedWatson/react-select/issues/5459 is fixed.
