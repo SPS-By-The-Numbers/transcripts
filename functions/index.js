@@ -28,6 +28,11 @@ exports.speakerinfo = onRequest(
       return res.status(400).send("Not So Secure");
     }
 
+    const category = req.body?.category;
+    if (!category || category.length > 20) {
+      return res.status(400).send("Invalid Category");
+    }
+
     const videoId = req.body?.videoId;
     if (!videoId || videoId.length > 12) {
        try {
@@ -42,11 +47,15 @@ exports.speakerinfo = onRequest(
       return res.status(400).send("Expect speakerInfo");
     }
 
+    // Validate request structure.
+    const allTags = new Set();
+    const allNames = new Set();
     for (const [speaker, info] of Object.entries(speakerInfo)) {
       const name = info.name;
       if (!name) {
         return res.status(400).send("Expect name");
       }
+      allNames.add(name);
 
       const tags = info.tags;
       if (!tags || !Array.isArray(tags)) {
@@ -56,16 +65,59 @@ exports.speakerinfo = onRequest(
         if (typeof(tag) !== 'string') {
           return res.status(400).send("Expect tags to be strings");
         }
+        allTags.add(tag);
       }
     }
 
+    // Write audit log.
+    try {
+      const dbRoot = admin.database().ref(`/transcripts/${category}`);
+      if ((await dbRoot.child('<enabled>').once('value')).val() !== 1) {
+        return res.status(400).send("Invalid Category");
+      }
 
-    const existingVideoSnapshot = await admin.database().ref(`/transcripts/v/${videoId}`).once('value');
-    const existingOptionsSnapshot = await admin.database().ref('/existing').once('value');
+      // Timestamp to close enough for txn id. Do not use PII as it is
+      // by public.
+      const txnId = `${(new Date).toISOString().split('.')[0]}Z`;
+      const auditRef = dbRoot.child(`audit/${txnId}`);
+      auditRef.set({
+        name: 'speakerinfo POST',
+        headers: req.headers,
+        body: req.body,
+        });
 
+      const videoRef = dbRoot.child(`v/${videoId}`);
+      videoRef.set(speakerInfo);
 
-    // Grab user ID data if available.
-    // Compose 
-    res.status(200).send("Hello world!");
+      // Update the database stuff.
+      const existingRef = dbRoot.child('existing');
+      const existingOptions = (await existingRef.once('value')).val();
+      // Add new tags.
+      let existingOptionsUpdated = false;
+      for (const name of allNames) {
+        if (!existingOptions.names.hasOwnProperty(name)) {
+          existingOptions.names[name] = txnId;
+          existingOptionsUpdated = true;
+        }
+      }
+      for (const tag of allTags) {
+        if (!existingOptions.tags.hasOwnProperty(tag)) {
+          existingOptions.tags[tag] = txnId;
+          existingOptionsUpdated = true;
+        }
+      }
+      if (existingOptionsUpdated) {
+        existingRef.set(existingOptions);
+      }
+
+      res.status(200).send(JSON.stringify({
+        speakerInfo,
+        existingTags: Object.keys(existingOptions.tags),
+        existingNames: Object.keys(existingOptions.names)}));
+
+    } catch(e) {
+      console.error("Updating DB failed with: ", e);
+      return res.status(500).send("Internal error");
+    }
   }
 );

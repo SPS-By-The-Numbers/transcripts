@@ -103,9 +103,9 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   useEffect(() => {
     let ignore = false;
     const database = getDatabase(app);
-    const path = `transcripts/v/${videoId}`;
-    const videoRef = ref(database, `transcripts/v/${videoId}`);
-    const existingRef = ref(database, `existing`);
+    const categoryRoot = ref(database, `transcripts/${category}`);
+    const videoRef = categoryRoot.child(`v/${videoId}`);
+    const existingRef = categoryRoot.child('existing');
 
     onValue(videoRef, (snapshot) => {
       const data = snapshot.val();
@@ -115,7 +115,6 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
           newSpeakerInfo[k] = {...v, tags: new Set(v.tags)};
         }
         setSpeakerInfo(newSpeakerInfo);
-      // TODO(awong): Category.
       }
     });
 
