@@ -16,7 +16,8 @@ type SpeakerInfoData = {
 type SpeakerInfoParams = {
   speakerKeys : Set<string>;
   videoId : string;
-  initialSpeakerInfo: SpeakerInfoData;
+  speakerInfo: SpeakerInfoData;
+  setSpeakerInfo: any;
 };
 
 type OptionType = {
@@ -31,8 +32,8 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 
-function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
-  const data = speakerInfo[speaker];
+export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
+  const data = speakerInfo ? speakerInfo[speaker] : undefined;
   const name = data?.name || speaker;
   const tags = data?.tags || new Set<string>;
 
@@ -44,8 +45,7 @@ function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) 
 
 // speakerInfo has the name, tags, etc.
 // speakerKeys is a list of speaker keys like SPEAKER_00
-export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} : SpeakerInfoParams) {
-  const [speakerInfo, setSpeakerInfo] = useState<SpeakerInfoData>(initialSpeakerInfo);
+export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
   const [existingNames, setExistingNames] = useState<Set<string>>(new Set<string>);
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
 
@@ -110,6 +110,11 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
     return () => { ignore = true; };
   }, [videoId, setSpeakerInfo, setExistingNames, setExistingTags]);
 
+  // Must be deleted once
+  // https://github.com/JedWatson/react-select/issues/5459 is fixed.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
   // Create all options.
   const allSpeakers : string[] = Array.from(speakerKeys).sort();
   const newExistingNames = new Set(existingNames);
@@ -129,29 +134,33 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];
-  for (const s of allSpeakers) {
-    const { name, color, tags } = getSpeakerAttributes(s, speakerInfo);
-    const curName = nameOptions.filter(v => v.label === name)?.[0];
-    speakerLabelInputs.push(
-      <li key={`li-${name}`} className="py-1 flex" style={{backgroundColor: color.name()}}>
-        <div className="pl-2 pr-1 basis-1/2">
-          <CreatableSelect
-              isClearable
-              options={nameOptions}
-              value={curName}
-              placeholder={`Name for ${name}`}
-              onChange={(newValue: OptionType) => handleNameChange(s, newValue)} />
-        </div>
-        <div className="pl-1 pr-2 basis-1/2">
-          <CreatableSelect
-              isClearable
-              isMulti
-              options={tagOptions}
-              placeholder={`Tags for ${name}`}
-              onChange={newValue => handleTagsChange(s, newValue)} />
-        </div>
-      </li>
-    );
+  if (isMounted) {
+    for (const s of allSpeakers) {
+      const { name, color, tags } = getSpeakerAttributes(s, speakerInfo);
+      const curName = nameOptions.filter(v => v.label === name)?.[0];
+      speakerLabelInputs.push(
+        <li key={`li-${s}`} className="py-1 flex" style={{backgroundColor: color.name()}}>
+          <div className="pl-2 pr-1 basis-1/2">
+            <CreatableSelect
+                id={`cs-name-${name}`}
+                isClearable
+                options={nameOptions}
+                value={curName}
+                placeholder={`Name for ${name}`}
+                onChange={(newValue: OptionType) => handleNameChange(s, newValue)} />
+          </div>
+          <div className="pl-1 pr-2 basis-1/2">
+            <CreatableSelect
+                id={`cs-tag-${name}`}
+                isClearable
+                isMulti
+                options={tagOptions}
+                placeholder={`Tags for ${name}`}
+                onChange={newValue => handleTagsChange(s, newValue)} />
+          </div>
+        </li>
+      );
+    }
   }
 
   return (

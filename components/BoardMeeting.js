@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import SpeakerInfo from 'components/SpeakerInfo'
+import SpeakerInfo, { getSpeakerAttributes } from 'components/SpeakerInfo'
 import YouTube from 'react-youtube'
 import distinctColors from 'distinct-colors'
 import styles from '../styles/BoardMeeting.module.css'
@@ -73,17 +73,6 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     }
   }
 
-  function getSpeakerAttributes(speaker) {
-    // TODO: Make this all go into speakerInfo.
-    const origLabel = speakerKeys[speaker];
-    const overrideLabel = speakerInfo[speaker];
-    const name = overrideLabel?.name || origLabel || speaker;
-    const speakerNum = Number(speaker.split('_')[1]);
-    const color = palette[speakerNum];
-
-    return { name, color, origLabel, speaker };
-  }
-
   function jumpToTimeInternal(id) {
     if (ytComponent) {
       ytComponent.seekTo(id);
@@ -96,12 +85,11 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     jumpToTimeInternal(event.target.id);
   }
 
-
   // Merge all segments from the same speaker to produce speaking divs.
   for (const [i, segment] of Object.values(transcript.segments).entries()) {
     // If speaker changed, push the div and reset curWordAnchors.
     if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
-      const { name, color } = getSpeakerAttributes(curSpeaker);
+      const { name, color } = getSpeakerAttributes(curSpeaker, speakerInfo);
       dialogDivs.push(
         <section key={`segment-${i}`} className={styles.e} style={{ backgroundColor: color }}>
           <div style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
@@ -153,7 +141,8 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
                   <SpeakerInfo
                       speakerKeys={speakerKeys}
                       videoId={videoId}
-                      initialSpeakerInfo={initialSpeakerInfo} />
+                      speakerInfo={speakerInfo}
+                      setSpeakerInfo={setSpeakerInfo} />
               </div>
           </div>
 
