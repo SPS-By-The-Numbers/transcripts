@@ -10,10 +10,11 @@ import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
 
 type SpeakerInfoData = {
-  [key: string]: {name: string, tags: Set<string>, color: string};
+  [key: string] : {name: string, tags: Set<string>, color: string};
 };
 
 type SpeakerInfoParams = {
+  category : string;
   speakerKeys : Set<string>;
   videoId : string;
   speakerInfo: SpeakerInfoData;
@@ -21,8 +22,8 @@ type SpeakerInfoParams = {
 };
 
 type OptionType = {
-  value: string;
-  label: string;
+  value : string;
+  label : string;
 };
 
 const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
@@ -45,7 +46,7 @@ export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfo
 
 // speakerInfo has the name, tags, etc.
 // speakerKeys is a list of speaker keys like SPEAKER_00
-export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
+export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
   const [existingNames, setExistingNames] = useState<Set<string>>(new Set<string>);
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
 
@@ -80,6 +81,7 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
   function handleOnClick(event) {
     const data = {
       auth: 'SPSSoSekure',
+      category,
       videoId,
       speakerInfo: Object.fromEntries(
           Object.entries(speakerInfo).map(
@@ -113,6 +115,7 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
           newSpeakerInfo[k] = {...v, tags: new Set(v.tags)};
         }
         setSpeakerInfo(newSpeakerInfo);
+      // TODO(awong): Category.
       }
     });
 
@@ -144,10 +147,16 @@ export default function SpeakerInfo({speakerKeys, videoId, speakerInfo, setSpeak
   if (newExistingNames.size !== existingNames.size) {
     setExistingNames(newExistingNames);
   }
-  const nameOptions : OptionType[] =
-      [...newExistingNames.keys()].sort().map(name => ({label: name, value: name}));
-  const tagOptions : OptionType[] =
-      [...existingTags.keys()].sort().map(tag => ({label: tag, value: tag}));
+
+  const nameOptions : OptionType[] = [];
+  for (const name of Array.from(newExistingNames.keys()).sort()) {
+    nameOptions.push({label: name, value: name});
+  }
+
+  const tagOptions : OptionType[] = [];
+  for (const tag of Array.from(existingTags.keys()).sort()) {
+    tagOptions.push({label: tag, value: tag});
+  }
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];

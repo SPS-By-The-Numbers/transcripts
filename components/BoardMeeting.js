@@ -135,6 +135,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
               <YouTube style={ytplayerStyle} videoId={ metadata.video_id } opts={youtubeOpts} onReady={onReady} />
               <div className="px-2 border border-2 border-black rounded">
                   <SpeakerInfo
+                      category={category}
                       speakerKeys={speakerKeys}
                       videoId={videoId}
                       speakerInfo={speakerInfo}
