@@ -51,15 +51,31 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
 
   function handleNameChange(curSpeaker : string, selectedOption : OptionType) {
     const newSpeakerInfo = {...speakerInfo};
-    console.log("Updateing ", curSpeaker, " to ", selectedOption);
-    newSpeakerInfo[curSpeaker].name = selectedOption.value;
-    setSpeakerInfo(newSpeakerInfo);
+    const newName = selectedOption?.value;
+    if (newName) {
+      newSpeakerInfo[curSpeaker].name = newName;
+      setSpeakerInfo(newSpeakerInfo);
+      if (!existingNames.has(newName)) {
+        const newExistingNames = new Set(existingNames);
+        newExistingNames.add(newName);
+        setExistingNames(newExistingNames);
+      }
+    }
   }
 
   function handleTagsChange(curSpeaker, newValue) {
     const newSpeakerInfo = {...speakerInfo};
-    newSpeakerInfo[curSpeaker].tags.add(newValue.value);
-    setSpeakerInfo(newSpeakerInfo);
+    const newTag = newValue?.value;
+    if (newTag) {
+      newSpeakerInfo[curSpeaker].tags.add(newTag);
+      setSpeakerInfo(newSpeakerInfo);
+
+      if (!existingTags.has(newTag)) {
+        const newExistingTags = new Set(existingTags);
+        newExistingTags.add(newTag);
+        setExistingNames(newExistingTags);
+      }
+    }
   }
 
   async function handleOnClick(event) {
@@ -108,9 +124,9 @@ export default function SpeakerInfo({speakerKeys, videoId, initialSpeakerInfo} :
     setExistingNames(newExistingNames);
   }
   const nameOptions : OptionType[] =
-      [...newExistingNames.keys()].map(name => ({label: name, value: name}));
+      [...newExistingNames.keys()].sort().map(name => ({label: name, value: name}));
   const tagOptions : OptionType[] =
-      [...existingTags.keys()].map(tag => ({label: tag, value: tag}));
+      [...existingTags.keys()].sort().map(tag => ({label: tag, value: tag}));
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];
