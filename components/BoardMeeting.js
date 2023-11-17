@@ -104,7 +104,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
         <Link key={`word-${i}-${j}`} name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={jumpToTime}> {word['word']}</Link>
       );
     }
-    curWordAnchors.push(<p key={`segment-${i}`} className="my-1.5 leading-tight">{wordsInSegment}</p>);
+    curWordAnchors.push(<span key={`segment-${i}`} className="my-1.5 leading-tight">{wordsInSegment}</span>);
   }
 
   return (
