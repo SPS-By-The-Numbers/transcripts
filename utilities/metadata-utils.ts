@@ -1,7 +1,17 @@
 import path from 'path';
+import { getStorage, ref, listAll } from "firebase/storage";
+import { initializeApp } from "firebase/app";
 import { readdir, readFile } from 'fs/promises';
 import { Dirent, existsSync } from 'fs';
 import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
+
+const firebaseConfig = {
+  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
+  storageBucket: "sps-by-the-numbers.appspot.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage();
 
 export type VideoData = {
     metadata: any, // TODO: replace these with schema objects
@@ -15,14 +25,9 @@ function buildTranscriptFolderPath(category: string, id: string): string {
 }
 
 export async function getAllCategories(): Promise<string[]> {
-    const entries: Dirent[] = await readdir(
-        path.join(process.cwd(), 'data', 'transcripts'),
-        { withFileTypes: true }
-    );
-
-    return entries
-        .filter(entry => entry.isDirectory())
-        .map(entry => entry.name);
+    const listRef = ref(storage, '/transcription');
+    const result = await listAll(listRef);
+    return result.prefixes.map(e => e.name);
 }
 
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {

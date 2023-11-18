@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Color } from "chroma-js"
 import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
+import { getAuth } from "firebase/auth";
 
 type DbInfoEntry ={
   name : string;
@@ -37,6 +38,8 @@ const firebaseConfig = {
   databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com"
 };
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
