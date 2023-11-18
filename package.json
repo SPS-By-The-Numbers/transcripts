@@ -12,10 +12,17 @@
     "setupFirebase": "firebase target:apply hosting transcripts transcripts-sps-by-the-numbers",
     "start": "next start"
   },
-  "devDependencies": {
-    "@babel/eslint-parser": "^7.23.3",
+  "dependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
     "@mdx-js/loader": "^3.0.0",
     "@next/mdx": "^14.0.2",
+    "date-fns": "^2.30.0",
+    "distinct-colors": "^3.0.0",
+    "next": "^14.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@babel/eslint-parser": "^7.23.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
@@ -43,14 +50,5 @@
     "sass": "^1.69.5",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.1.6"
-  },
-  "dependencies": {
-    "@types/jest": "^29.5.8",
-    "@types/node": "^20.9.0",
-    "date-fns": "^2.30.0",
-    "distinct-colors": "^3.0.0",
-    "next": "^14.0.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
   }
 }
