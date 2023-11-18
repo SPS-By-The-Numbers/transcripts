@@ -33,9 +33,7 @@ exports.speakerinfo = onRequest(
 
     const videoId = req.body?.videoId;
     if (!videoId || videoId.length > 12) {
-       try {
-         window.atob(videoId);
-       } catch(e) {
+       if (Buffer.from(videoId, 'base64').toString('base64') !== videoId) {
          return res.status(400).send("Invalid VideoID");
        }
     }
@@ -48,7 +46,7 @@ exports.speakerinfo = onRequest(
     // Validate request structure.
     const allTags = new Set();
     const allNames = new Set();
-    for (const [speaker, info] of Object.entries(speakerInfo)) {
+    for (const info of Object.values(speakerInfo)) {
       const name = info.name;
       if (name) {
         allNames.add(name);
@@ -94,13 +92,13 @@ exports.speakerinfo = onRequest(
       // Add new tags.
       let existingOptionsUpdated = false;
       for (const name of allNames) {
-        if (!existingOptions.names.hasOwnProperty(name)) {
+        if (!Object.prototype.hasOwnProperty.call(existingOptions.names, name)) {
           existingOptions.names[name] = txnId;
           existingOptionsUpdated = true;
         }
       }
       for (const tag of allTags) {
-        if (!existingOptions.tags.hasOwnProperty(tag)) {
+        if (!Object.prototype.hasOwnProperty.call(existingOptions.tags, tag)) {
           existingOptions.tags[tag] = txnId;
           existingOptionsUpdated = true;
         }

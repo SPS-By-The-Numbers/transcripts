@@ -149,7 +149,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     });
 
     return () => { ignore = true; };
-  }, [videoId, category, setSpeakerInfo, setExistingNames, setExistingTags]);
+  }, [videoId, category, speakerInfo, setSpeakerInfo, setExistingNames, setExistingTags]);
 
   // Must be deleted once
   // https://github.com/JedWatson/react-select/issues/5459 is fixed.

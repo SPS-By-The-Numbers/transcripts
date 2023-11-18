@@ -24,12 +24,6 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams() {
-    const categories = await getAllCategories();
-
-    return categories.map(category => ({category}));
-}
-
 export default async function Index({params}: {params: CategoryParams}) {
     return <DateIndex category={params.category} dates={await getDatesForCategory(params.category)} />
 }

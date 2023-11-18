@@ -6,20 +6,15 @@
     ]
   },
   "hosting": {
-    "target": "transcripts",
-    "public": "out",
+    "source": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "cleanUrls": true,
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+    "frameworksBackend": {
+      "region": "us-west1"
+    }
   },
   "storage": {
     "rules": "storage.rules"

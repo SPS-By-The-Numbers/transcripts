@@ -1,13 +1,10 @@
 module.exports = {
   root: true,
-  parser: "eslint-parser",
   env: {
-    es6: true,
+    es2020: true,
     node: true,
   },
   extends: [
     "eslint:recommended",
   ],
-  rules: {
-  },
 };

@@ -27,27 +27,6 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams() {
-    const categories: string[] = await getAllCategories();
-
-    const categoriesWithDates: Array<{ category: string, date: Date }> = [];
-
-    for (const category of categories) {
-        const dates: Date[] = await getDatesForCategory(category);
-
-        categoriesWithDates.push(...dates.map(date => ({
-            category,
-            date
-        })));
-    }
-
-    return categoriesWithDates.map(
-        ({category, date}) => ({
-            category,
-            datePath: formatDateForPath(date)
-            }));
-}
-
 export default async function Index({params}: {params: DateParams}) {
     const date = parseDateFromPath(params.datePath);
     return (<VideoLinks

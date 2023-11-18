@@ -30,27 +30,6 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams() {
-    const categories: string[] = await getAllCategories();
-
-    const categoriesWithVideos: Array<{ category: string, video: VideoData }> = [];
-    
-    for (const category of categories) {
-        const videos: VideoData[] = await getAllVideosForCategory(category);
-
-        categoriesWithVideos.push(...videos.map(video => ({
-            category,
-            video,
-        })));
-    }
-
-    return categoriesWithVideos.map(({ category, video }) => ({
-        category: category,
-        prefix: video.metadata.video_id.substr(0,2).toUpperCase(),
-        videoId: video.metadata.video_id
-    }));
-}
-
 export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
     const transcript = await getTranscript(params.category, params.videoId);
