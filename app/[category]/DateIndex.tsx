@@ -7,14 +7,14 @@ import { getDatePath } from 'utilities/path-utils';
 
 type Props = {
     category: string,
-    dates: Date[]
+    dates: string[]
 }
 
 export default function DateIndex({category, dates}: Props): ReactNode {
-    dates.sort(compareDesc);
+    dates.sort().reverse();
 
-    const dateLinks = dates.map((date: Date, i: number): ReactNode => (
-        <li key={`li-${i}`} className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date.toLocaleDateString('en-US') }</Link></li>
+    const dateLinks = dates.map((date: string, i: number): ReactNode => (
+        <li key={`li-${i}`} className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date }</Link></li>
     ))
 
     return (

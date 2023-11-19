@@ -28,9 +28,8 @@ export async function generateMetadata(
 }
 
 export default async function Index({params}: {params: DateParams}) {
-    const date = parseDateFromPath(params.datePath);
     return (<VideoLinks
         category={params.category}
-        videos={await getAllVideosForPublishDate(params.category, date)}
-        date={date} />);
+        videos={await getAllVideosForPublishDate(params.category, params.datePath)}
+        datePath={params.datePath} />);
 }

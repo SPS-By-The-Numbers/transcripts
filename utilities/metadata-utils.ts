@@ -1,17 +1,19 @@
 import path from 'path';
-import { getStorage, ref, listAll } from "firebase/storage";
+import { getDatabase, get, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app";
 import { readdir, readFile } from 'fs/promises';
 import { Dirent, existsSync } from 'fs';
 import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
 
+const pathDateFormat = 'yyyy-MM-dd';
+
 const firebaseConfig = {
   databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
-  storageBucket: "sps-by-the-numbers.appspot.com"
 };
 
 const app = initializeApp(firebaseConfig);
-const storage = getStorage();
+const database = getDatabase(app);
+const dbRoot = ref(database, '/transcripts');
 
 export type VideoData = {
     metadata: any, // TODO: replace these with schema objects
@@ -25,9 +27,9 @@ function buildTranscriptFolderPath(category: string, id: string): string {
 }
 
 export async function getAllCategories(): Promise<string[]> {
-    const listRef = ref(storage, '/transcription');
-    const result = await listAll(listRef);
-    return result.prefixes.map(e => e.name);
+    const result = (await get(dbRoot)).val();
+
+    return Object.keys(result);
 }
 
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
@@ -95,22 +97,19 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
 }
 
 export async function getDatesForCategory(category: string): Promise<Date[]> {
-    const allVideos = await getAllVideosForCategory(category);
-
-    // https://stackoverflow.com/a/44906207
-    const uniqueDates = allVideos.map(video => video.date)
-      .filter((date, i, self) => 
-          self.findIndex(d => isEqual(d, date)) === i);
-    return uniqueDates.sort(compareAsc);
+    const result = (await get(dbRoot)).child(`${category}/index/date`).val();
+    return Object.keys(result);
 }
 
-export async function getAllVideosForPublishDate(category: string, date: Date): Promise<VideoData[]> {
-    const categoryVideos: VideoData[] = await getAllVideosForCategory(category);
+export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoData[]> {
+    const result = (await get(dbRoot)).child(`${category}/index/date/${datePath}`).val();
 
-    return categoryVideos
-        .filter((video: VideoData) => {
-            return isEqual(startOfDay(video.date), startOfDay(date));
-        });
+    return Object.entries(result).map(([videoId, metadata]) => ({
+      metadata,
+      props: {},
+      date: datePath,
+      transcriptionPath: "hi"
+    }));
 }
 
 export async function getVideoForDateAndId(category: string, date: Date, videoId: string): Promise<VideoData> {
@@ -139,17 +138,7 @@ export async function getTranscript(category: string, id: string): Promise<any> 
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
-    const metadataPath = path.join(buildTranscriptFolderPath(category, id), `${id}.metadata.json`);
-    return await readFile(metadataPath, { encoding: 'utf8' }).then(
-        JSON.parse
-    ).catch((err) => {
-        if (err.code === 'ENOENT') {
-            return {};
-        }
-        else {
-            return Promise.reject(err);
-        }
-    });
+    return (await get(dbRoot)).child(`${category}/metadata/${id}`).val();
 }
 
 export async function getSpeakerMapping(category: string, id: string): Promise<any> {

@@ -7,11 +7,11 @@ import { getVideoPath } from 'utilities/path-utils';
 
 type DateProps = {
     category: string,
-    date: Date,
+    datePath: string,
     videos: any[],
 };
 
-export default function VideoLinks({category, videos, date}: DateProps): ReactNode {
+export default function VideoLinks({category, videos, datePath}: DateProps): ReactNode {
 
     const videoLinks: ReactNode[] = videos.map(
         video => (
@@ -26,7 +26,7 @@ export default function VideoLinks({category, videos, date}: DateProps): ReactNo
         <main className="mx-5 my-5">
           <h2 className="my-4 text-lg">
             Meetings that we have transcripts for.
-            Transcripts for { category } on { intlFormat(date) }
+            Transcripts for { category } on { datePath }
           </h2>
             <ul className="flex flex-col flex-wrap h-screen">
                 { videoLinks }
