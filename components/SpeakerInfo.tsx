@@ -2,10 +2,11 @@
 
 import React from 'react';
 
+import { Color } from "chroma-js"
 import { getDatabase, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app"
+import { isEqual } from 'lodash-es';
 import { useEffect, useState } from 'react'
-import { Color } from "chroma-js"
 import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
 
@@ -59,12 +60,18 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     const newSpeakerInfo = {...speakerInfo};
     const newName = selectedOption?.value;
     const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
-    if (newName) {
-      info.name = newName;
-      setSpeakerInfo(newSpeakerInfo);
-      if (!existingNames.has(newName)) {
-        const newExistingNames = new Set(existingNames);
-        newExistingNames.add(newName);
+    info.name = newName;
+
+    // Update if there is a change.
+    if (!isEqual(speakerInfo, newSpeakerInfo)) {
+        setSpeakerInfo(newSpeakerInfo);
+    }
+
+    if (!existingNames.has(newName)) {
+      const newExistingNames = new Set(existingNames);
+      newExistingNames.add(newName);
+      // TODO: Extract all these isEquals() checks.
+      if (!isEqual(existingNames, newExistingNames)) {
         setExistingNames(newExistingNames);
       }
     }
@@ -129,27 +136,37 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
           const entry = v as DbInfoEntry;
           const n = entry?.name;
           const t = entry?.tags;
-          if (n) {
+          newSpeakerInfo[k] = newSpeakerInfo[k] || {};
+          if (newSpeakerInfo[k].name === undefined) {
             newSpeakerInfo[k].name = n;
           }
-          if (t) {
+          if (newSpeakerInfo[k].tags === undefined) {
             newSpeakerInfo[k].tags = new Set<string>(t);
           }
         }
-        setSpeakerInfo(newSpeakerInfo);
+        if (!isEqual(speakerInfo, newSpeakerInfo)) {
+          setSpeakerInfo(newSpeakerInfo);
+        }
       }
     });
 
     onValue(existingRef, (snapshot) => {
       const data = snapshot.val();
       if (!ignore && data) {
-        setExistingNames(new Set<string>(Object.keys(data.names)));
-        setExistingTags(new Set<string>(Object.keys(data.tags)));
+        const newNames = new Set<string>(Object.keys(data.names));
+        if (!isEqual(existingNames, newNames)) {
+          setExistingNames(newNames);
+        }
+
+        const newTags = new Set<string>(Object.keys(data.tags));
+        if (!isEqual(existingTags, newTags)) {
+          setExistingTags(new Set<string>(Object.keys(data.tags)));
+        }
       }
     });
 
     return () => { ignore = true; };
-  }, [videoId, category, speakerInfo, setSpeakerInfo, setExistingNames, setExistingTags]);
+  }, [videoId, category, speakerInfo, setSpeakerInfo, existingNames, setExistingNames, existingTags, setExistingTags]);
 
   // Must be deleted once
   // https://github.com/JedWatson/react-select/issues/5459 is fixed.

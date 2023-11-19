@@ -1,5 +1,6 @@
 import path from 'path';
 import { getDatabase, get, ref, child, onValue } from "firebase/database"
+import * as Storage from "firebase/storage"
 import { initializeApp } from "firebase/app";
 import { readdir, readFile } from 'fs/promises';
 import { Dirent, existsSync } from 'fs';
@@ -9,6 +10,7 @@ const pathDateFormat = 'yyyy-MM-dd';
 
 const firebaseConfig = {
   databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
+  storageBucket: "sps-by-the-numbers.appspot.com"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -18,12 +20,12 @@ const dbRoot = ref(database, '/transcripts');
 export type VideoData = {
     metadata: any, // TODO: replace these with schema objects
     props: any,
-    date: Date,
+    date: string,
     transcriptionPath: string
 }
 
-function buildTranscriptFolderPath(category: string, id: string): string {
-    return path.join(process.cwd(), 'data', 'transcripts', category, id[0]);
+function makeTranscriptsPath(category: string, path: string): string {
+    return `/transcripts/public/${category}/${path}`;
 }
 
 export async function getAllCategories(): Promise<string[]> {
@@ -79,7 +81,7 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
                 props = {};
             }
 
-            const date: Date = parseISO(props.date || metadata.publish_date);
+            const date: string = props.date || metadata.publish_date;
             const transcriptionPath: string = path.join(prefixPath, `${videoId}.json`);
 
             const videoData: VideoData = {
@@ -96,7 +98,7 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
     return allVideos;
 }
 
-export async function getDatesForCategory(category: string): Promise<Date[]> {
+export async function getDatesForCategory(category: string): Promise<string[]> {
     const result = (await get(dbRoot)).child(`${category}/index/date`).val();
     return Object.keys(result);
 }
@@ -112,29 +114,16 @@ export async function getAllVideosForPublishDate(category: string, datePath: str
     }));
 }
 
-export async function getVideoForDateAndId(category: string, date: Date, videoId: string): Promise<VideoData> {
-    const allVideosForDate: VideoData[] = await getAllVideosForPublishDate(category, date);
-
-    const video = allVideosForDate.find(video => video.metadata.video_id === videoId);
-    if (!video) {
-        throw `Missing video ${videoId}`;
+export async function getTranscript(category: string, id: string): Promise<any> {
+    const transcriptsPath = makeTranscriptsPath(category, `json/${id}.en.json`);
+    try {
+      const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
+      return JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
+    } catch (e) {
+      console.error(e);
     }
 
-    return video;
-}
-
-export async function getTranscript(category: string, id: string): Promise<any> {
-    const transcriptPath = path.join(buildTranscriptFolderPath(category, id), `${id}.json`);
-    return await readFile(transcriptPath, { encoding: 'utf8' }).then(
-        JSON.parse
-    ).catch((err) => {
-        if (err.code === 'ENOENT') {
-            return { segments: [] };
-        }
-        else {
-            return Promise.reject(err);
-        }
-    });
+    return { segments: [] };
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
@@ -142,12 +131,11 @@ export async function getMetadata(category: string, id: string): Promise<any> {
 }
 
 export async function getSpeakerMapping(category: string, id: string): Promise<any> {
+/*
+    const speakersRootRef = Storage.ref(makeTranscriptsRootRef(category), 'speakers');
     const speakerPath: string = path.join(buildTranscriptFolderPath(category, id), `${id}.speakers.json`);
+    */
 
-    // Not all transcripts are expected to be mapped, so handle missing files by returning an empty object
-    if (!existsSync(speakerPath)) {
-        return {};
-    }
 
-    return JSON.parse(await readFile(speakerPath, { encoding: 'utf8' }));
+    return {};
 }

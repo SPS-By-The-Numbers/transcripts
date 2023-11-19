@@ -33,12 +33,13 @@ async function regenerateMetadata(category, limit) {
       break;
     }
     n = n+1;
-    console.log(`processing ${file.name}`);
 
     outstanding.push((new Response(file.createReadStream())).json().then(async (metadata) => {
       const publishDate = parseISO(metadata.publish_date);
-      const dirRef = dbRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
-      await dirRef.set(metadata);
+      const indexRef = dbRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
+      outstanding.push(indexRef.set(metadata));
+      const metadataRef = dbRoot.child(`metadata/${metadata.video_id}`);
+      outstanding.push(metadataRef.set(metadata));
     }));
 
     // Concurrency limit.
@@ -60,6 +61,7 @@ async function migrate(category, limit) {
   console.log("Starting for files: " + files.length);
   let n = 0;
   let outstanding = [];
+  let numMetadata = 0;
   for (const file of files) {
     if (limit && n > limit) {
       break;
@@ -74,6 +76,7 @@ async function migrate(category, limit) {
     }
     let dest = undefined;
     if (origBasename.endsWith('.metadata.json')) {
+      numMetadata = numMetadata+1;
       dest = makeDest('metadata', videoId, 'metadata.json');
     } else if (origBasename.endsWith('.json')) {
       dest = makeDest('json', videoId, 'en.json');
@@ -87,12 +90,13 @@ async function migrate(category, limit) {
       dest = makeDest('tsv', videoId, 'en.tsv');
     }
     if (dest) {
-      outstanding.push(file.exists().then(async (exists) => {
-        if (!exists) {
+      let shouldSkip = false;
+      outstanding.push(dest.exists().then((exists) => shouldSkip = exists).finally(async ()=>{
+        if (!shouldSkip) {
           console.log(`copy ${file.name} to ${dest.name}`);
           await file.copy(dest, { predefinedAcl: 'publicRead' });
         }
-      }));
+      }).catch(console.error));
     }
 
     // Concurrency limit.
@@ -101,6 +105,8 @@ async function migrate(category, limit) {
       outstanding = [];
     }
   }
+  console.log('numMetadata', numMetadata);
+  await Promise.allSettled(outstanding);
 }
 
 // POST to speaker info with JSON body of type:
