@@ -1,40 +1,55 @@
 'use strict';
 
+const { parseISO, format } = require('date-fns');
+
 const {onRequest} = require("firebase-functions/v2/https");
 
 const admin = require("firebase-admin");
 const {getStorage} = require("firebase-admin/storage");
 admin.initializeApp();
 
+const pathDateFormat = 'yyyy-MM-dd';
+
 function basename(path) {
   return path.split('/').pop();
 }
 
-async function regenerateMetadata() {
+async function regenerateMetadata(category, limit) {
   const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
   const options = {
-    prefix: "transcription/sps-board/-/",
-    matchGlob: "**.json",
+    prefix: `transcripts/public/${category}/metadata/`,
+    matchGlob: "**.metadata.json",
     delimiter: "/",
   };
 
-  console.log ("starting");
+  const dbRoot = admin.database().ref(`/transcripts/${category}`);
+
   const [files] = await bucket.getFiles(options);
-  console.log("files here");
+  console.log(`found ${files.length}`);
   let n = 0;
-  console.log(files);
+  let outstanding = [];
   for (const file of files) {
-    if (n > 10) {
+    if (limit && n > limit) {
       break;
     }
     n = n+1;
     console.log(`processing ${file.name}`);
-    const metadata = new Response(file.createReadStream()).json();
-    console.log(metadata);
+
+    outstanding.push((new Response(file.createReadStream())).json().then(async (metadata) => {
+      const publishDate = parseISO(metadata.publish_date);
+      const dirRef = dbRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
+      await dirRef.set(metadata);
+    }));
+
+    // Concurrency limit.
+    if (outstanding.length > 25) {
+      await Promise.allSettled(outstanding);
+      outstanding = [];
+    }
   }
 }
 
-async function migrate(category) {
+async function migrate(category, limit) {
   const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
   const options = {
     prefix: `transcription/${category}`
@@ -44,8 +59,9 @@ async function migrate(category) {
 
   console.log("Starting for files: " + files.length);
   let n = 0;
+  let outstanding = [];
   for (const file of files) {
-    if (n > 10) {
+    if (limit && n > limit) {
       break;
     }
     n = n+1;
@@ -53,8 +69,8 @@ async function migrate(category) {
 
     const origBasename = basename(file.name);
     const videoId = origBasename.split('.')[0];
-    function makeDest(type, videoId, suffix) {
-      return bucket.file(`transcripts/public/${type}/${videoId}.${suffix}`);
+    const makeDest = (type, videoId, suffix) => {
+      return bucket.file(`transcripts/public/${category}/${type}/${videoId}.${suffix}`);
     }
     let dest = undefined;
     if (origBasename.endsWith('.metadata.json')) {
@@ -71,8 +87,18 @@ async function migrate(category) {
       dest = makeDest('tsv', videoId, 'en.tsv');
     }
     if (dest) {
-      console.log(`copy ${file.name} to ${dest.name}`);
-      file.copy(dest, { predefinedAcl: 'publicRead' });
+      outstanding.push(file.exists().then(async (exists) => {
+        if (!exists) {
+          console.log(`copy ${file.name} to ${dest.name}`);
+          await file.copy(dest, { predefinedAcl: 'publicRead' });
+        }
+      }));
+    }
+
+    // Concurrency limit.
+    if (outstanding.length > 25) {
+      await Promise.allSettled(outstanding);
+      outstanding = [];
     }
   }
 }
@@ -203,9 +229,13 @@ exports.metadata = onRequest(
        return res.status(400).send("Expects JSON");
     }
 
+    if (!req.body.category) {
+      return res.status(400).send("Expects category");
+    }
+
     if (req.body?.cmd === "regenerateMetadata") {
       try {
-        await regenerateMetadata();
+        await regenerateMetadata(req.body.category, req.body.limit);
       } catch (e) {
         console.error(e);
         return res.status(500).send("Exception");
@@ -213,11 +243,8 @@ exports.metadata = onRequest(
       return res.status(200).send("done");
     }
     if (req.body?.cmd === "migrate") {
-      if (!req.body.category) {
-        return res.status(400).send("Expects category");
-      }
       try {
-        await migrate(req.body.category);
+        await migrate(req.body.category, req.body.limit);
       } catch (e) {
         console.error(e);
         return res.status(500).send("Exception");
