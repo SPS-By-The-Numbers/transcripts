@@ -6,7 +6,6 @@
     ]
   },
   "hosting": {
-    "site": "testing",
     "target": "testing",
     "source": ".",
     "ignore": [

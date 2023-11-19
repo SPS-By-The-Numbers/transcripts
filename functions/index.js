@@ -3,7 +3,79 @@
 const {onRequest} = require("firebase-functions/v2/https");
 
 const admin = require("firebase-admin");
+const {getStorage} = require("firebase-admin/storage");
 admin.initializeApp();
+
+function basename(path) {
+  return path.split('/').pop();
+}
+
+async function regenerateMetadata() {
+  const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
+  const options = {
+    prefix: "transcription/sps-board/-/",
+    matchGlob: "**.json",
+    delimiter: "/",
+  };
+
+  console.log ("starting");
+  const [files] = await bucket.getFiles(options);
+  console.log("files here");
+  let n = 0;
+  console.log(files);
+  for (const file of files) {
+    if (n > 10) {
+      break;
+    }
+    n = n+1;
+    console.log(`processing ${file.name}`);
+    const metadata = new Response(file.createReadStream()).json();
+    console.log(metadata);
+  }
+}
+
+async function migrate(category) {
+  const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
+  const options = {
+    prefix: `transcription/${category}`
+  };
+
+  const [files] = await bucket.getFiles(options);
+
+  console.log("Starting for files: " + files.length);
+  let n = 0;
+  for (const file of files) {
+    if (n > 10) {
+      break;
+    }
+    n = n+1;
+    console.log(`processing ${file.name}`);
+
+    const origBasename = basename(file.name);
+    const videoId = origBasename.split('.')[0];
+    function makeDest(type, videoId, suffix) {
+      return bucket.file(`transcripts/public/${type}/${videoId}.${suffix}`);
+    }
+    let dest = undefined;
+    if (origBasename.endsWith('.metadata.json')) {
+      dest = makeDest('metadata', videoId, 'metadata.json');
+    } else if (origBasename.endsWith('.json')) {
+      dest = makeDest('json', videoId, 'en.json');
+    } else if (origBasename.endsWith('.vtt')) {
+      dest = makeDest('vtt', videoId, 'en.vtt');
+    } else if (origBasename.endsWith('.srt')) {
+      dest = makeDest('srt', videoId, 'en.srt');
+    } else if (origBasename.endsWith('.txt')) {
+      dest = makeDest('txt', videoId, 'en.txt');
+    } else if (origBasename.endsWith('.tsv')) {
+      dest = makeDest('tsv', videoId, 'en.tsv');
+    }
+    if (dest) {
+      console.log(`copy ${file.name} to ${dest.name}`);
+      file.copy(dest, { predefinedAcl: 'publicRead' });
+    }
+  }
+}
 
 // POST to speaker info with JSON body of type:
 // {
@@ -116,5 +188,43 @@ exports.speakerinfo = onRequest(
       console.error("Updating DB failed with: ", e);
       return res.status(500).send("Internal error");
     }
+  }
+);
+
+exports.metadata = onRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+       return res.status(400).send("Expects POST");
+    }
+
+    // Check request to ensure it looks like valid JSON request.
+    if (req.headers['content-type'] !== 'application/json') {
+       return res.status(400).send("Expects JSON");
+    }
+
+    if (req.body?.cmd === "regenerateMetadata") {
+      try {
+        await regenerateMetadata();
+      } catch (e) {
+        console.error(e);
+        return res.status(500).send("Exception");
+      }
+      return res.status(200).send("done");
+    }
+    if (req.body?.cmd === "migrate") {
+      if (!req.body.category) {
+        return res.status(400).send("Expects category");
+      }
+      try {
+        await migrate(req.body.category);
+      } catch (e) {
+        console.error(e);
+        return res.status(500).send("Exception");
+      }
+      return res.status(200).send("done");
+    }
+
+    return res.status(400).send("Unknown command");
   }
 );
