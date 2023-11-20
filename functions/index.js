@@ -68,7 +68,7 @@ async function migrate(category, limit) {
       break;
     }
     n = n+1;
-    console.log(`processing ${file.name}`);
+//    console.log(`processing ${file.name}`);
 
     const origBasename = basename(file.name);
     const videoId = origBasename.split('.')[0];
@@ -92,12 +92,15 @@ async function migrate(category, limit) {
     }
     if (dest) {
       let shouldSkip = false;
-      outstanding.push(dest.exists().then((exists) => shouldSkip = exists).finally(async ()=>{
-        if (!shouldSkip) {
-          console.log(`copy ${file.name} to ${dest.name}`);
-          await file.copy(dest, { predefinedAcl: 'publicRead' });
-        }
-      }).catch(console.error));
+      outstanding.push(dest.exists()
+        .then(([exists]) => shouldSkip = exists)
+        .finally(async () => {
+            if (!shouldSkip) {
+              console.log(`copy ${file.name} to ${dest.name}`);
+              await file.copy(dest, { predefinedAcl: 'publicRead' });
+            }
+          })
+        .catch(console.error));
     }
 
     // Concurrency limit.

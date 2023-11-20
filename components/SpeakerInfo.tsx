@@ -156,8 +156,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     };
 
     fetch(
-      //'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
-      'http://127.0.0.1:5001/sps-by-the-numbers/us-west1/speakerinfo',
+      'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
+      //'http://127.0.0.1:5001/sps-by-the-numbers/us-west1/speakerinfo',
       {
         method: "POST",
         headers: {
