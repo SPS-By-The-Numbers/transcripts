@@ -6,7 +6,7 @@
     ]
   },
   "hosting": {
-    "target": "testing",
+    "site": "transcripts-spsbtn",
     "source": ".",
     "ignore": [
       "firebase.json",

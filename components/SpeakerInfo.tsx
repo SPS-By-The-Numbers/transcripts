@@ -4,6 +4,7 @@ import React from 'react';
 
 import { Color } from "chroma-js"
 import { getDatabase, ref, child, onValue } from "firebase/database"
+import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app"
 import { isEqual } from 'lodash-es';
 import { useEffect, useState } from 'react'
@@ -34,10 +35,22 @@ type OptionType = {
 
 const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com"
+  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
+  authDomain: "sps-by-the-numbers.firebaseapp.com",
+  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
+  projectId: "sps-by-the-numbers",
+  storageBucket: "sps-by-the-numbers.appspot.com",
+  messagingSenderId: "319988578351",
+  appId: "1:319988578351:web:1caaadd0171003126deeda",
+  measurementId: "G-WKM5FTSSLL"
 };
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
