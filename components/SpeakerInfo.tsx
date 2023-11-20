@@ -60,7 +60,7 @@ let appCheck;
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
   const name = data?.name || speaker;
-  const tags = data?.tags || new Set<string>;
+  const tags = data?.tags || new Set<string>();
 
   const speakerNum = Number(speaker.split('_')[1]);
   const color = palette[speakerNum];
@@ -71,7 +71,7 @@ export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfo
 // speakerInfo has the name, tags, etc.
 // speakerKeys is a list of speaker keys like SPEAKER_00
 export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
-  const [existingNames, setExistingNames] = useState<Set<string>>(new Set<string>);
+  const [existingNames, setExistingNames] = useState<object>({});
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
   const [authState, setAuthState] = useState<object>({});
 
@@ -79,21 +79,24 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     const newSpeakerInfo = {...speakerInfo};
     const newName = selectedOption?.value;
     const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
-    info.name = newName;
-
-    // Update if there is a change.
-    if (!isEqual(speakerInfo, newSpeakerInfo)) {
-        setSpeakerInfo(newSpeakerInfo);
-    }
-
-    if (!existingNames.has(newName)) {
-      const newExistingNames = new Set(existingNames);
-      newExistingNames.add(newName);
+    if (newName && !existingNames.hasOwnProperty(newName)) {
+      const newExistingNames = Object.assign({}, existingNames);
+      newExistingNames[newName] = {recentTags: Array.from(info.tags)};
       // TODO: Extract all these isEquals() checks.
       if (!isEqual(existingNames, newExistingNames)) {
         setExistingNames(newExistingNames);
       }
     }
+
+    if (newName !== info.name) {
+      info.name = newName;
+      // Autopopulate the recent tags if nothing else was there.
+      if (!info.tags || info.tags.size === 0) {
+        info.tags = new Set<string>(newExistingNames[newName].recentTags);
+      }
+      setSpeakerInfo(newSpeakerInfo);
+    }
+
   }
 
   async function handleSignin() {
@@ -153,7 +156,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     };
 
     fetch(
-      'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
+      //'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
+      'http://127.0.0.1:5001/sps-by-the-numbers/us-west1/speakerinfo',
       {
         method: "POST",
         headers: {
@@ -197,9 +201,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     onValue(existingRef, (snapshot) => {
       const data = snapshot.val();
       if (!ignore && data) {
-        const newNames = new Set<string>(Object.keys(data.names));
-        if (!isEqual(existingNames, newNames)) {
-          setExistingNames(newNames);
+        if (!isEqual(existingNames, data.names)) {
+          setExistingNames(Object.assign({}, existingNames, data.names));
         }
 
         const newTags = existingTags;
@@ -220,19 +223,19 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
 
   // Create all options.
   const allSpeakers : string[] = Array.from(speakerKeys).sort();
-  const newExistingNames = new Set(existingNames);
+  const newExistingNames = Object.assign({}, existingNames);
   for (const s of allSpeakers) {
-    const { name } = getSpeakerAttributes(s, speakerInfo);
+    const { name, tags } = getSpeakerAttributes(s, speakerInfo);
     if (name !== s) {
-      newExistingNames.add(name);
+      newExistingNames[name] = {recentTags: Array.from(tags)};
     }
   }
-  if (newExistingNames.size !== existingNames.size) {
+  if (!isEqual(newExistingNames, existingNames)) {
     setExistingNames(newExistingNames);
   }
 
   const nameOptions : OptionType[] = [];
-  for (const name of Array.from(newExistingNames.keys()).sort()) {
+  for (const name of Object.keys(newExistingNames).sort()) {
     nameOptions.push({label: name, value: name});
   }
 
