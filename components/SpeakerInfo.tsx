@@ -4,12 +4,13 @@ import React from 'react';
 
 import { Color } from "chroma-js"
 import { getDatabase, ref, child, onValue } from "firebase/database"
-import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app"
 import { isEqual } from 'lodash-es';
 import { useEffect, useState } from 'react'
 import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
+
+const useMount = (fun) => useEffect(fun, []);
 
 type DbInfoEntry ={
   name : string;
@@ -50,7 +51,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
@@ -103,7 +103,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     info.tags = newTags;
     setSpeakerInfo(newSpeakerInfo);
 
-    if (existingTags.size !== newExistingTags.size) {
+    if (!isEqual(existingTags, newExistingTags)) {
       setExistingTags(newExistingTags);
     }
   }
@@ -134,7 +134,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   }
 
   // Load from the database.
-  useEffect(() => {
+  useMount(() => {
     let ignore = false;
     const database = getDatabase(app);
     const categoryRoot = ref(database, `transcripts/${category}`);
@@ -150,10 +150,10 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
           const n = entry?.name;
           const t = entry?.tags;
           newSpeakerInfo[k] = newSpeakerInfo[k] || {};
-          if (newSpeakerInfo[k].name === undefined) {
+          if (n && newSpeakerInfo[k].name === undefined) {
             newSpeakerInfo[k].name = n;
           }
-          if (newSpeakerInfo[k].tags === undefined) {
+          if (t && newSpeakerInfo[k].tags === undefined) {
             newSpeakerInfo[k].tags = new Set<string>(t);
           }
         }
@@ -171,7 +171,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
           setExistingNames(newNames);
         }
 
-        const newTags = new Set<string>(Object.keys(data.tags));
+        const newTags = existingTags;
+        Object.keys(data.tags).forEach(tag => newTags.add(tag));
         if (!isEqual(existingTags, newTags)) {
           setExistingTags(new Set<string>(Object.keys(data.tags)));
         }
@@ -179,7 +180,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     });
 
     return () => { ignore = true; };
-  }, [videoId, category, speakerInfo, setSpeakerInfo, existingNames, setExistingNames, existingTags, setExistingTags]);
+  });
 
   // Must be deleted once
   // https://github.com/JedWatson/react-select/issues/5459 is fixed.
