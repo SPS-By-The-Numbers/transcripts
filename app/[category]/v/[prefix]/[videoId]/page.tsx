@@ -37,7 +37,7 @@ export default async function Index({params}: {params: VideoParams}) {
     let speakerInfo = {};
     if (speakerMapping) {
         for (const [k,n] of Object.entries(speakerMapping)) {
-            speakerInfo[k] = {'name': n, 'tags': new Set() }
+            speakerInfo[k] = {'name': n }
         }
     }
 

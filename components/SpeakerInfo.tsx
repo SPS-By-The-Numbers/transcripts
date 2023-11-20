@@ -3,6 +3,8 @@
 import React from 'react';
 
 import { Color } from "chroma-js"
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getDatabase, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app"
 import { isEqual } from 'lodash-es';
@@ -51,6 +53,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+let appCheck;
 
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
@@ -68,6 +73,7 @@ export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfo
 export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
   const [existingNames, setExistingNames] = useState<Set<string>>(new Set<string>);
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
+  const [authState, setAuthState] = useState<object>({});
 
   function handleNameChange(curSpeaker : string, selectedOption : OptionType) {
     const newSpeakerInfo = {...speakerInfo};
@@ -90,6 +96,31 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     }
   }
 
+  async function handleSignin() {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+
+      // The signed-in user info.
+      const user = result.user;
+      setAuthState({user, credential});
+
+      // IdP data available using getAdditionalUserInfo(result)
+      // ...
+
+    } catch (error) {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      console.error("Signin failed", errorCode, errorMessage, email, credential);
+    }
+  }
+
   function handleTagsChange(curSpeaker, newTagOptions) {
     const newSpeakerInfo = {...speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
@@ -108,9 +139,9 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     }
   }
 
-  function handleOnClick(event) {
+  async function handleSubmit(event) {
     const data = {
-      auth: 'SPSSoSekure',
+      auth: auth.currentUser ? await auth.currentUser.getIdToken(true) : "SpsSoSekure",
       category,
       videoId,
       speakerInfo: Object.fromEntries(
@@ -212,7 +243,20 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];
+  let submitButton : React.ReactElement = (<></>);
   if (isMounted) {
+    // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
+    // key is the counterpart to the secret key you set in the Firebase console.
+    if (!appCheck) {
+      appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8'),
+
+        // Optional argument. If true, the SDK automatically refreshes App Check
+        // tokens as needed.
+        isTokenAutoRefreshEnabled: true
+      });
+    }
+
     for (const s of allSpeakers) {
       const { name, color, tags } = getSpeakerAttributes(s, speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
@@ -241,6 +285,26 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
         </li>
       );
     }
+
+    if (auth.currentUser) {
+      submitButton = (
+        <button key="submit-button"
+          className="px-4 py-2 m-2 bg-red-500 rounded"
+          onClick={handleSubmit}>
+            Submit Changes as {auth.currentUser.email}
+        </button>
+      );
+    } else {
+      submitButton = (
+        <button key="signin-button"
+          className="px-4 py-2 m-2 bg-red-500 rounded"
+          onClick={handleSignin}>
+            Login To Submit
+        </button>
+      );
+    }
+  } else {
+    speakerLabelInputs.push(<div key="loading-div">Wait...Loading Speakers Labels</div>);
   }
 
   return (
@@ -249,11 +313,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
       <ul className="list-style-none">
         { speakerLabelInputs }
       </ul>
-      <button
-        className="px-4 py-2 m-2 bg-red-500 rounded"
-        onClick={handleOnClick}>
-          Submit Changes
-      </button>
+      {submitButton}
     </div>
   );
 }

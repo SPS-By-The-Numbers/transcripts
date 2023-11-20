@@ -9,8 +9,14 @@ import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
 const pathDateFormat = 'yyyy-MM-dd';
 
 const firebaseConfig = {
+  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
+  authDomain: "sps-by-the-numbers.firebaseapp.com",
   databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
-  storageBucket: "sps-by-the-numbers.appspot.com"
+  projectId: "sps-by-the-numbers",
+  storageBucket: "sps-by-the-numbers.appspot.com",
+  messagingSenderId: "319988578351",
+  appId: "1:319988578351:web:1caaadd0171003126deeda",
+  measurementId: "G-WKM5FTSSLL"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -126,8 +126,11 @@ exports.speakerinfo = onRequest(
        return res.status(400).send("Expects JSON");
     }
 
-    if (req.body?.auth !== 'SPSSoSekure') {
-      return res.status(400).send("Not So Secure");
+    let decodedIdToken = null;
+    try {
+      decodedIdToken = await admin.auth().verifyIdToken(req.body?.auth);
+    } catch (error) {
+      return res.status(400).send("Did you forget to login?");
     }
 
     const category = req.body?.category;
@@ -185,6 +188,9 @@ exports.speakerinfo = onRequest(
         name: 'speakerinfo POST',
         headers: req.headers,
         body: req.body,
+        email: decodedIdToken.email,
+        emailVerified: decodedIdToken.email_verified,
+        uid: decodedIdToken.uid
         });
 
       const videoRef = dbRoot.child(`v/${videoId}/speakerInfo`);
