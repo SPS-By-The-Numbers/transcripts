@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const { parseISO, format } = require('date-fns');
 
 const {onRequest} = require("firebase-functions/v2/https");
@@ -153,6 +154,7 @@ exports.speakerinfo = onRequest(
     // Validate request structure.
     const allTags = new Set();
     const allNames = new Set();
+    const recentTagsForName = {};
     for (const info of Object.values(speakerInfo)) {
       const name = info.name;
       if (name) {
@@ -163,6 +165,9 @@ exports.speakerinfo = onRequest(
       if (tags) {
         if (!Array.isArray(tags)) {
           return res.status(400).send("Expect tags to be an array");
+        }
+        if (name) {
+          recentTagsForName[name] = [...(new Set(tags))];
         }
         for (const tag of tags) {
           if (typeof(tag) !== 'string') {
@@ -202,8 +207,10 @@ exports.speakerinfo = onRequest(
       // Add new tags.
       let existingOptionsUpdated = false;
       for (const name of allNames) {
-        if (!Object.prototype.hasOwnProperty.call(existingOptions.names, name)) {
-          existingOptions.names[name] = txnId;
+        const recentTags = recentTagsForName[name];
+        if (!Object.prototype.hasOwnProperty.call(existingOptions.names, name) ||
+            (recentTags && !_.isEqual(existingOptions.names[name].recentTags, recentTags))) {
+          existingOptions.names[name] = {txnId, recentTags: recentTags || []};
           existingOptionsUpdated = true;
         }
       }

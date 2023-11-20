@@ -17,7 +17,8 @@
     "@google-cloud/functions-framework": "^3.1.0",
     "date-fns": "^2.30.0",
     "firebase-admin": "^11.11.0",
-    "firebase-functions": "^4.5.0"
+    "firebase-functions": "^4.5.0",
+    "lodash": "^4.17.21"
   },
   "private": true,
   "devDependencies": {
