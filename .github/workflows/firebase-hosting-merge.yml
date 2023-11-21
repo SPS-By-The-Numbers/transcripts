@@ -48,3 +48,5 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPS_BY_THE_NUMBERS }}'
           channelId: live
           projectId: sps-by-the-numbers
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
