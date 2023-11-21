@@ -81,7 +81,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
     if (newName && !existingNames.hasOwnProperty(newName)) {
       const newExistingNames = Object.assign({}, existingNames);
-      newExistingNames[newName] = {recentTags: Array.from(info.tags)};
+      const recentTags = info.tags ? Array.from(info.tags) : [];
+      newExistingNames[newName] = { recentTags };
       // TODO: Extract all these isEquals() checks.
       if (!isEqual(existingNames, newExistingNames)) {
         setExistingNames(newExistingNames);
@@ -92,7 +93,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
       info.name = newName;
       // Autopopulate the recent tags if nothing else was there.
       if (!info.tags || info.tags.size === 0) {
-        info.tags = new Set<string>(newExistingNames[newName].recentTags);
+        info.tags = new Set<string>(newExistingNames[newName]?.recentTags);
       }
       setSpeakerInfo(newSpeakerInfo);
     }
