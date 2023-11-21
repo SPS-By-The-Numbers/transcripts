@@ -33,7 +33,7 @@ jobs:
       - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         name: List the state of node modules
         continue-on-error: true
-        run: npm list
+        run: npm list; npm --prefix functions list
 
       - name: Cache firebase emulators
         uses: actions/cache@v2
@@ -41,7 +41,12 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: ${{ runner.os }}-firebase-${{ steps.cache-npm.outputs.firebase-tools }}
 
-      - run: npm ci && npm run build
+      # Only ci, no build. The action-hosting-deploy with the webframeworks does the build.
+      - run: npm ci
+
+      # Firebase webframeworks doesn't do npm install on the functions directory.
+      - run: npm --prefix functions install
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
