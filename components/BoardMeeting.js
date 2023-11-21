@@ -98,13 +98,20 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     curSpeaker = segment['speaker'] || 'SPEAKER_9999';
     speakerKeys.add(curSpeaker);
 
-    const wordsInSegment = [];
-    for (const [j, word] of segment['words'].entries()) {
-      wordsInSegment.push(
-        <Link key={`word-${i}-${j}`} name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={jumpToTime}> {word['word']}</Link>
-      );
-    }
-    curWordAnchors.push(<span key={`segment-${i}`} className="my-1.5 leading-tight">{wordsInSegment}</span>);
+    // Temporarily disabled to reduce DOM size
+    // TODO: Make this into a stateful loader so that it can be replaced with fully marked up text after
+    // initial load
+
+    // const wordsInSegment = [];
+    // for (const [j, word] of segment['words'].entries()) {
+    //   wordsInSegment.push(
+    //     <Link key={`word-${i}-${j}`} name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={jumpToTime}> {word['word']}</Link>
+    //   );
+    // }
+    const startTime = segment['start'];
+    curWordAnchors.push(<span key={`segment-${i}`} id={ startTime } className="my-1.5 leading-tight">
+      <Link href={toTimeAnchor(startTime)} id={startTime} style={ltStyle} onClick={jumpToTime}> {segment['text']}</Link>
+    </span>);
   }
 
   return (
