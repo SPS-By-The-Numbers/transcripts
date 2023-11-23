@@ -52,7 +52,6 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
   const speakerBubble = [];
   let curSpeaker = null;
   let curWordAnchors = []
-  const speakerSuggestion = [];
   const speakerKeys = new Set();
 
   function onReady(event) {
