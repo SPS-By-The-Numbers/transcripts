@@ -2,14 +2,12 @@
 
 import React from 'react';
 
-import { Color } from "chroma-js"
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getDatabase, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app"
 import { isEqual } from 'lodash-es';
 import { useEffect, useState } from 'react'
-import distinctColors from 'distinct-colors'
 import CreatableSelect from 'react-select/creatable'
 
 const useMount = (fun) => useEffect(fun, []);
@@ -36,8 +34,6 @@ type OptionType = {
   label : string;
 };
 
-const palette = distinctColors({ count: 45, lightMin: 70, chromaMax: 200 });
-
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -57,15 +53,23 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 let appCheck;
 
+export function toColorClass(speaker) {
+  const num = speaker.split('_')[1];
+  if (num) {
+    const n = Number(num) % 8;
+    return `c-${n}`;
+  }
+  return 'c-0';
+}
+
 export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
   const data = speakerInfo ? speakerInfo[speaker] : undefined;
   const name = data?.name || speaker;
   const tags = data?.tags || new Set<string>();
 
-  const speakerNum = Number(speaker.split('_')[1]);
-  const color = palette[speakerNum];
+  const colorClass = toColorClass(speaker);
 
-  return { name, color: color ? color.name() : 'grey', tags };
+  return { name, colorClass, tags };
 }
 
 // speakerInfo has the name, tags, etc.
@@ -262,11 +266,11 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     }
 
     for (const s of allSpeakers) {
-      const { name, color, tags } = getSpeakerAttributes(s, speakerInfo);
+      const { name, colorClass, tags } = getSpeakerAttributes(s, speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
-        <li key={`li-${s}`} className="py-1 flex" style={{backgroundColor: color}}>
+        <li key={`li-${s}`} className={`py-1 flex ${colorClass}`}>
           <div className="pl-2 pr-1 basis-1/2">
             <CreatableSelect
                 id={`cs-name-${name}`}

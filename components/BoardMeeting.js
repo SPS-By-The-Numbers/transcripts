@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import SpeakerInfo, { getSpeakerAttributes } from 'components/SpeakerInfo'
+import SpeakerInfo, { getSpeakerAttributes, toColorClass } from 'components/SpeakerInfo'
 import YouTube from 'react-youtube'
-import styles from '../styles/BoardMeeting.module.css'
 import { useState } from 'react'
 
 function toTimeAnchor(seconds) {
@@ -12,6 +11,11 @@ function toTimeAnchor(seconds) {
         return `#${hhmmss}`;
     }
     return '';
+}
+
+function toSec(hhmmss) {
+    const parts = hhmmss.split(':');
+    return Number(parts[2]) + Number((parts[1]) * 60) + Number((parts[0] * 60 * 60));
 }
 
 function cloudDownloadURL(category, videoId, ext) {
@@ -26,12 +30,6 @@ const mainStyle = {
     backgroundColor: '#efe7dd',
 };
 
-const ltStyle = {
-    color: 'inherit',
-    textDecoration: 'inherit',
-    display: 'inline',
-    textDecoration: 'none',
-};
 const ytplayerStyle = {
     aspectRatio: '16 / 9',
     width: '100%',
@@ -51,7 +49,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
   const [speakerInfo, setSpeakerInfo] = useState(initialSpeakerInfo);
   const videoId = metadata.video_id;
 
-  const dialogDivs = [];
+  const speakerBubble = [];
   let curSpeaker = null;
   let curWordAnchors = []
   const speakerSuggestion = [];
@@ -64,21 +62,22 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
       const el = document.querySelector(selString);
       if (el) {
         el.scrollIntoViewIfNeeded();
-        jumpToTimeInternal(el.id);
+        jumpToTimeInternal(toSec(el.href.split('#')[1]));
       }
     }
   }
 
-  function jumpToTimeInternal(id) {
+  function jumpToTimeInternal(timeSec) {
     if (ytComponent) {
-      ytComponent.seekTo(id);
+      ytComponent.seekTo(timeSec);
       ytComponent.playVideo();
     }
   }
 
   function jumpToTime(event) {
+    const fragment = (new URL(event.target.href)).hash.split('#')[1];
     history.pushState(null, null, event.target.href);
-    jumpToTimeInternal(event.target.id);
+    jumpToTimeInternal(toSec(fragment));
   }
 
   // Merge all segments from the same speaker to produce speaking divs.
@@ -86,32 +85,24 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     // If speaker changed, push the div and reset curWordAnchors.
     if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
       const { name, color } = getSpeakerAttributes(curSpeaker, speakerInfo);
-      dialogDivs.push(
-        <section key={`segment-${i}`} className={styles.e} style={{ backgroundColor: color }}>
-          <div style={{ margin: 0, paddingLeft: '5px', paddingTop: '10px', paddingBottom: '10px', paddingRight: '10px', wordWrap: 'normal', whiteSpace: 'normal' }}>
-              <span data-speaker={curSpeaker} style={{ color: 'black', fontWeight: 'bold' }}>{name}</span><br />
-              {curWordAnchors}
-          </div>
+      speakerBubble.push(
+        <section
+            key={`b-${i}`}
+            className={`b ${toColorClass(curSpeaker)}`}>
+          <h2>{name}</h2>
+          {curWordAnchors}
         </section>);
       curWordAnchors = [];
     }
     curSpeaker = segment['speaker'] || 'SPEAKER_9999';
     speakerKeys.add(curSpeaker);
-
-    // Temporarily disabled to reduce DOM size
-    // TODO: Make this into a stateful loader so that it can be replaced with fully marked up text after
-    // initial load
-
-    // const wordsInSegment = [];
-    // for (const [j, word] of segment['words'].entries()) {
-    //   wordsInSegment.push(
-    //     <Link key={`word-${i}-${j}`} name={toTimeAnchor(word['start']).substr(1)} href={toTimeAnchor(word['start'])} id={word['start']} style={ltStyle} onClick={jumpToTime}> {word['word']}</Link>
-    //   );
-    // }
     const startTime = segment['start'];
-    curWordAnchors.push(<span key={`segment-${i}`} id={ startTime } className="my-1.5 leading-tight">
-      <Link href={toTimeAnchor(startTime)} id={startTime} style={ltStyle} onClick={jumpToTime}> {segment['text']}</Link>
-    </span>);
+    curWordAnchors.push(
+      <Link key={`seg-${i}`}
+          href={toTimeAnchor(startTime)}
+          onClick={jumpToTime}>
+        {segment['text']}
+      </Link>);
   }
 
   return (
@@ -150,9 +141,9 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
               </div>
           </div>
 
-          <div className="dialogs">
-              {dialogDivs}
-          </div>
+          <section>
+              {speakerBubble}
+          </section>
       </main>
   );
 }
