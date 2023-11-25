@@ -2,6 +2,36 @@ import Link from 'next/link'
 import SpeakerBubble from 'components/SpeakerBubble'
 import VideoPlayer from 'components/VideoPlayer'
 import YouTube from 'react-youtube'
+import { SpeakerInfoData } from 'utilities/speaker-info'
+import type { Entries } from 'type-fest';
+
+type WordData = {
+  word: string;
+  start: number;
+  end: number;
+  score: number;
+  speaker: string;
+};
+
+type SegmentData = {
+  start: number;
+  end: number;
+  text: string;
+  speaker: string;
+  words: WordData[];
+};
+
+type TrasncriptData = {
+  segments : SegmentData[];
+  language : string;
+};
+
+type BoardMeetingParams = {
+  metadata: any,
+  category: string,
+  initialSpeakerInfo: SpeakerInfoData,
+  transcript: TrasncriptData,
+};
 
 function toTimeAnchor(seconds) {
     if (seconds) {
@@ -23,19 +53,19 @@ const mainStyle = {
     backgroundColor: '#efe7dd',
 };
 
-export default function BoardMeeting({ metadata, category, transcript, initialSpeakerInfo }) {
+export default function BoardMeeting({ metadata, category, transcript, initialSpeakerInfo } : BoardMeetingParams) {
   const videoId = metadata.video_id;
 
-  const speakerBubbles = [];
-  let curSpeaker = null;
-  let curWordAnchors = []
-  const speakerKeys = new Set();
+  const speakerBubbles : React.ReactNode[] = [];
+  let curSpeaker : string = '';
+  let curWordAnchors : React.ReactNode[] = []
+  const speakerKeys = new Set<string>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  for (const [i, segment] of Object.values(transcript.segments).entries()) {
+  for (const [i, segment] of Object.entries(Object.values(transcript.segments))) {
     // If speaker changed, push the div and reset curWordAnchors.
     if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
-      const speakerNum = curSpeaker.split('_')[1];
+      const speakerNum : number = Number(curSpeaker.split('_')[1]);
       speakerBubbles.push(
         <SpeakerBubble
             key={i}
@@ -49,7 +79,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     speakerKeys.add(curSpeaker);
     const startTime = segment['start'];
     curWordAnchors.push(
-      <Link key={`seg-${i}`}
+      <Link key={i}
           href={toTimeAnchor(startTime)}>
         {segment['text']}
       </Link>);
