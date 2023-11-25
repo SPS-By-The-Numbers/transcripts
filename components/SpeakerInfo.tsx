@@ -2,10 +2,11 @@
 
 import React from 'react';
 
+import { getSpeakerAttributes, SpeakerInfoData } from 'utilities/speaker-info'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getDatabase, ref, child, onValue } from "firebase/database"
 import { initializeApp } from "firebase/app"
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { isEqual } from 'lodash-es';
 import { useEffect, useState } from 'react'
 import CreatableSelect from 'react-select/creatable'
@@ -15,10 +16,6 @@ const useMount = (fun) => useEffect(fun, []);
 type DbInfoEntry ={
   name : string;
   tags : Array<string>;
-};
-
-type SpeakerInfoData = {
-  [key: string] : {name: string, tags: Set<string>, color: string};
 };
 
 type SpeakerInfoParams = {
@@ -52,25 +49,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 let appCheck;
-
-export function toColorClass(speaker) {
-  const num = speaker.split('_')[1];
-  if (num) {
-    const n = Number(num) % 8;
-    return `c-${n}`;
-  }
-  return 'c-0';
-}
-
-export function getSpeakerAttributes(speaker : string, speakerInfo : SpeakerInfoData ) {
-  const data = speakerInfo ? speakerInfo[speaker] : undefined;
-  const name = data?.name || speaker;
-  const tags = data?.tags || new Set<string>();
-
-  const colorClass = toColorClass(speaker);
-
-  return { name, colorClass, tags };
-}
 
 // speakerInfo has the name, tags, etc.
 // speakerKeys is a list of speaker keys like SPEAKER_00
@@ -230,7 +208,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   const allSpeakers : string[] = Array.from(speakerKeys).sort();
   const newExistingNames = Object.assign({}, existingNames);
   for (const s of allSpeakers) {
-    const { name, tags } = getSpeakerAttributes(s, speakerInfo);
+    const speakerNum = Number(s.split('_')[1]);
+    const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
     if (name !== s) {
       newExistingNames[name] = {recentTags: Array.from(tags)};
     }
@@ -266,7 +245,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     }
 
     for (const s of allSpeakers) {
-      const { name, colorClass, tags } = getSpeakerAttributes(s, speakerInfo);
+      const speakerNum = Number(s.split('_')[1]);
+      const { name, colorClass, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
