@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.11",
-    "@types/youtube-player": "^5.5.11"
+    "@types/youtube-player": "^5.5.11",
+    "type-fest": "^4.8.2"
   }
 }
