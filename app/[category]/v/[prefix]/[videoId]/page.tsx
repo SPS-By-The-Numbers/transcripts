@@ -1,7 +1,7 @@
 import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, VideoData } from "utilities/metadata-utils";
 import { getTranscript } from "utilities/transcript";
 import { formatDateForPath, parseDateFromPath } from "utilities/path-utils";
-import SpeakerInfoProvider from 'components/SpeakerInfoProvider';
+import TranscriptControlProvider from 'components/TranscriptControlProvider';
 import BoardMeeting from 'components/BoardMeeting';
 import { Metadata, ResolvingMetadata } from "next";
 import { ReactNode } from "react";
@@ -44,12 +44,12 @@ export default async function Index({params}: {params: VideoParams}) {
     }
 
     return (
-      <SpeakerInfoProvider initialSpeakerInfo={ speakerInfo }>
+      <TranscriptControlProvider initialSpeakerInfo={ speakerInfo }>
         <BoardMeeting
             metadata={ metadata }
             category={ params.category }
             transcript={ transcript }
             initialSpeakerInfo={ speakerInfo } />
-      </SpeakerInfoProvider>
+      </TranscriptControlProvider>
     );
 }

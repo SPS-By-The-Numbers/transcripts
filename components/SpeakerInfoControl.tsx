@@ -10,7 +10,7 @@ import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/s
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
 import { useEffect, useState } from 'react'
-import { useSpeakerInfo } from 'components/SpeakerInfoProvider'
+import { useTranscriptContext } from 'components/TranscriptControlProvider'
 
 const useMount = (fun) => useEffect(fun, []);
 
@@ -42,7 +42,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   const [existingNames, setExistingNames] = useState<object>({});
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
   const [authState, setAuthState] = useState<object>({});
-  const {speakerInfo, setSpeakerInfo} = useSpeakerInfo();
+  const {speakerInfo, setSpeakerInfo} = useTranscriptContext();
 
   function handleNameChange(speakerNum : number, selectedOption : OptionType) {
     const curSpeaker = toSpeakerKey(speakerNum);
