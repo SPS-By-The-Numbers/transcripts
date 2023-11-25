@@ -82,14 +82,35 @@ ul.points {
   white-space: normal;
 }
 
-/* Name of section */
-section.b h2 {
+// Speaker Info Controls
+.c {
+  overflow-y: scroll;
+  height: 40vh;
+}
+
+// Video Player styles.
+.p {
+  position: sticky;
+  top: 20px;
+  float: right;
+  width: 45%;
+}
+
+// Summary header.
+h2.t {
   color: black;
   font-weight: bold;
 }
 
+/* Name of speech bubble */
+article.b h2 {
+  color: darkblue;
+  font-size: larger;
+  font-weight: bold;
+}
+
 /* Transcription Segment */
-section.b a {
+article.b a {
   color: inherit;
   display: inline;
   line-height: 1.25;

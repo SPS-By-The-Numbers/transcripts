@@ -1,37 +1,18 @@
 import path from 'path';
-import { getDatabase, get, ref, child, onValue } from "firebase/database"
-import * as Storage from "firebase/storage"
-import { initializeApp } from "firebase/app";
+import { get, child } from "firebase/database"
+import { dbRoot } from 'utilities/firebase';
 import { readdir, readFile } from 'fs/promises';
 import { Dirent, existsSync } from 'fs';
 import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
 
 const pathDateFormat = 'yyyy-MM-dd';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
-  authDomain: "sps-by-the-numbers.firebaseapp.com",
-  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
-  projectId: "sps-by-the-numbers",
-  storageBucket: "sps-by-the-numbers.appspot.com",
-  messagingSenderId: "319988578351",
-  appId: "1:319988578351:web:1caaadd0171003126deeda",
-  measurementId: "G-WKM5FTSSLL"
-};
-
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const dbRoot = ref(database, '/transcripts');
 
 export type VideoData = {
     metadata: any, // TODO: replace these with schema objects
     props: any,
     date: string,
     transcriptionPath: string
-}
-
-function makeTranscriptsPath(category: string, path: string): string {
-    return `/transcripts/public/${category}/${path}`;
 }
 
 export async function getAllCategories(): Promise<string[]> {
@@ -118,18 +99,6 @@ export async function getAllVideosForPublishDate(category: string, datePath: str
       date: datePath,
       transcriptionPath: "hi"
     }));
-}
-
-export async function getTranscript(category: string, id: string): Promise<any> {
-    const transcriptsPath = makeTranscriptsPath(category, `json/${id}.en.json`);
-    try {
-      const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
-      return JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
-    } catch (e) {
-      console.error(e);
-    }
-
-    return { segments: [] };
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
