@@ -2,14 +2,15 @@
 
 import React from 'react';
 
-import { getSpeakerAttributes, SpeakerInfoData } from 'utilities/speaker-info'
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { getDatabase, ref, child, onValue } from "firebase/database"
-import { initializeApp } from "firebase/app"
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
-import { isEqual } from 'lodash-es';
-import { useEffect, useState } from 'react'
 import CreatableSelect from 'react-select/creatable'
+import { app } from 'utilities/firebase'
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
+import { getDatabase, ref, child, onValue } from "firebase/database"
+import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
+import { isEqual } from 'lodash-es'
+import { useEffect, useState } from 'react'
+import { useSpeakerInfo } from 'components/SpeakerInfoProvider'
 
 const useMount = (fun) => useEffect(fun, []);
 
@@ -18,12 +19,11 @@ type DbInfoEntry ={
   tags : Array<string>;
 };
 
-type SpeakerInfoParams = {
+type SpeakerInfoControlParams = {
   category : string;
-  speakerKeys : Set<string>;
+  speakerNums : Set<number>;
   videoId : string;
-  speakerInfo: SpeakerInfoData;
-  setSpeakerInfo: any;
+  className: string;
 };
 
 type OptionType = {
@@ -31,33 +31,21 @@ type OptionType = {
   label : string;
 };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
-  authDomain: "sps-by-the-numbers.firebaseapp.com",
-  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
-  projectId: "sps-by-the-numbers",
-  storageBucket: "sps-by-the-numbers.appspot.com",
-  messagingSenderId: "319988578351",
-  appId: "1:319988578351:web:1caaadd0171003126deeda",
-  measurementId: "G-WKM5FTSSLL"
-};
-
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 let appCheck;
 
 // speakerInfo has the name, tags, etc.
-// speakerKeys is a list of speaker keys like SPEAKER_00
-export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo, setSpeakerInfo} : SpeakerInfoParams) {
+// number is a list of speaker keys like [0, 1, 2, .. ]
+export default function SpeakerInfoControl({category, className, speakerNums, videoId} : SpeakerInfoControlParams) {
   const [existingNames, setExistingNames] = useState<object>({});
   const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
   const [authState, setAuthState] = useState<object>({});
+  const {speakerInfo, setSpeakerInfo} = useSpeakerInfo();
 
-  function handleNameChange(curSpeaker : string, selectedOption : OptionType) {
+  function handleNameChange(speakerNum : number, selectedOption : OptionType) {
+    const curSpeaker = toSpeakerKey(speakerNum);
     const newSpeakerInfo = {...speakerInfo};
     const newName = selectedOption?.value;
     const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
@@ -107,7 +95,8 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
     }
   }
 
-  function handleTagsChange(curSpeaker, newTagOptions) {
+  function handleTagsChange(speakerNum : number, newTagOptions) {
+    const curSpeaker = toSpeakerKey(speakerNum);
     const newSpeakerInfo = {...speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
 
@@ -205,12 +194,11 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   useEffect(() => setIsMounted(true), []);
 
   // Create all options.
-  const allSpeakers : string[] = Array.from(speakerKeys).sort();
+  const allSpeakers : number[] = Array.from(speakerNums).sort();
   const newExistingNames = Object.assign({}, existingNames);
-  for (const s of allSpeakers) {
-    const speakerNum = Number(s.split('_')[1]);
+  for (const speakerNum of allSpeakers) {
     const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
-    if (name !== s) {
+    if (name !== toSpeakerKey(speakerNum)) {
       newExistingNames[name] = {recentTags: Array.from(tags)};
     }
   }
@@ -244,13 +232,12 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
       });
     }
 
-    for (const s of allSpeakers) {
-      const speakerNum = Number(s.split('_')[1]);
+    for (const speakerNum of allSpeakers) {
       const { name, colorClass, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
-        <li key={`li-${s}`} className={`py-1 flex ${colorClass}`}>
+        <li key={speakerNum} className={`py-1 flex ${colorClass}`}>
           <div className="pl-2 pr-1 basis-1/2">
             <CreatableSelect
                 id={`cs-name-${name}`}
@@ -258,7 +245,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
                 options={nameOptions}
                 value={curName}
                 placeholder={`Name for ${name}`}
-                onChange={(newValue: OptionType) => handleNameChange(s, newValue)} />
+                onChange={(newValue: OptionType) => handleNameChange(speakerNum, newValue)} />
           </div>
           <div className="pl-1 pr-2 basis-1/2">
             <CreatableSelect
@@ -268,7 +255,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
                 value={curTags}
                 options={tagOptions}
                 placeholder={`Tags for ${name}`}
-                onChange={newValue => handleTagsChange(s, newValue)} />
+                onChange={newValue => handleTagsChange(speakerNum, newValue)} />
           </div>
         </li>
       );
@@ -296,7 +283,7 @@ export default function SpeakerInfo({category, speakerKeys, videoId, speakerInfo
   }
 
   return (
-    <div style={{overflowY: "scroll", height: "40vh"}}>
+    <div className={className}>
       Speaker List
       <ul className="list-style-none">
         { speakerLabelInputs }

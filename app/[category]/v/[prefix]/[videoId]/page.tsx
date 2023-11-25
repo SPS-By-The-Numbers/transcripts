@@ -1,4 +1,5 @@
-import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, getTranscript, VideoData } from "utilities/metadata-utils";
+import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, VideoData } from "utilities/metadata-utils";
+import { getTranscript } from "utilities/transcript";
 import { formatDateForPath, parseDateFromPath } from "utilities/path-utils";
 import SpeakerInfoProvider from 'components/SpeakerInfoProvider';
 import BoardMeeting from 'components/BoardMeeting';
@@ -33,7 +34,7 @@ export async function generateMetadata(
 
 export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
-    const transcript = await getTranscript(params.category, params.videoId);
+    const transcript = await getTranscript(params.category, params.videoId, false);
     const speakerMapping = await getSpeakerMapping(params.category, params.videoId);
     let speakerInfo = {};
     if (speakerMapping) {

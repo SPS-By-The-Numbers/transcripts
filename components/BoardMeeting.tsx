@@ -1,48 +1,28 @@
 import Link from 'next/link'
+import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
+import SpeakerInfoControl from 'components/SpeakerInfoControl'
+import TranscriptControl from 'components/TranscriptControl';
 import VideoPlayer from 'components/VideoPlayer'
 import YouTube from 'react-youtube'
 import { SpeakerInfoData } from 'utilities/speaker-info'
+import type { TranscriptData } from 'utilities/transcript'
 import type { Entries } from 'type-fest';
-
-type WordData = {
-  word: string;
-  start: number;
-  end: number;
-  score: number;
-  speaker: string;
-};
-
-type SegmentData = {
-  start: number;
-  end: number;
-  text: string;
-  speaker: string;
-  words: WordData[];
-};
-
-type TrasncriptData = {
-  segments : SegmentData[];
-  language : string;
-};
+import { toSpeakerKey, UnknownSpeakerNum } from 'utilities/speaker-info'
 
 type BoardMeetingParams = {
   metadata: any,
   category: string,
   initialSpeakerInfo: SpeakerInfoData,
-  transcript: TrasncriptData,
+  transcript: TranscriptData,
 };
 
 function toTimeAnchor(seconds) {
     if (seconds) {
         const hhmmss = new Date(seconds * 1000).toISOString().slice(11, 19);
-        return `#${hhmmss}`;
+        return `${hhmmss}`;
     }
     return '';
-}
-
-function cloudDownloadURL(category, videoId, ext) {
-    return `https://storage.googleapis.com/sps-by-the-numbers.appspot.com/transcription/${category}/${videoId[0]}/${videoId}.${ext}`
 }
 
 const mainStyle = {
@@ -57,15 +37,14 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
   const videoId = metadata.video_id;
 
   const speakerBubbles : React.ReactNode[] = [];
-  let curSpeaker : string = '';
+  let speakerNum : number = UnknownSpeakerNum;
   let curWordAnchors : React.ReactNode[] = []
-  const speakerKeys = new Set<string>();
+  const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
   for (const [i, segment] of Object.entries(Object.values(transcript.segments))) {
-    // If speaker changed, push the div and reset curWordAnchors.
-    if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
-      const speakerNum : number = Number(curSpeaker.split('_')[1]);
+    // If speaker changed, create a SpeakerBubble and reset curWordAnchors.
+    if (speakerNum && speakerNum !== segment.speakerNum && curWordAnchors.length > 0) {
       speakerBubbles.push(
         <SpeakerBubble
             key={i}
@@ -75,48 +54,52 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
       );
       curWordAnchors = [];
     }
-    curSpeaker = segment['speaker'] || 'SPEAKER_9999';
-    speakerKeys.add(curSpeaker);
-    const startTime = segment['start'];
-    curWordAnchors.push(
-      <Link key={i}
-          href={toTimeAnchor(startTime)}>
-        {segment['text']}
-      </Link>);
+    speakerNum = segment.speakerNum;
+    speakerNums.add(speakerNum);
+    for (let wordNum = 0; wordNum < segment.words.length; wordNum++) {
+      curWordAnchors.push(
+        <span key={`${i}-${wordNum}`}
+          id={toTimeAnchor(segment.starts[wordNum])}>
+          { segment.words[wordNum] }
+        </span>);
+    }
+  }
+
+  // Catch the last bubble.
+  if (curWordAnchors.length > 0) {
+    speakerBubbles.push(
+      <SpeakerBubble
+          key={'last'}
+          speakerNum={ speakerNum }>
+        {curWordAnchors}
+      </SpeakerBubble>
+    );
   }
 
   return (
       <main style={mainStyle}>
-          <div className="flex">
-              <div className="flex-auto text-right">
-                  <b>Data Files:</b>
-                  <Link className={"px-1"} href={cloudDownloadURL(category, metadata.video_id, 'json')}>json</Link>
-                  <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, metadata.video_id, 'tsv')}>tsv</Link>
-                  <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, metadata.video_id, 'txt')}>txt</Link>
-                  <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, metadata.video_id, 'srt')}>srt</Link>
-                  <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, metadata.video_id, 'vtt')}>vtt</Link>
-              </div>
-              <div className={"flex-auto text-right"}>
-                  <i>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">{"Majdoddin's collab example"}</Link></i>
-              </div>
-          </div>
+        <TranscriptHeader
+            category={category}
+            title={metadata.title}
+            description={metadata.description}
+            videoId={metadata.video_id} />
 
-          <div>
-              <div className="p-2 bg-slate-50 my-2 border-dashed border-2 border-black">
-                  <h2>{ metadata.title }</h2>
-                  <p>{ metadata.description }</p>
-                  <p><b>Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</b></p>
-              </div>
-          </div>
-
+        <section className="p">
+          <VideoPlayer
+            category={category}
+            videoId={videoId} />
+          <SpeakerInfoControl
+              className="c px-2 border border-2 border-black rounded"
+              category={category}
+              speakerNums={speakerNums}
+              videoId={videoId} />
+        </section>
+        <TranscriptControl>
           <section>
               {speakerBubbles}
           </section>
+        </TranscriptControl>
 
-          <VideoPlayer
-            category={category}
-            speakerKeys={speakerKeys}
-            videoId={videoId} />
       </main>
   );
 }

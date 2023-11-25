@@ -1,7 +1,7 @@
 'use client'
  
 import { createContext, useContext, useState } from 'react'
-import { toColorClass, getSpeakerAttributes, SpeakerInfoData } from 'utilities/speaker-info'
+import { SpeakerInfoData } from 'utilities/speaker-info'
 
 export type SpeakerInfoContext = {
   speakerInfo: SpeakerInfoData;

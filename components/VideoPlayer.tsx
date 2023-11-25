@@ -1,13 +1,11 @@
 'use client'
 
-import SpeakerInfo from 'components/SpeakerInfo'
 import YouTube, { YouTubePlayer } from 'react-youtube'
 import { Options } from 'youtube-player/dist/types';
 import { useState } from 'react'
 
 type VideoPlayerParams = {
   category: string;
-  speakerKeys: any;
   videoId: string;
 };
 
@@ -30,9 +28,8 @@ function toSec(hhmmss) {
     return Number(parts[2]) + Number((parts[1]) * 60) + Number((parts[0] * 60 * 60));
 }
 
-export default function VideoPlayer({category, speakerKeys, videoId} : VideoPlayerParams) {
+export default function VideoPlayer({category, videoId} : VideoPlayerParams) {
   const [ytComponent, setYtComponent] = useState<YouTubePlayer>();
-  const [speakerInfo, setSpeakerInfo] = useState({});
 
   function jumpToTime(event) {
     const fragment = (new URL(event.target.href)).hash.split('#')[1];
@@ -60,17 +57,7 @@ export default function VideoPlayer({category, speakerKeys, videoId} : VideoPlay
   }
 
   return (
-    <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '45%' }}>
-        <YouTube style={ytplayerStyle} videoId={ videoId } opts={youtubeOpts} onReady={handleReady} />
-        <div className="px-2 border border-2 border-black rounded">
-            <SpeakerInfo
-                category={category}
-                speakerKeys={speakerKeys}
-                videoId={videoId}
-                speakerInfo={speakerInfo}
-                setSpeakerInfo={setSpeakerInfo} />
-        </div>
-    </div>
-    );
+    <YouTube style={ytplayerStyle} videoId={ videoId } opts={youtubeOpts} onReady={handleReady} />
+  );
 
 }
