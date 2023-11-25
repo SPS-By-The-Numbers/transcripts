@@ -1,10 +1,11 @@
-import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, VideoData } from "utilities/metadata-utils";
-import { getTranscript } from "utilities/transcript";
-import { formatDateForPath, parseDateFromPath } from "utilities/path-utils";
-import TranscriptControlProvider from 'components/TranscriptControlProvider';
-import BoardMeeting from 'components/BoardMeeting';
-import { Metadata, ResolvingMetadata } from "next";
-import { ReactNode } from "react";
+import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, VideoData } from "utilities/metadata-utils"
+import { toSpeakerNum } from "utilities/speaker-info"
+import { getTranscript } from "utilities/transcript"
+import { formatDateForPath, parseDateFromPath } from "utilities/path-utils"
+import TranscriptControlProvider from 'components/TranscriptControlProvider'
+import BoardMeeting from 'components/BoardMeeting'
+import { Metadata, ResolvingMetadata } from "next"
+import { ReactNode } from "react"
 
 type VideoParams = {
     category: string,
@@ -39,7 +40,7 @@ export default async function Index({params}: {params: VideoParams}) {
     let speakerInfo = {};
     if (speakerMapping) {
         for (const [k,n] of Object.entries(speakerMapping)) {
-            speakerInfo[k] = {'name': n }
+            speakerInfo[toSpeakerNum(k)] = {'name': n }
         }
     }
 

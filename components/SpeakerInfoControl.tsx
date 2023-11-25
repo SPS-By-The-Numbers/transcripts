@@ -9,6 +9,7 @@ import { getDatabase, ref, child, onValue } from "firebase/database"
 import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
+import { toSpeakerNum } from "utilities/speaker-info"
 import { useEffect, useState } from 'react'
 import { useTranscriptContext } from 'components/TranscriptControlProvider'
 
@@ -152,7 +153,8 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
       const data = snapshot.val();
       if (!ignore && data && data.speakerInfo) {
         const newSpeakerInfo = Object.assign({}, speakerInfo);
-        for (const [k,v] of Object.entries(data.speakerInfo)) {
+        for (const [origK,v] of Object.entries(data.speakerInfo)) {
+          const k = toSpeakerNum(origK);
           const entry = v as DbInfoEntry;
           const n = entry?.name;
           const t = entry?.tags;
