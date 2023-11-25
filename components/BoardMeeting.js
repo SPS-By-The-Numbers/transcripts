@@ -1,9 +1,7 @@
-'use client'
-
 import Link from 'next/link'
-import SpeakerInfo, { getSpeakerAttributes, toColorClass } from 'components/SpeakerInfo'
+import SpeakerBubble from 'components/SpeakerBubble'
+import VideoPlayer from 'components/VideoPlayer'
 import YouTube from 'react-youtube'
-import { useState } from 'react'
 
 function toTimeAnchor(seconds) {
     if (seconds) {
@@ -11,11 +9,6 @@ function toTimeAnchor(seconds) {
         return `#${hhmmss}`;
     }
     return '';
-}
-
-function toSec(hhmmss) {
-    const parts = hhmmss.split(':');
-    return Number(parts[2]) + Number((parts[1]) * 60) + Number((parts[0] * 60 * 60));
 }
 
 function cloudDownloadURL(category, videoId, ext) {
@@ -30,67 +23,26 @@ const mainStyle = {
     backgroundColor: '#efe7dd',
 };
 
-const ytplayerStyle = {
-    aspectRatio: '16 / 9',
-    width: '100%',
-    height: 'auto',
-};
-
-const youtubeOpts = {
-    height: '390',
-    width: '640',
-    playerVars: {
-        playsinline: 1
-    }
-};
-
 export default function BoardMeeting({ metadata, category, transcript, initialSpeakerInfo }) {
-  const [ytComponent, setYtComponent] = useState(null);
-  const [speakerInfo, setSpeakerInfo] = useState(initialSpeakerInfo);
   const videoId = metadata.video_id;
 
-  const speakerBubble = [];
+  const speakerBubbles = [];
   let curSpeaker = null;
   let curWordAnchors = []
   const speakerKeys = new Set();
-
-  function onReady(event) {
-    setYtComponent(event.target);
-    if (window.location.hash) {
-      const selString = `a[name="${window.location.hash.substr(1)}"]`;
-      const el = document.querySelector(selString);
-      if (el) {
-        el.scrollIntoViewIfNeeded();
-        jumpToTimeInternal(toSec(el.href.split('#')[1]));
-      }
-    }
-  }
-
-  function jumpToTimeInternal(timeSec) {
-    if (ytComponent) {
-      ytComponent.seekTo(timeSec);
-      ytComponent.playVideo();
-    }
-  }
-
-  function jumpToTime(event) {
-    const fragment = (new URL(event.target.href)).hash.split('#')[1];
-    history.pushState(null, null, event.target.href);
-    jumpToTimeInternal(toSec(fragment));
-  }
 
   // Merge all segments from the same speaker to produce speaking divs.
   for (const [i, segment] of Object.values(transcript.segments).entries()) {
     // If speaker changed, push the div and reset curWordAnchors.
     if (curSpeaker && curSpeaker !== segment['speaker'] && curWordAnchors.length > 0) {
-      const { name, color } = getSpeakerAttributes(curSpeaker, speakerInfo);
-      speakerBubble.push(
-        <section
-            key={`b-${i}`}
-            className={`b ${toColorClass(curSpeaker)}`}>
-          <h2>{name}</h2>
+      const speakerNum = curSpeaker.split('_')[1];
+      speakerBubbles.push(
+        <SpeakerBubble
+            key={i}
+            speakerNum={ speakerNum }>
           {curWordAnchors}
-        </section>);
+        </SpeakerBubble>
+      );
       curWordAnchors = [];
     }
     curSpeaker = segment['speaker'] || 'SPEAKER_9999';
@@ -98,8 +50,7 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
     const startTime = segment['start'];
     curWordAnchors.push(
       <Link key={`seg-${i}`}
-          href={toTimeAnchor(startTime)}
-          onClick={jumpToTime}>
+          href={toTimeAnchor(startTime)}>
         {segment['text']}
       </Link>);
   }
@@ -128,21 +79,14 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
               </div>
           </div>
 
-          <div id="player-div" style={{ position: 'sticky', top: '20px', float: 'right', width: '45%' }}>
-              <YouTube style={ytplayerStyle} videoId={ metadata.video_id } opts={youtubeOpts} onReady={onReady} />
-              <div className="px-2 border border-2 border-black rounded">
-                  <SpeakerInfo
-                      category={category}
-                      speakerKeys={speakerKeys}
-                      videoId={videoId}
-                      speakerInfo={speakerInfo}
-                      setSpeakerInfo={setSpeakerInfo} />
-              </div>
-          </div>
-
           <section>
-              {speakerBubble}
+              {speakerBubbles}
           </section>
+
+          <VideoPlayer
+            category={category}
+            speakerKeys={speakerKeys}
+            videoId={videoId} />
       </main>
   );
 }
