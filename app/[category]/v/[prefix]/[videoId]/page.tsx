@@ -33,8 +33,7 @@ async function loadSpeakerControlInfo(category: string, videoId: string) {
   const speakerInfo = {};
   const videoData = (await get(videoRef)).val();
   if (videoData && videoData.speakerInfo) {
-    for (const [origK,v] of Object.entries(videoData.speakerInfo)) {
-      const k = toSpeakerNum(origK);
+    for (const [k,v] of Object.entries(videoData.speakerInfo)) {
       const entry = v as DbInfoEntry;
       const n = entry?.name;
       const t = entry?.tags;
