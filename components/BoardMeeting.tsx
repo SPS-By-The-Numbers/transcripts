@@ -13,7 +13,8 @@ import { toSpeakerKey, UnknownSpeakerNum } from 'utilities/speaker-info'
 type BoardMeetingParams = {
   metadata: any,
   category: string,
-  initialSpeakerInfo: SpeakerInfoData,
+  initialExistingNames: object,
+  initialExistingTags: Set<string>,
   transcript: TranscriptData,
 };
 
@@ -33,7 +34,12 @@ const mainStyle = {
     backgroundColor: '#efe7dd',
 };
 
-export default function BoardMeeting({ metadata, category, transcript, initialSpeakerInfo } : BoardMeetingParams) {
+export default function BoardMeeting({
+    metadata,
+    category,
+    transcript,
+    initialExistingNames,
+    initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
 
   const speakerBubbles : React.ReactNode[] = [];
@@ -91,6 +97,8 @@ export default function BoardMeeting({ metadata, category, transcript, initialSp
           <SpeakerInfoControl
               className="c px-2 border border-2 border-black rounded"
               category={category}
+              initialExistingNames={initialExistingNames}
+              initialExistingTags={initialExistingTags}
               speakerNums={speakerNums}
               videoId={videoId} />
         </section>

@@ -1,7 +1,4 @@
-'use client'
-
 import Link from 'next/link';
-import { ReactNode } from 'react';
 import { compareDesc } from 'date-fns';
 import { getDatePath } from 'utilities/path-utils';
 
@@ -10,10 +7,10 @@ type Props = {
     dates: string[]
 }
 
-export default function DateIndex({category, dates}: Props): ReactNode {
+export default function DateIndex({category, dates}: Props) {
     dates.sort().reverse();
 
-    const dateLinks = dates.map((date: string, i: number): ReactNode => (
+    const dateLinks = dates.map((date: string, i: number): React.ReactNode => (
         <li key={`li-${i}`} className="mx-3 list-disc"><Link href={ getDatePath(category, date) }>{ date }</Link></li>
     ))
 

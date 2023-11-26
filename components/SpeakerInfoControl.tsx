@@ -5,7 +5,6 @@ import React from 'react';
 import CreatableSelect from 'react-select/creatable'
 import { app } from 'utilities/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { getDatabase, ref, child, onValue } from "firebase/database"
 import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
@@ -25,6 +24,8 @@ type SpeakerInfoControlParams = {
   speakerNums : Set<number>;
   videoId : string;
   className: string;
+  initialExistingNames : object,
+  initialExistingTags : Set<string>,
 };
 
 type OptionType = {
@@ -39,9 +40,9 @@ let appCheck;
 
 // speakerInfo has the name, tags, etc.
 // number is a list of speaker keys like [0, 1, 2, .. ]
-export default function SpeakerInfoControl({category, className, speakerNums, videoId} : SpeakerInfoControlParams) {
-  const [existingNames, setExistingNames] = useState<object>({});
-  const [existingTags, setExistingTags] = useState<Set<string>>(new Set<string>);
+export default function SpeakerInfoControl({category, className, speakerNums, videoId, initialExistingNames, initialExistingTags} : SpeakerInfoControlParams) {
+  const [existingNames, setExistingNames] = useState<object>(initialExistingNames);
+  const [existingTags, setExistingTags] = useState<Set<string>>(initialExistingTags);
   const [authState, setAuthState] = useState<object>({});
   const {speakerInfo, setSpeakerInfo} = useTranscriptContext();
 
@@ -140,55 +141,6 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
         body: JSON.stringify(data)
       });
   }
-
-  // Load from the database.
-  useMount(() => {
-    let ignore = false;
-    const database = getDatabase(app);
-    const categoryRoot = ref(database, `transcripts/${category}`);
-    const videoRef = child(categoryRoot, `v/${videoId}`);
-    const existingRef = child(categoryRoot, 'existing');
-
-    onValue(videoRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!ignore && data && data.speakerInfo) {
-        const newSpeakerInfo = Object.assign({}, speakerInfo);
-        for (const [origK,v] of Object.entries(data.speakerInfo)) {
-          const k = toSpeakerNum(origK);
-          const entry = v as DbInfoEntry;
-          const n = entry?.name;
-          const t = entry?.tags;
-          newSpeakerInfo[k] = newSpeakerInfo[k] || {};
-          if (n && newSpeakerInfo[k].name === undefined) {
-            newSpeakerInfo[k].name = n;
-          }
-          if (t && newSpeakerInfo[k].tags === undefined) {
-            newSpeakerInfo[k].tags = new Set<string>(t);
-          }
-        }
-        if (!isEqual(speakerInfo, newSpeakerInfo)) {
-          setSpeakerInfo(newSpeakerInfo);
-        }
-      }
-    });
-
-    onValue(existingRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!ignore && data) {
-        if (!isEqual(existingNames, data.names)) {
-          setExistingNames(Object.assign({}, existingNames, data.names));
-        }
-
-        const newTags = existingTags;
-        Object.keys(data.tags).forEach(tag => newTags.add(tag));
-        if (!isEqual(existingTags, newTags)) {
-          setExistingTags(new Set<string>(Object.keys(data.tags)));
-        }
-      }
-    });
-
-    return () => { ignore = true; };
-  });
 
   // Must be deleted once
   // https://github.com/JedWatson/react-select/issues/5459 is fixed.
