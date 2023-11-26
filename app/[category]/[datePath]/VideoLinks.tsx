@@ -1,8 +1,5 @@
-'use client'
-
 import { intlFormat } from 'date-fns';
 import Link from 'next/link'
-import { ReactNode } from 'react';
 import { getVideoPath } from 'utilities/path-utils';
 
 type DateProps = {
@@ -11,9 +8,9 @@ type DateProps = {
     videos: any[],
 };
 
-export default function VideoLinks({category, videos, datePath}: DateProps): ReactNode {
+export default function VideoLinks({category, videos, datePath}: DateProps) {
 
-    const videoLinks: ReactNode[] = videos.map(
+    const videoLinks: React.ReactNode[] = videos.map(
         video => (
             <li key={video.metadata.video_id} className="mx-3 list-disc">
                 <Link href={getVideoPath(category, video.metadata.video_id)}>

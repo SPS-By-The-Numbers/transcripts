@@ -1,14 +1,11 @@
-'use client'
-
 import Link from 'next/link';
-import { ReactNode } from 'react';
 import { getCategoryPath } from '../utilities/path-utils';
 
 type Props = {
     categories: string[]
 };
 
-export default function CategoryIndex(props: Props): ReactNode {
+export default function CategoryIndex(props: Props) {
     const { categories } = props;
 
     const categoryLinks = categories.map(
