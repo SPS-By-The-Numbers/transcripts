@@ -47,10 +47,9 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   const {speakerInfo, setSpeakerInfo} = useTranscriptContext();
 
   function handleNameChange(speakerNum : number, selectedOption : OptionType) {
-    const curSpeaker = toSpeakerKey(speakerNum);
     const newSpeakerInfo = {...speakerInfo};
     const newName = selectedOption?.value;
-    const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
+    const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     if (newName && !existingNames.hasOwnProperty(newName)) {
       const newExistingNames = Object.assign({}, existingNames);
       const recentTags = info.tags ? Array.from(info.tags) : [];
@@ -61,6 +60,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
       }
     }
 
+    console.log('names', newName, info.name);
     if (newName !== info.name) {
       info.name = newName;
       // Autopopulate the recent tags if nothing else was there.
@@ -98,11 +98,10 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   }
 
   function handleTagsChange(speakerNum : number, newTagOptions) {
-    const curSpeaker = toSpeakerKey(speakerNum);
     const newSpeakerInfo = {...speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
 
-    const info = newSpeakerInfo[curSpeaker] = newSpeakerInfo[curSpeaker] || {};
+    const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     const newTags = new Set<string>();
     for (const option of newTagOptions) {
       newTags.add(option.value);
@@ -148,7 +147,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   useEffect(() => setIsMounted(true), []);
 
   // Create all options.
-  const allSpeakers : number[] = Array.from(speakerNums).sort();
+  const allSpeakers : number[] = Array.from(speakerNums).sort((a,b) => a-b);
   const newExistingNames = Object.assign({}, existingNames);
   for (const speakerNum of allSpeakers) {
     const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
