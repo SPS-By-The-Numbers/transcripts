@@ -1,17 +1,14 @@
 'use client'
 
-import { useEffect } from 'react'
-import { jumpToTime } from 'components/VideoPlayer';
-
 type TranscriptControlParams = {
-  children : React.ReactNode;
+  onTimeStampSelected: (timeStamp: string) => void,
+  children : React.ReactNode,
 };
 
-export default function TranscriptControl({children} : TranscriptControlParams) {
-  function handleClick(e) {
+export default function TranscriptControl({onTimeStampSelected, children} : TranscriptControlParams) {
+  function handleClick(e): void {
     if (e.target.tagName === 'SPAN' && e.target.id) {
-      history.pushState(null, '', `#${e.target.id}`);
-      jumpToTime(e.target.id);
+      onTimeStampSelected(e.target.id);
     }
   }
 
