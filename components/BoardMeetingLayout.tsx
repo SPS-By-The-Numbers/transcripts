@@ -1,7 +1,7 @@
 'use client'
 
-import { ElementType, ReactNode } from 'react';
-import VideoPlayer, { jumpToTime } from './VideoPlayer';
+import { ReactNode, useRef } from 'react';
+import VideoPlayer, { VideoPlayerControl } from './VideoPlayer';
 import SpeakerInfoControl from './SpeakerInfoControl';
 import TranscriptControl from './TranscriptControl';
 
@@ -24,9 +24,11 @@ export default function BoardMeetingLayout({
   initialExistingTags,
   speakerNums
 }: BoardMeetingLayoutParams): ReactNode {
+  const videoPlayer = useRef<VideoPlayerControl | null>(null);
+
   function handleTimeStampSelected(timeStamp: string): void {
-      history.pushState(null, '', `#${timeStamp}`);
-      jumpToTime(timeStamp);
+    history.pushState(null, '', `#${timeStamp}`);
+    videoPlayer.current?.jumpToTime(timeStamp);
   }
 
   return (
@@ -34,8 +36,8 @@ export default function BoardMeetingLayout({
         { header }
         <section className="p">
           <VideoPlayer
-            category={category}
-            videoId={videoId} />
+            videoId={videoId}
+            ref={videoPlayer} />
           <SpeakerInfoControl
               className="c px-2 border border-2 border-black rounded"
               category={category}

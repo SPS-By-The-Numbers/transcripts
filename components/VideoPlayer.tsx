@@ -1,11 +1,10 @@
 'use client'
 
+import { forwardRef, MutableRefObject, useRef } from 'react';
 import YouTube from 'react-youtube'
 import { Options } from 'youtube-player/dist/types';
-import { useTranscriptContext } from 'components/TranscriptControlProvider';
 
 type VideoPlayerParams = {
-  category: string;
   videoId: string;
 };
 
@@ -23,29 +22,34 @@ const youtubeOpts : Options = {
     }
 };
 
-function toSec(hhmmss) {
+function toSec(hhmmss: string): number {
     const parts = hhmmss.split(':');
-    return Number(parts[2]) + Number((parts[1]) * 60) + Number((parts[0] * 60 * 60));
+    return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
 }
 
-let ytElement : any = null;
-
-export function jumpToTime(hhmmss) {
-  jumpToTimeInternal(toSec(hhmmss));
+export interface VideoPlayerControl {
+  jumpToTime(hhmmss: string): void;
 }
 
-function jumpToTimeInternal(timeSec) {
-  if (ytElement) {
-    ytElement.seekTo(timeSec, true);
-    ytElement.playVideo();
+export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, ref: MutableRefObject<VideoPlayerControl>) {
+  const ytElement = useRef<any>(null);
+
+  function jumpToTimeInternal(timeSec: number) {
+    if (ytElement.current) {
+      ytElement.current.seekTo(timeSec, true);
+      ytElement.current.playVideo();
+    }
   }
-}
 
-export default function VideoPlayer({category, videoId} : VideoPlayerParams) {
+  ref.current = {
+    jumpToTime: (hhmmss: string) => {
+      jumpToTimeInternal(toSec(hhmmss));
+    }
+  };
 
   function handleReady(event) {
     if (event.target) {
-      ytElement = event.target;
+      ytElement.current = event.target;
       if (window.location.hash) {
         const selString = `span[id="${window.location.hash.substr(1)}"]`;
         const el = document.querySelector(selString) as HTMLSpanElement;
@@ -58,7 +62,6 @@ export default function VideoPlayer({category, videoId} : VideoPlayerParams) {
   }
 
   return (
-    <YouTube style={ytplayerStyle} videoId={ videoId } opts={youtubeOpts} onReady={handleReady} />
+    <YouTube style={ytplayerStyle} videoId={videoId} opts={youtubeOpts} onReady={handleReady} />
   );
-
-}
+});
