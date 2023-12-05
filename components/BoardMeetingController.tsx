@@ -15,7 +15,7 @@ type BoardMeetingLayoutParams = {
   speakerNums: Set<number>
 };
 
-export default function BoardMeetingLayout({
+export default function BoardMeetingController({
   header,
   transcript,
   category,

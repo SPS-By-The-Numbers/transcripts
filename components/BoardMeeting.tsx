@@ -2,7 +2,7 @@ import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
 import type { TranscriptData } from 'utilities/transcript'
 import { UnknownSpeakerNum } from 'utilities/speaker-info'
-import BoardMeetingLayout from './BoardMeetingLayout';
+import BoardMeetingController from './BoardMeetingController';
 
 type BoardMeetingParams = {
   metadata: any,
@@ -89,7 +89,7 @@ export default function BoardMeeting({
 
   return (
       <main style={mainStyle}>
-        <BoardMeetingLayout
+        <BoardMeetingController
           header={transcriptHeader}
           transcript={transcriptSection}
           category={category}
