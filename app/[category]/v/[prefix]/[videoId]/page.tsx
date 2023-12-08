@@ -2,11 +2,9 @@ import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { Metadata, ResolvingMetadata } from "next"
 import { app } from 'utilities/firebase'
-import { formatDateForPath, parseDateFromPath } from "utilities/path-utils"
-import { getAllCategories, getAllVideosForCategory, getMetadata, getSpeakerMapping, VideoData } from "utilities/metadata-utils"
+import { getMetadata } from "utilities/metadata-utils"
 import { getDatabase, ref, child, get } from "firebase/database"
 import { getTranscript } from "utilities/transcript"
-import { toSpeakerNum } from "utilities/speaker-info"
 
 type VideoParams = {
     category: string,

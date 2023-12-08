@@ -1,14 +1,8 @@
-import Link from 'next/link'
 import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
-import SpeakerInfoControl from 'components/SpeakerInfoControl'
-import TranscriptControl from 'components/TranscriptControl';
-import VideoPlayer from 'components/VideoPlayer'
-import YouTube from 'react-youtube'
-import { SpeakerInfoData } from 'utilities/speaker-info'
+import BoardMeetingControl from 'components/BoardMeetingControl';
 import type { TranscriptData } from 'utilities/transcript'
-import type { Entries } from 'type-fest';
-import { toSpeakerKey, UnknownSpeakerNum } from 'utilities/speaker-info'
+import { UnknownSpeakerNum } from 'utilities/speaker-info'
 
 type BoardMeetingParams = {
   metadata: any,
@@ -82,32 +76,28 @@ export default function BoardMeeting({
     );
   }
 
-  return (
-      <main style={mainStyle}>
-        <TranscriptHeader
+  const transcriptHeader = <TranscriptHeader
             category={category}
             title={metadata.title}
             description={metadata.description}
             videoId={metadata.video_id} />
 
-        <section className="p">
-          <VideoPlayer
-            category={category}
-            videoId={videoId} />
-          <SpeakerInfoControl
-              className="c px-2 border border-2 border-black rounded"
-              category={category}
-              initialExistingNames={initialExistingNames}
-              initialExistingTags={initialExistingTags}
-              speakerNums={speakerNums}
-              videoId={videoId} />
-        </section>
-        <TranscriptControl>
-          <section>
-              {speakerBubbles}
-          </section>
-        </TranscriptControl>
+  const transcriptSection = (
+    <section>
+      {speakerBubbles}
+    </section>);
 
+  return (
+      <main style={mainStyle}>
+        <BoardMeetingControl
+          header={transcriptHeader}
+          transcript={transcriptSection}
+          category={category}
+          videoId={videoId}
+          initialExistingNames={initialExistingNames}
+          initialExistingTags={initialExistingTags}
+          speakerNums={speakerNums}
+        />
       </main>
   );
 }
