@@ -1,8 +1,8 @@
 import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
+import BoardMeetingControl from 'components/BoardMeetingControl';
 import type { TranscriptData } from 'utilities/transcript'
 import { UnknownSpeakerNum } from 'utilities/speaker-info'
-import BoardMeetingControl from './BoardMeetingControl';
 
 type BoardMeetingParams = {
   metadata: any,
