@@ -15,6 +15,11 @@ type BoardMeetingLayoutParams = {
   speakerNums: Set<number>
 };
 
+// Client-side control for handling state/logic of the Board Meeting page.
+// Server-rendered sections are passed in via the header and transcript
+// properties. This allows layout and client-side logic to be handled in
+// one place while having multiple parts of the page be pre-rendered on
+// the server, and not just a single "children" section.
 export default function BoardMeetingControl({
   header,
   transcript,
