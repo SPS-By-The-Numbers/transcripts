@@ -7,7 +7,6 @@
     "deploy": "firebase deploy --only hosting:transcripts",
     "dev": "next dev",
     "lint": "next lint",
-    "postbuild": "next-sitemap",
     "syncData": "bash syncdata.sh",
     "setupFirebase": "firebase target:apply hosting transcripts transcripts-sps-by-the-numbers",
     "start": "next start"
