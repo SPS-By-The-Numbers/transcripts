@@ -20,8 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const videos = await getAllVideosForCategory(category);
 
     videoPages.push(...videos.map(v => ({
-      url: getVideoPath(category, v.metadata.video_id),
-      lastModified: v.date,
+      url: getVideoPath(category, v.videoId),
+      lastModified: v.publishDate,
       changeFrequency: 'yearly' as ChangeFrequency,
       priority: 1.0,
     })));
