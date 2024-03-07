@@ -48,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const categoryPages: SiteMapEntry[] = categories.map(c => ({
     url: buildUrl(getCategoryPath(c)),
-    changeFrequency: 'montly' as ChangeFrequency,
+    changeFrequency: 'monthly' as ChangeFrequency,
     // TODO: Add last-modified, either a hard-coded value, or something determined from changelog
   }));
 
