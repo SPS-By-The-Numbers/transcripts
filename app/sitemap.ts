@@ -11,6 +11,13 @@ type SiteMapEntry = {
     priority?: number;
 };
 
+// TODO: Move this to an environment variable
+const hostName = 'https://transcripts.sps-by-the-numbers.com';
+
+function buildUrl(relativePath): string {
+  return `${hostName}/${relativePath}`;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categories: string[] = await getAllCategories();
 
@@ -20,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const videos = await getAllVideosForCategory(category);
 
     videoPages.push(...videos.map(v => ({
-      url: getVideoPath(category, v.videoId),
+      url: buildUrl(getVideoPath(category, v.videoId)),
       lastModified: v.publishDate,
       changeFrequency: 'yearly' as ChangeFrequency,
       priority: 1.0,
@@ -33,14 +40,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const dates = await getDatesForCategory(category);
 
     datePages.push(...dates.map(d => ({
-      url: getDatePath(category, d),
+      url: buildUrl(getDatePath(category, d)),
       lastModified: d,
       changeFrequency: 'weekly' as ChangeFrequency,
     })));
   }
 
   const categoryPages: SiteMapEntry[] = categories.map(c => ({
-    url: getCategoryPath(c),
+    url: buildUrl(getCategoryPath(c)),
     changeFrequency: 'montly' as ChangeFrequency,
     // TODO: Add last-modified, either a hard-coded value, or something determined from changelog
   }));
