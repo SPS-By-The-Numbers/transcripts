@@ -27,6 +27,7 @@
 
 from pytube import YouTube
 from pytube import Playlist
+from pytube import Channel
 from random import randint
 from time import sleep
 
@@ -34,6 +35,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 import traceback
 
@@ -56,13 +58,13 @@ parser = argparse.ArgumentParser(
         description='Downloads audio from youtube videos in a channel or playlist')
 parser.add_argument('-o', '--outdir', dest='outdir', metavar='OUTDIR',
                     help='write files in structure under OUTDIR', required=True)
-parser.add_argument('-p', '--playlist', dest='playlist', metavar="PLAYLIST",
-                    help='URL of PLAYLIST to download from', required=True)
+parser.add_argument('-u', '--url', dest='url', metavar="URL",
+                    help='URL of playlist or channel  to download from', required=True)
 parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
 parser.add_argument('-s', '--skip-existing', dest='skip', help='Skip download of existing audio files. Only update metadata.', action=argparse.BooleanOptionalAction)
 
 args = parser.parse_args()
-if not args.playlist or not args.outdir:
+if not args.url or not args.outdir:
     parser.print_help()
     sys.exit(1)
 
@@ -71,10 +73,17 @@ if args.debug:
 else:
     logging.getLogger().setLevel(logging.INFO)
 
+# Check URL structure for /c/ to guess if it is a channel. Otherwise
+# assume it is a playlist.
+if re.match(r'.*/c|channels/.*', args.url):
+    videos = Channel(args.url).video_urls
+else:
+    videos = Playlist(args.url).videos
+print(videos)
 
+raise "foo"
 
-playlist = Playlist(args.playlist)
-for v in playlist.videos:
+for v in videos:
     # Check if json file exists for video and is parseable.
     video_id = v.video_id
     outfile_base = get_outfile_base(args.outdir, video_id)

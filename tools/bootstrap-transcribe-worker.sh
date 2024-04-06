@@ -39,9 +39,7 @@ ssh -p $2 $1 <<HEREDOC
   fi
 
 
-  conda install -y pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia
+  conda install pytorch==2.2.2 torchaudio==2.2.2 pytorch-cuda=11.8 -c pytorch -c nvidia
   conda run --name whisperx pip install git+https://github.com/m-bain/whisperx.git
-  conda run --name whisperx pip install pyannote.audio==3.0.1
-  conda run --name whisperx pip uninstall -y onnxruntime
-  conda run --name whisperx pip install --force-reinstall onnxruntime-gpu
+  conda run --name whisperx pip install pyannote.audio==3.1
 HEREDOC
