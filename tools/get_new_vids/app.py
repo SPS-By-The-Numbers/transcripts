@@ -25,6 +25,18 @@ from utils.logging import logger
 app = Flask(__name__)
 
 
+@app.route("/runScript", methods = ['POST'])
+def testScript():
+    global_log_fields = get_global_log_fields()
+    entry = dict(
+        severity="NOTICE",
+        message="ran the script",
+        # Log viewer accesses 'component' as jsonPayload.component'.
+        component="arbitrary-property",
+        **global_log_fields,
+    )
+
+
 @app.route("/")
 def hello() -> str:
     # Use basic logging with custom fields
@@ -38,7 +50,7 @@ def hello() -> str:
     #making and outputting a test log
     entry = dict(
         severity="NOTICE",
-        message="This is the default display field.",
+        message="recieved service visit",
         # Log viewer accesses 'component' as jsonPayload.component'.
         component="arbitrary-property",
         **global_log_fields,
@@ -47,6 +59,7 @@ def hello() -> str:
     print(json.dumps(entry))
     
     return "Hello Web!"
+    
     
 def get_global_log_fields():
     PROJECT = 'infra-memento-419521'
