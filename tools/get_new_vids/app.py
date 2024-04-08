@@ -49,7 +49,7 @@ def hello() -> str:
 	return "Hello Web!"
     
 def get_global_log_fields():
-    PROJECT = 'infra-memento-419521';
+    PROJECT = 'infra-memento-419521'
     global_log_fields = {}
     
     request_is_defined = "request" in globals() or "request" in locals()
