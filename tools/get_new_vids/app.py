@@ -26,15 +26,10 @@ app = Flask(__name__)
 
 
 @app.route("/runScript", methods = ['POST'])
-def testScript():
-    global_log_fields = get_global_log_fields()
-    entry = dict(
-        severity="NOTICE",
-        message="ran the script",
-        # Log viewer accesses 'component' as jsonPayload.component'.
-        component="arbitrary-property",
-        **global_log_fields,
-    )
+def testScript() -> str:
+    defLog("the script was run")
+    
+    return "the script has been run"
 
 
 @app.route("/")
@@ -45,22 +40,25 @@ def hello() -> str:
     # https://cloud.google.com/run/docs/logging#correlate-logs
     #logger.info("Child logger with trace Id.")
     
-    global_log_fields = get_global_log_fields()
            
     #making and outputting a test log
+    defLog("servive was visited")
+    
+    return "Hello Web!"
+    
+
+def defLog(messageText):
+    global_log_fields = get_global_log_fields()
     entry = dict(
         severity="NOTICE",
-        message="recieved service visit",
+        message=messageText,
         # Log viewer accesses 'component' as jsonPayload.component'.
         component="arbitrary-property",
         **global_log_fields,
     )
     
     print(json.dumps(entry))
-    
-    return "Hello Web!"
-    
-    
+
 def get_global_log_fields():
     PROJECT = 'infra-memento-419521'
     global_log_fields = {}
