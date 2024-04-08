@@ -15,6 +15,7 @@
 import signal
 import sys
 import os
+import json
 from types import FrameType
 
 from flask import Flask
@@ -27,13 +28,41 @@ app = Flask(__name__)
 @app.route("/")
 def hello() -> str:
     # Use basic logging with custom fields
-    logger.info(logField="custom-entry", arbitraryField="custom-entry")
+    #logger.info(logField="custom-entry", arbitraryField="custom-entry")
 
     # https://cloud.google.com/run/docs/logging#correlate-logs
-    logger.info("Child logger with trace Id.")
+    #logger.info("Child logger with trace Id.")
+    
+    global_log_fields = get_global_log_fields()
+           
+    #making and outputting a test log
+    entry = dict(
+        severity="NOTICE",
+        message="This is the default display field.",
+        # Log viewer accesses 'component' as jsonPayload.component'.
+        component="arbitrary-property",
+        **global_log_fields,
+    )
+    
+    print(json.dumps(entry))
+    
+	return "Hello Web!"
+    
+def get_global_log_fields():
+    PROJECT = 'infra-memento-419521';
+    global_log_fields = {}
+    
+    request_is_defined = "request" in globals() or "request" in locals()
+    if request_is_defined and request:
+        trace_header = request.headers.get("X-Cloud-Trace-Context")
 
-    name = os.environ.get("NAME", "World")
-	return f"Hello {name}!"
+        if trace_header and PROJECT:
+            trace = trace_header.split("/")
+            global_log_fields[
+                "logging.googleapis.com/trace"
+            ] = f"projects/{PROJECT}/traces/{trace[0]}"
+    
+    return global_log_fields
 
 
 def shutdown_handler(signal_int: int, frame: FrameType) -> None:
