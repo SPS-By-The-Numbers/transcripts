@@ -25,8 +25,9 @@
 # /mount_point/a/ab123.mp4
 # /mount_point/-/-1abd.mp4
 
-#for testing, I'm using command line args
-#py download_yt_audio.py -o "C:\Users\Joseph\Documents\test_out" -u "https://www.youtube.com/user/wanderbots/" -d
+#for testing, I used the command line call
+#py download_yt_audio.py -o "C:\Users\Joseph\Documents\test_out" -u "https://www.youtube.com/user/wanderbots/"
+#note the user/ instead of @, since @wanderbots would break with pytube
 
 from pytube import YouTube
 from pytube import Playlist
