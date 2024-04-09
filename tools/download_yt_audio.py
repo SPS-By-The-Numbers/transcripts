@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
-# Downloads audio and metadata from youtube into a directory structure.
+# Downloads metadata from youtube into a directory structure.
 #
-# Audio from videos as well as metadata are downloaded into files by the name:
+# currently just downloads the most recen three videos from a channel
 #
-#  [video_id].mp4
+# metadata is downloaded into files by the name:
+#
 #  [video_id].metadata.json
 #
 # The metadata is written last as a way of marking completion. If it is a
@@ -12,18 +13,6 @@
 #
 # On download, an empty file named
 #  [video_id].new_download
-#
-# Is also created to allow for quick searches of new videos in the processing
-# pipeline.
-#
-# Because there may be thousands of files, they are downloaded into a
-# 1-level directory prefix tree based on the first character of the videoid.
-# Since videoIds are base64 encoded, this gives a 64x reduction in directory
-# entries. So abcde.mp4, ab123.mp4, -1abd.mp4 would be store as
-#
-# /mount_point/a/abcde.mp4
-# /mount_point/a/ab123.mp4
-# /mount_point/-/-1abd.mp4
 
 #for testing, I used the command line call
 #py download_yt_audio.py -o "C:\Users\Joseph\Documents\test_out" -u "https://www.youtube.com/user/wanderbots/"
