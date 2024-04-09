@@ -6,7 +6,7 @@ from download_yt_audio import get_videos as print_video_data
 #change this to True if this will be run on gcs so the logs will be formatted correctly
 onGcs = False
 
-def main() -> str:
+def main():
     #making and outputting a test log
     defLog(print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data"))
     
@@ -45,3 +45,4 @@ def get_global_log_fields():
 
 if __name__ == "__main__":
     print("running!")
+    main()
