@@ -26,8 +26,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 #install git
-RUN apt-get -y update
-RUN apt-get -y install git
+#RUN apt-get -y update
+#RUN apt-get -y install git
 
 #install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
