@@ -22,7 +22,7 @@ from flask import Flask
 
 from utils.logging import logger
 
-#from download_yt_audio import get_videos as print_video_data
+from download_yt_audio import get_videos as print_video_data
 
 app = Flask(__name__)
 #change this to True if this will be run on gcs so the logs will be formatted correctly
@@ -48,7 +48,7 @@ def hello() -> str:
     #making and outputting a test log
     defLog("servive was visited")
     
-    #print_video_data("/usr/src/app/data", "https://www.youtube.com/user/wanderbots/")
+    print_video_data("/usr/src/app/data", "https://www.youtube.com/user/wanderbots/")
     
     return "Hello Web!"
     
