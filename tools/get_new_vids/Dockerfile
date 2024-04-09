@@ -19,9 +19,6 @@ ENV PYTHONUNBUFFERED 1
 # Create and change to the app directory.
 WORKDIR /usr/src/app
 
-# Install dependencies.
-#RUN pip install -r requirements.txt
-
 # Copy local code to the container image.
 COPY . .
 
