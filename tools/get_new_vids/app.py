@@ -4,7 +4,7 @@ import json
 from download_yt_audio import get_videos as print_video_data
 
 #change this to True if this will be run on gcs so the logs will be formatted correctly
-onGcs = False
+onGcs = True
 
 def main():
     #making and outputting a test log
