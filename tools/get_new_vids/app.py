@@ -1,6 +1,5 @@
 
 import json
-import subprocess
 
 from download_yt_audio import get_videos as print_video_data
 
@@ -25,7 +24,7 @@ def defLog(messageText):
     if(onGcs):
         print(json.dumps(entry))
     else:
-        Popen('echo ' + messageText, shell=true)
+        print(messageText)
 
 def get_global_log_fields():
     PROJECT = 'infra-memento-419521'
