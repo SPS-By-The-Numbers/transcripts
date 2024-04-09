@@ -48,9 +48,9 @@ def hello() -> str:
     #making and outputting a test log
     defLog("servive was visited")
     
-    print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data")
     
-    return "Hello Web!"
+    
+    return "Hello Web!" + print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data")
     
 
 def defLog(messageText):

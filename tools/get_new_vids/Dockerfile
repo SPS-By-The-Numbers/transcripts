@@ -31,7 +31,7 @@ RUN apt-get -y install git
 
 #install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install pytube git+https://github.com/24makee/pytube.git@c709202d4f2c0d36d9484314d44fd26744225b7d
+RUN pip install --no-cache-dir pytube git+https://github.com/24makee/pytube.git@c709202d4f2c0d36d9484314d44fd26744225b7d
 
 EXPOSE 5000
 

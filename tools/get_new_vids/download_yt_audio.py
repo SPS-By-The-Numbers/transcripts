@@ -46,17 +46,18 @@ def is_json_file(path):
     except:
             return False
 
-def get_videos(url, outdir):
+def get_videos(url, outdir) -> str:
     
     if not url or not outdir:
         sys.exit(1)
     
     videos = get_video_urls(url)
+    vidData = []
     
     for v in range(3):
         print(videos[v])
-        manage_video(videos[v], outdir)
-    
+        vidData.add(manage_video(videos[v], outdir))
+    return str(videos) + str(vidData)
 
 def get_video_urls(url):
     # Check URL structure against the smae regex pytube uses for checking if a url is a channel, otherwise, assume it's a playlist
@@ -80,11 +81,12 @@ def get_video_urls(url):
     
     return videos
 
-def manage_video(v, outdir):
+def manage_video(v, outdir) -> str:
     # Check if json file exists for video and is parseable.
     video_id = v.split('=')[1]
     outfile_base = get_outfile_base(outdir, video_id)
     metadata_path = '%s.metadata.json' % outfile_base
+    data = ""
     
     if is_json_file(metadata_path):
         logging.info("Skipping %s" % video_id)
@@ -92,15 +94,16 @@ def manage_video(v, outdir):
         logging.info("Downloading %s" % video_id)
         
         try:
-            save_video(video_id, metadata_path, outfile_base)
+            data = save_video(video_id, metadata_path, outfile_base)
             
         except Exception as e:
             print("Download of %s Failed with exception %s" % (video_id, e))
             traceback.print_exc()
     pause_secs = randint(1,5)
     sleep(pause_secs)
+    return data
 
-def save_video(video_id, metadata_path, outfile_base):
+def get_video_data(video_id, metadata_path, outfile_base) -> st:
     vid = YouTube.from_id(video_id)
     
     # Ensure the files are there.
@@ -119,19 +122,19 @@ def save_video(video_id, metadata_path, outfile_base):
                 max_retries=5,
                 #this is meant to be based on a command line argument, but this is fine for now
                 skip_existing=True)
-    
-    # Download completed. Time to write metadata.
-    with open(metadata_path, "w") as f:
-        metadata = {
+    metadata = {
             'title': vid.title,
             'video_id': vid.video_id,
             'channel_id': vid.channel_id,
             'description': vid.description,
             'publish_date': vid.publish_date.isoformat(),
         }
+    # Download completed. Time to write metadata.
+    with open(metadata_path, "w") as f:
         print(metadata)
         json.dump(metadata, f)
     logging.info("Done Downloading %s" % video_id)
+    return str(metadata)
 
 if(__name__ == "__main__"):
     main()
