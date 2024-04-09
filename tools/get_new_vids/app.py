@@ -1,50 +1,12 @@
-# Copyright 2021 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-import signal
-import sys
-import os
 import json
-from types import FrameType
-
-from flask import Flask
-
-from utils.logging import logger
 
 from download_yt_audio import get_videos as print_video_data
 
-app = Flask(__name__)
 #change this to True if this will be run on gcs so the logs will be formatted correctly
 onGcs = False
 
-
-@app.route("/getData")
-def testScript() -> str:
-    defLog("the script was run")
-    
-    return "the script has been run"
-
-
-@app.route("/")
-def hello() -> str:
-    # Use basic logging with custom fields
-    #logger.info(logField="custom-entry", arbitraryField="custom-entry")
-    
-    # https://cloud.google.com/run/docs/logging#correlate-logs
-    #logger.info("Child logger with trace Id.")
-    
-           
+def main() -> str:
     #making and outputting a test log
     defLog("servive was visited")
     
@@ -85,25 +47,5 @@ def get_global_log_fields():
     return global_log_fields
 
 
-def shutdown_handler(signal_int: int, frame: FrameType) -> None:
-    logger.info(f"Caught Signal {signal.strsignal(signal_int)}")
-    
-    from utils.logging import flush
-    
-    flush()
-    
-    # Safely exit program
-    sys.exit(0)
-
-
 if __name__ == "__main__":
-    # Running application locally, outside of a Google Cloud Environment
-    
-    # handles Ctrl-C termination
-    signal.signal(signal.SIGINT, shutdown_handler)
     print("running!")
-    
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
-else:
-    # handles Cloud Run container termination
-    signal.signal(signal.SIGTERM, shutdown_handler)
