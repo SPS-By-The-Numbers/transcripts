@@ -22,10 +22,14 @@ from flask import Flask
 
 from utils.logging import logger
 
+from download_yt_audio import get_videos as print_video_data
+
 app = Flask(__name__)
+#change this to True if this will be run on gcs so the logs will be formatted correctly
+onGcs = False
 
 
-@app.route("/runScript", methods = ['POST'])
+@app.route("/getData")
 def testScript() -> str:
     defLog("the script was run")
     
@@ -44,6 +48,8 @@ def hello() -> str:
     #making and outputting a test log
     defLog("servive was visited")
     
+    print_video_data("/usr/src/app/data", "https://www.youtube.com/user/wanderbots/")
+    
     return "Hello Web!"
     
 
@@ -57,7 +63,10 @@ def defLog(messageText):
         **global_log_fields,
     )
     
-    print(json.dumps(entry))
+    if(onGcs):
+        print(json.dumps(entry))
+    else:
+        print(messageText)
 
 def get_global_log_fields():
     PROJECT = 'infra-memento-419521'
@@ -92,8 +101,9 @@ if __name__ == "__main__":
     
     # handles Ctrl-C termination
     signal.signal(signal.SIGINT, shutdown_handler)
+    print("running!")
     
-    app.run(host="localhost", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
 else:
     # handles Cloud Run container termination
     signal.signal(signal.SIGTERM, shutdown_handler)
