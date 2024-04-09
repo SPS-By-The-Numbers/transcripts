@@ -8,11 +8,7 @@ onGcs = False
 
 def main() -> str:
     #making and outputting a test log
-    defLog("servive was visited")
-    
-    
-    
-    return "Hello Web!" + print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data")
+    defLog(print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data"))
     
 
 def defLog(messageText):
