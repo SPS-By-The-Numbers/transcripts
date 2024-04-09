@@ -10,24 +10,11 @@
 # limitations under the License.
 
 # Use the official lightweight Python image.
-# https://hub.docker.com/_/python
-FROM python:3.10.6-slim
+FROM awfulbananas/slim-python-with-git
 
-# Allow statements and log messages to immediately appear in the Cloud Run logs
-ENV PYTHONUNBUFFERED 1
-
-# Create and change to the app directory.
 WORKDIR /usr/src/app
 
-# Copy local code to the container image.
 COPY . .
-
-#install git
-RUN apt-get -y update
-RUN apt-get -y install git
-
-#update pip
-#RUN pip install --upgrade pip
 
 #install dependencies
 RUN pip install --no-cache-dir -r requirements.txt

@@ -56,8 +56,8 @@ def get_videos(url, outdir) -> str:
     
     for v in range(3):
         print(videos[v])
-        vidData.add(manage_video(videos[v], outdir))
-    return str(videos) + str(vidData)
+        vidData.append(manage_video(videos[v], outdir))
+    return url + str(vidData)
 
 def get_video_urls(url):
     # Check URL structure against the smae regex pytube uses for checking if a url is a channel, otherwise, assume it's a playlist
@@ -94,7 +94,7 @@ def manage_video(v, outdir) -> str:
         logging.info("Downloading %s" % video_id)
         
         try:
-            data = save_video(video_id, metadata_path, outfile_base)
+            data = get_video_data(video_id, metadata_path, outfile_base)
             
         except Exception as e:
             print("Download of %s Failed with exception %s" % (video_id, e))
@@ -103,7 +103,7 @@ def manage_video(v, outdir) -> str:
     sleep(pause_secs)
     return data
 
-def get_video_data(video_id, metadata_path, outfile_base) -> st:
+def get_video_data(video_id, metadata_path, outfile_base) -> str:
     vid = YouTube.from_id(video_id)
     
     # Ensure the files are there.
