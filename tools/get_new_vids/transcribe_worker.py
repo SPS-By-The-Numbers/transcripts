@@ -86,18 +86,9 @@ def process_vids(vid_list):
         logging.info("Whisper took: %d seconds" % (end - start))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-            prog='WhisperX transcription worker.',
-            description='Downloads audio from google cloud bucket tree and runs WhisperX on it')
-    parser.add_argument('-t', '--threads', dest='threads', metavar="NUM_THREADS", type=int,
-                        help='number of threads to run',
-                        required=True)
-    parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
     
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG)
+
 
     args = parser.parse_args()
     #I don't need to do this if I'm not saving the file
