@@ -12,9 +12,6 @@ import sys
 import datetime
 import time
 import whisper
- 
-WORKING_DIR='/usr/src/transcribe'
-model = "tiny.en"
 
 def ensure_environment():
     # Ensure there's a working directory.
@@ -77,7 +74,7 @@ def process_vids(vid_list):
             "--",
             vid_path])
         """
-        model = whisper.load_model(model)
+        model = whisper.load_model("tiny.en")
         result = model.transcribe(vid)
         print(result["text"])
         
