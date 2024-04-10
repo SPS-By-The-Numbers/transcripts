@@ -40,7 +40,7 @@ def get_vid_list():
 
 def process_vids(vid_list):
     for vid in vid_list:
-        logging.info("Clearing working dir at %s", WORKING_DIR);
+        #logging.info("Clearing working dir at %s", WORKING_DIR);
         #subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
         #os.chdir(WORKING_DIR)
 
