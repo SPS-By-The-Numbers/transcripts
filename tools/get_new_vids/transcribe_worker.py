@@ -44,17 +44,17 @@ def get_vid_list():
 def process_vids(vid_list):
     for vid in vid_list:
         logging.info("Clearing working dir at %s", WORKING_DIR);
-        subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
-        os.chdir(WORKING_DIR)
+        #subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
+        #os.chdir(WORKING_DIR)
 
         # Get the video
-        subprocess.run(["gcloud", "storage", "cp", vid, '.'])
+        #subprocess.run(["gcloud", "storage", "cp", vid, '.'])
 
         # Extract all the path names.
         vid_path = os.path.basename(vid)
         gs_path = os.path.dirname(vid)
 
-        name = os.path.splitext(vid_path)[0]
+        #name = os.path.splitext(vid_path)[0]
 
         # Do the transcription
         start = time.time()
