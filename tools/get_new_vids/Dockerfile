@@ -1,13 +1,7 @@
-FROM awfulbananas/slim-python-with-git
+FROM awfulbananas/whisper-ready
 
 # Create and change to the app directory.
 WORKDIR /usr/src
-
-RUN apt update && sudo apt install ffmpeg
-RUN pip install whisper git+https://github.com/openai/whisper.git 
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
 COPY startupScript.sh .
 
