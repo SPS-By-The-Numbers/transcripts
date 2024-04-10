@@ -4,10 +4,10 @@ FROM awfulbananas/slim-python-with-git
 WORKDIR /usr/src
 
 RUN sudo apt update && sudo apt install ffmpeg
+RUN pip install whisper git+https://github.com/openai/whisper.git 
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install whisper git+https://github.com/openai/whisper.git 
 
 COPY startupScript.sh .
 

@@ -15,15 +15,12 @@ import whisper
  
 WORKING_DIR='/workspace/transcribe'
 args = {}
+model = "tiny.en"
 
 def ensure_environment():
     # Ensure there's a working directory.
     os.makedirs(WORKING_DIR, exist_ok=True)
 
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
 def get_vid_list():
     """Gets a list of cloud storage paths with the audio to transcribe
@@ -81,7 +78,7 @@ def process_vids(vid_list):
             "--",
             vid_path])
         """
-        model = whisper.load_model("base")
+        model = whisper.load_model(model)
         result = model.transcribe(vid)
         print result["text"]
         
@@ -96,9 +93,16 @@ if __name__ == "__main__":
                         help='number of threads to run',
                         required=True)
     parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
+    
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
 
     args = parser.parse_args()
-    ensure_environment()
+    #I don't need to do this if I'm not saving the file
+    #ensure_environment()
     vid_list = get_vid_list()
-    random.shuffle(vid_list)  # poorman race reduction between workers.
+    #I don't need this for only one file
+    #random.shuffle(vid_list)  # poorman race reduction between workers.
     process_vids(vid_list)
