@@ -1,0 +1,6 @@
+.git
+.gitignore
+.gcloudignore
+venv
+*~
+*.mp3
