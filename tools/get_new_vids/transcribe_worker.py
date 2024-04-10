@@ -14,7 +14,6 @@ import time
 import whisper
  
 WORKING_DIR='/workspace/transcribe'
-args = {}
 model = "tiny.en"
 
 def ensure_environment():
@@ -89,8 +88,6 @@ if __name__ == "__main__":
     
     logging.getLogger().setLevel(logging.DEBUG)
 
-
-    args = parser.parse_args()
     #I don't need to do this if I'm not saving the file
     #ensure_environment()
     vid_list = get_vid_list()
