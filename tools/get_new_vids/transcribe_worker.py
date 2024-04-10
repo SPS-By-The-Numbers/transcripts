@@ -11,6 +11,7 @@ import logging
 import sys
 import datetime
 import time
+import whisper
  
 WORKING_DIR='/workspace/transcribe'
 args = {}
@@ -42,7 +43,7 @@ def get_vid_list():
             logging.error(new_download.stderr)
         return [ re.sub(r'.new_download', '', x) for x in new_downloads.stdout.split('\n') ]
     """
-    return [WORKING_DIR + '/test1.mp4']
+    return ['audio.wav']
 
 def process_vids(vid_list):
     for vid in vid_list:
@@ -61,7 +62,8 @@ def process_vids(vid_list):
 
         # Do the transcription
         start = time.time()
-        result = subprocess.run([
+        #I'm using the python library for now instead of command line
+        """result = subprocess.run([
             "conda",
             "run",
             "--name",
@@ -78,6 +80,10 @@ def process_vids(vid_list):
             WORKING_DIR,
             "--",
             vid_path])
+        """
+        model = whisper.load_model("base")
+        result = model.transcribe(vid)
+        
         end = time.time()
         logging.info("Whisper took: %d seconds" % (end - start))
 

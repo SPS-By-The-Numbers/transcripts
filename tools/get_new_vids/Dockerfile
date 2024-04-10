@@ -1,15 +1,13 @@
-# https://hub.docker.com/_/python
-FROM python:3.10.6-slim
+FROM awfulbananas/slim-python-with-git
 
 # Create and change to the app directory.
-WORKDIR /
+WORKDIR /usr/src
 
-COPY setupScript.sh .
-
-RUN setupScript.sh
+RUN sudo apt update && sudo apt install ffmpeg
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install whisper git+https://github.com/openai/whisper.git 
 
 COPY startupScript.sh .
 
