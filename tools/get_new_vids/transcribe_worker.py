@@ -80,7 +80,7 @@ def process_vids(vid_list):
         """
         model = whisper.load_model(model)
         result = model.transcribe(vid)
-        print result["text"]
+        print(result["text"])
         
         end = time.time()
         logging.info("Whisper took: %d seconds" % (end - start))
