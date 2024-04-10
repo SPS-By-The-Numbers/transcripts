@@ -13,7 +13,7 @@ import datetime
 import time
 import whisper
  
-WORKING_DIR='/workspace/transcribe'
+WORKING_DIR='/usr/src/transcribe'
 model = "tiny.en"
 
 def ensure_environment():
