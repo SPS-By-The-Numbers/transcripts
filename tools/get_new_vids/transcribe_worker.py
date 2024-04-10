@@ -36,7 +36,7 @@ def get_vid_list():
             logging.error(new_download.stderr)
         return [ re.sub(r'.new_download', '', x) for x in new_downloads.stdout.split('\n') ]
     """
-    return ['audio.wav']
+    return ['/usr/src/vastai-whisper-script/audio.wav']
 
 def process_vids(vid_list):
     for vid in vid_list:
