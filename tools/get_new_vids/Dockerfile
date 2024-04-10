@@ -3,7 +3,7 @@ FROM awfulbananas/slim-python-with-git
 # Create and change to the app directory.
 WORKDIR /usr/src
 
-RUN sudo apt update && sudo apt install ffmpeg
+RUN apt update && sudo apt install ffmpeg
 RUN pip install whisper git+https://github.com/openai/whisper.git 
 
 COPY requirements.txt .
