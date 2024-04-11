@@ -11,59 +11,46 @@ import logging
 import sys
 import datetime
 import time
-import whisper
+
+WORKING_DIR='/usr/src/transcribe'
+args = {}
 
 def ensure_environment():
     # Ensure there's a working directory.
     os.makedirs(WORKING_DIR, exist_ok=True)
+    
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
 
 
 def get_vid_list():
-    """Gets a list of cloud storage paths with the audio to transcribe
-    
-    Returns: [ 'gs://sps-by-the-numbers.appspot.com/transcription/seattle-city-council/z/zzjAhUGVrf8.mp4', ... ]
-    """
     #I'm hardcoding local files for testing
-    """if args.files:
-        with open(args.files, "r") as f:
-            return json.load(f)
-    else:
-        new_downloads = subprocess.run(
-                ["gcloud", "storage", "ls", ("%s/**/*.mp4.new_download" % args.bucket)],
-                capture_output = True,
-                text = True)
-        if new_downloads.stderr:
-            logging.error(new_download.stderr)
-        return [ re.sub(r'.new_download', '', x) for x in new_downloads.stdout.split('\n') ]
-    """
-    return ['/usr/src/vastai-whisper-script/audio.wav']
+    return ['/usr/src/audio.wav']
 
 def process_vids(vid_list):
     for vid in vid_list:
-        #logging.info("Clearing working dir at %s", WORKING_DIR);
-        #subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
-        #os.chdir(WORKING_DIR)
-
-        # Get the video
-        #subprocess.run(["gcloud", "storage", "cp", vid, '.'])
+        logging.info("Clearing working dir at %s", WORKING_DIR);
+        subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
+        os.chdir(WORKING_DIR)
 
         # Extract all the path names.
         vid_path = os.path.basename(vid)
         gs_path = os.path.dirname(vid)
 
-        #name = os.path.splitext(vid_path)[0]
+        name = os.path.splitext(vid_path)[0]
 
         # Do the transcription
         start = time.time()
-        #I'm using the python library for now instead of command line
-        """result = subprocess.run([
+        result = subprocess.run([
             "conda",
             "run",
             "--name",
             "whisperx",
             "whisperx",
             "--model",
-            "large-v2",
+            "tiny.en",
             "--language=en",
             "--thread=%d" % args.threads,
             "--hf_token",
@@ -73,21 +60,44 @@ def process_vids(vid_list):
             WORKING_DIR,
             "--",
             vid_path])
-        """
-        model = whisper.load_model("tiny.en")
-        result = model.transcribe(vid)
-        print(result["text"])
-        
         end = time.time()
         logging.info("Whisper took: %d seconds" % (end - start))
+        
+        #I don't need to toush gcloud in this script for now, so I'll just print the output
+        """
+        if result.returncode == 0:
+            logging.info("Uploading results")
+            result = subprocess.run([
+                "gcloud",
+                "storage",
+                "cp",
+                "%s.json" % name,
+                "%s.srt" % name,
+                "%s.tsv" % name,
+                "%s.txt" % name,
+                "%s.vtt" % name,
+                gs_path])
+
+        if result.returncode == 0:
+            logging.info("Marking as processed")
+            subprocess.run([
+                "gcloud",
+                "storage",
+                "rm",
+                "%s.new_download" % vid])
+        """
 
 if __name__ == "__main__":
-    
-    logging.getLogger().setLevel(logging.DEBUG)
+    parser = argparse.ArgumentParser(
+            prog='WhisperX transcription worker.',
+            description='Downloads audio from google cloud bucket tree and runs WhisperX on it')
+    parser.add_argument('-t', '--threads', dest='threads', metavar="NUM_THREADS", type=int,
+                        help='number of threads to run',
+                        required=True)
+    parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
 
-    #I don't need to do this if I'm not saving the file
-    #ensure_environment()
+    args = parser.parse_args()
+    ensure_environment()
     vid_list = get_vid_list()
-    #I don't need this for only one file
     #random.shuffle(vid_list)  # poorman race reduction between workers.
     process_vids(vid_list)

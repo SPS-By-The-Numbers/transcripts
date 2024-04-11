@@ -1,0 +1,8 @@
+.git
+.gitignore
+.gcloudignore
+venv
+BaseDockerfile
+transcription/*
+*.mp3
+*.m4a
