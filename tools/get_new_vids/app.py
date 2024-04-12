@@ -1,5 +1,6 @@
 
 import json
+from vast_manager import find_instance
 
 from download_yt_audio import get_videos as print_video_data
 
@@ -8,8 +9,8 @@ onGcs = True
 
 def main():
     #making and outputting a test log
-    defLog(print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data"))
-    
+    #defLog(print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data"))
+    find_instance()
 
 def defLog(messageText):
     global_log_fields = get_global_log_fields()
