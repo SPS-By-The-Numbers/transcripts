@@ -24,6 +24,7 @@ def find_instance():
     
     #sort the entries by price
     def data_sorter(entry):
+        print(entry)
         return entry["$/hr"]
     entries.sort(key=data_sorter)
     
