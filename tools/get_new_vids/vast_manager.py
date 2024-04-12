@@ -2,6 +2,7 @@ import subprocess
 from subprocess import PIPE
 
 searchCall = ['vastai', 'search offers', 'cpu_cores>=10 gpu_total_ram>=8 reliability>=0.95 dph<2']
+BIG_NUM = 10.0
 
 def find_instance():
     #run the command, and split it into a big table
@@ -27,7 +28,10 @@ def find_instance():
     #sort the entries by price
     def data_sorter(entry):
         if "$/hr" in entry:
-            return entry["$/hr"]
+            return float(entry["$/hr"])
+        else:
+            #an arbitrarily large(for these purposes) number to put invalid entries at the bottom of the list
+            return BIG_NUM
     entries.sort(key=data_sorter)
     
     #return the cheapest one
