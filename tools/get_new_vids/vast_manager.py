@@ -20,7 +20,7 @@ def find_instance():
     #parse entries into a list of dictionary objects
     for i in range(0, len(entries)):
         for j in range(0, len(tableHeader)):
-            entries[tableHeader[j]] = table[i + 1][j]
+            entries[i][tableHeader[j]] = table[i + 1][j]
     
     #sort the entries by price
     def data_sorter(entry):
