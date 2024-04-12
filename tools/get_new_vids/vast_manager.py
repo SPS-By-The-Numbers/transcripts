@@ -13,6 +13,7 @@ def find_instance() -> str:
     tableData = [table[i] for i in range(1, len(table))]
     costInd = tableHeader.index("$/hr")
     def data_sorter(row):
+        print("cost ind: " + str(costInd))
         return row[costInd]
     
     tableData.sort(key=data_sorter)
