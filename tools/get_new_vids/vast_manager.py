@@ -10,7 +10,7 @@ def find_instance() -> str:
         return "Failed"
     table = [row.split() for row in rows]
     tableHeader = table[0]
-    tableData = table[range(1, len(table))]
+    tableData = [table[i] for i in range(1, len(table))]
     costInd = tableHeader.index("$/hr")
     def data_sorter(row):
         return row[costInd]
