@@ -5,4 +5,4 @@ requests==2.31.0
 structlog==24.1.0
 
 google-auth==2.3.2
-vastai
+vastai==0.2.2
