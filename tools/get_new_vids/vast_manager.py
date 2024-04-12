@@ -22,8 +22,6 @@ def find_instance():
     for i in range(0, len(entries) - 1):
         for j in range(0, len(tableHeader) - 1):
             entries[i][tableHeader[j]] = table[i + 1][j]
-        print(i)
-        print(entries[i])
     
     #sort the entries by price
     def data_sorter(entry):
