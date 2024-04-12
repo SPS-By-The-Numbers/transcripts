@@ -18,8 +18,8 @@ def find_instance():
         return "Failed"
     
     #parse entries into a list of dictionary objects
-    for(i in range(0, len(entries))):
-        for(j in range(0, len(tableHeader))) {
+    for i in range(0, len(entries)):
+        for j in range(0, len(tableHeader)):
             entries[tableHeader[j]] = table[i + 1][j]
     
     #sort the entries by price
