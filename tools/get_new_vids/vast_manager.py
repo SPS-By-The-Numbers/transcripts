@@ -26,7 +26,8 @@ def find_instance():
     
     #sort the entries by price
     def data_sorter(entry):
-        if(entry.has_key("$/hr")) return entry["$/hr"]
+        if(entry.has_key("$/hr")):
+            return entry["$/hr"]
     entries.sort(key=data_sorter)
     
     #return the cheapest one
