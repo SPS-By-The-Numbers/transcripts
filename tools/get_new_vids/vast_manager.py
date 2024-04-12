@@ -10,8 +10,8 @@ def find_instance():
     table = [row.split() for row in rows]
     tableHeader = table[0]
     
-    #minus one because there's a trailing value which messes with the sorting, and start at one to skip the header
-    entries = [dict() for i in range(1, len(table) - 1)]
+    #minus two because there's a trailing value which messes with the sorting, and start at one to skip the header
+    entries = [dict() for i in range(1, len(table) - 2)]
     
     #if there's no entries return a bad value
     if(len(entries) < 1):
