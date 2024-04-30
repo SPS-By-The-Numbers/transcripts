@@ -2,15 +2,16 @@
 import json
 from vast_manager import find_instance
 
-from download_yt_audio import get_videos as print_video_data
+from download_yt_audio import get_videos
+import firebase_manager
 
 #change this to True if this will be run on gcs so the logs will be formatted correctly
 onGcs = True
 
 def main():
-    #making and outputting a test log
-    #defLog(print_video_data("https://www.youtube.com/user/wanderbots/", "/usr/src/app/data"))
-    print(str(find_instance()))
+    videos = get_videos("https://www.youtube.com/c/braintruffle")
+    firebase_manager.queue_failed_tasks()
+    firebase_manager.queue_video_data(videos)
 
 def defLog(messageText):
     global_log_fields = get_global_log_fields()

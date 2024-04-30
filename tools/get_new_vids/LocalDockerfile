@@ -1,0 +1,12 @@
+FROM awfulbananas/slim-python-with-git
+
+#a local version of the dockerfile, so not everything needs to be on github (private keys)
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install --no-cache-dir pytube git+https://github.com/24makee/pytube.git@c709202d4f2c0d36d9484314d44fd26744225b7d;
+
+COPY . .
+
+CMD python app.py
