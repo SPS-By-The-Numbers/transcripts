@@ -1,18 +1,20 @@
 # https://hub.docker.com/_/python
-FROM python:3.10.6-slim
+FROM python:3.12-alpine
 
 # Allow statements and log messages to immediately appear in the Cloud Run logs
 ENV PYTHONUNBUFFERED 1
 
 # Create and change to the app directory.
-WORKDIR /usr/src
+WORKDIR /app
 
-#install git
-RUN apt-get -y update
-RUN apt-get -y install git
+# Only copy requirements.txt first as this is more stable than source. This lets
+# us create 1 layer for requirements that don't change too much.
+COPY app/requirements.txt /app
 
-#copy the startup script
-COPY startupScript.sh .
+RUN pip install --no-cache-dir -r requirements.txt
 
-#the startup script manages all the initial behaviour
-CMD bash startupScript.sh
+# Copy all app files into /app directory.
+COPY app/* /app
+
+# Default startup script.
+CMD [ "python",  "find_new_videos.py" ]

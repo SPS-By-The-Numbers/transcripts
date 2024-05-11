@@ -1,12 +1,18 @@
-
 import json
-from vast_manager import find_instance
 
 from download_yt_audio import get_videos
+from vast_manager import find_instance
+
 import firebase_manager
 
-#change this to True if this will be run on gcs so the logs will be formatted correctly
+# Change this to True if this will be run on gcs so the logs will be formatted correctly
 onGcs = True
+
+class VastParseError(Exception):
+    def __init__(self, message, out, err):
+        super().__init__(message)
+        self.out = out
+        self.err = err
 
 def main():
     videos = get_videos("https://www.youtube.com/c/braintruffle")
