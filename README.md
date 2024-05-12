@@ -89,6 +89,7 @@ probably it.
 
 ### Public data for channel
 | Key | Description |
+| --- | --- |
 |* &lt;enabled&gt; | Set to 1 if the category should be published on the website. |
 | metadata | Entries with metadata about the video from youtube. Minimally `channel_id`, `publish_date`, `title`. They entry key is the `video_id` from Youtube. |
 | index | all the `video_id`s grouped by YYYY-MM-DD. |
