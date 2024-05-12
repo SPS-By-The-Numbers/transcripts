@@ -97,10 +97,12 @@ probably it.
 
 ### Private data for channel
 | Key | Description |
+| --- | --- |
 | audit | List of all updates made by the public including identity information of poster. Key is the timestamp of the change. |
 | queue | Workqueue of tasks for backend processing. |
 
 ### Storage
 ### Public data for channel
 | Key | Description |
+| --- | --- |
 | json | Transcript in json. File format is `${video_id}.${lang}.json` where `lang` is an ISO639 code. |`
