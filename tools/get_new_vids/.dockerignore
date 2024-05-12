@@ -26,3 +26,6 @@ venv/
 
 # Exclude git history and configuration.
 .gitignore
+
+*.sw{op}
+*~
