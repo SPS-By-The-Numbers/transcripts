@@ -61,3 +61,46 @@ Github should do the deploy automatically via the workflow but if you want to do
 ```bash
 npx firebase deploy
 ```
+
+## Datamodel
+
+### Database and storage structure.
+Firebase Realtime Database is used as the primary database for the frontend
+and batch processing.
+
+Google Cloud Storage holding the data files such as transcriptions.
+
+## Transcripts datamodel.
+### Path structure
+This describes the structure of the data stored for the transcripts. All
+paths start with `/transcripts` to namespace from other apps.
+
+Underneath each of these, there is a `public` and `private` split. Then
+there is a `channel` which corresponds to a Youtube Channel being tracked.
+
+So `/transcripts/public/foo` in both the Realtime DB and in Cloud Storage
+would contain all public data for a channel named `foo`.  This will have
+no access restrictions from the public and should contain nearly all the
+data on the site.
+
+`/transcripts/private/foo` has private data for keeping the youtube channel
+`foo` synced.  It will have audit logs, backend task queues, and that is
+probably it.
+
+### Public data for channel
+| Key | Description |
+|* &lt;enabled&gt; | Set to 1 if the category should be published on the website. |
+| metadata | Entries with metadata about the video from youtube. Minimally `channel_id`, `publish_date`, `title`. They entry key is the `video_id` from Youtube. |
+| index | all the `video_id`s grouped by YYYY-MM-DD. |
+| v | Stores extra information about each video. Currently just has `speakerInfo` which provides the name for each diarized speaker. They key is the speaker number. |
+| existing | 2 list of holding previously used names and tags. Used to populate the auto-suggest for labeling speakers. |
+
+### Private data for channel
+| Key | Description |
+| audit | List of all updates made by the public including identity information of poster. Key is the timestamp of the change. |
+| queue | Workqueue of tasks for backend processing. |
+
+### Storage
+### Public data for channel
+| Key | Description |
+| json | Transcript in json. File format is `${video_id}.${lang}.json` where `lang` is an ISO639 code. |`

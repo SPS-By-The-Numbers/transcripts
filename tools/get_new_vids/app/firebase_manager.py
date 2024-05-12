@@ -10,9 +10,7 @@ database = {'databaseURL': 'https://hello-web-410622-default-rtdb.firebaseio.com
 firebase_admin.initialize_app(cred, database)
 
 # As an admin, the app has access to read and write all data, regradless of Security Rules
-queueRef = db.reference('/transcripts/queue')
-completedRef = db.reference('/transcripts/completed')
-processingRef = db.reference('/transcripts/processing')
+queueRef = db.reference('/transcripts/backend/queue/new');
 
 def queue_video_data(videos):
     completed = get_completed()

@@ -1,5 +1,5 @@
 # https://hub.docker.com/_/python
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 # Allow statements and log messages to immediately appear in the Cloud Run logs
 ENV PYTHONUNBUFFERED 1
@@ -11,7 +11,11 @@ WORKDIR /app
 # us create 1 layer for requirements that don't change too much.
 COPY app/requirements.txt /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN <<EOF
+  apt-get update -y
+  apt-get install git -y
+  pip install --no-cache-dir -r requirements.txt
+EOF
 
 # Copy all app files into /app directory.
 COPY app/* /app
