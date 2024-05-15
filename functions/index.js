@@ -37,7 +37,7 @@ async function regenerateMetadata(category, limit) {
     delimiter: "/",
   };
 
-  const dbRoot = admin.database().ref(`/transcripts/${category}`);
+  const publicRoot = getCategoryPublicDb(category);
 
   const [files] = await bucket.getFiles(options);
   console.log(`found ${files.length}`);
@@ -51,9 +51,9 @@ async function regenerateMetadata(category, limit) {
 
     outstanding.push((new Response(file.createReadStream())).json().then(async (metadata) => {
       const publishDate = parseISO(metadata.publish_date);
-      const indexRef = dbRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
+      const indexRef = publicRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
       outstanding.push(indexRef.set(metadata));
-      const metadataRef = dbRoot.child(`metadata/${metadata.video_id}`);
+      const metadataRef = publicRoot.child(`metadata/${metadata.video_id}`);
       outstanding.push(metadataRef.set(metadata));
     }));
 
@@ -197,15 +197,16 @@ exports.speakerinfo = onRequest(
 
     // Write audit log.
     try {
-      const dbRoot = admin.database().ref(`/transcripts/${category}`);
-      if ((await dbRoot.child('<enabled>').once('value')).val() !== 1) {
+      const privateRoot = getCategoryPrivateDb(category);
+      const publicRoot = getCategoryPublicDb(category);
+      if ((await publicRoot.child('<enabled>').once('value')).val() !== 1) {
         return res.status(400).send(makeResponseJson(false, "Invalid Category"));
       }
 
       // Timestamp to close enough for txn id. Do not use PII as it is
       // by public.
       const txnId = `${(new Date).toISOString().split('.')[0]}Z`;
-      const auditRef = dbRoot.child(`audit/${txnId}`);
+      const auditRef = privateRoot.child(`audit/${txnId}`);
       auditRef.set({
         name: 'speakerinfo POST',
         headers: req.headers,
@@ -215,11 +216,11 @@ exports.speakerinfo = onRequest(
         uid: decodedIdToken.uid
         });
 
-      const videoRef = dbRoot.child(`v/${videoId}/speakerInfo`);
+      const videoRef = publicRoot.child(`v/${videoId}/speakerInfo`);
       videoRef.set(speakerInfo);
 
       // Update the database stuff.
-      const existingRef = dbRoot.child('existing');
+      const existingRef = publicRoot.child('existing');
       const existingOptions = (await existingRef.once('value')).val();
 
       // Add new tags.

@@ -26,13 +26,13 @@ function metadataToVideoData(entry: any): VideoData {
 }
 
 export async function getAllCategories(): Promise<string[]> {
-    const result = (await get(dbRoot)).val();
+    const result = (await get(dbRoot)).child('public').val();
 
     return Object.keys(result);
 }
 
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
-    const result = (await get(dbRoot)).child(`${category}/metadata`).val();
+    const result = (await get(dbRoot)).child(`public/${category}metadata`).val();
     if (!result) {
       return [];
     }
@@ -45,7 +45,7 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
 }
 
 export async function getDatesForCategory(category: string): Promise<string[]> {
-    const result = (await get(dbRoot)).child(`${category}/index/date`).val();
+    const result = (await get(dbRoot)).child(`public/${category}/index/date`).val();
     if (!result) {
       return [];
     }
@@ -53,13 +53,13 @@ export async function getDatesForCategory(category: string): Promise<string[]> {
 }
 
 export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoData[]> {
-    const result = (await get(dbRoot)).child(`${category}/index/date/${datePath}`).val();
+    const result = (await get(dbRoot)).child(`public/${category}/index/date/${datePath}`).val();
 
     return Object.entries(result).map(([videoId, metadata]) => metadataToVideoData(metadata));
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
-    return (await get(dbRoot)).child(`${category}/metadata/${id}`).val();
+    return (await get(dbRoot)).child(`public/${category}/metadata/${id}`).val();
 }
 
 export async function getSpeakerMapping(category: string, id: string): Promise<any> {
