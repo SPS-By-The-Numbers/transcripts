@@ -33,6 +33,9 @@ export async function getAllCategories(): Promise<string[]> {
 
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
     const result = (await get(dbRoot)).child(`${category}/metadata`).val();
+    if (!result) {
+      return [];
+    }
 
     const allVideos: VideoData[] = Object.entries(result).map(
       ([videoId, metadata]) => metadataToVideoData(metadata)
@@ -43,6 +46,9 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
 
 export async function getDatesForCategory(category: string): Promise<string[]> {
     const result = (await get(dbRoot)).child(`${category}/index/date`).val();
+    if (!result) {
+      return [];
+    }
     return Object.keys(result);
 }
 
