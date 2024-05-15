@@ -1,11 +1,18 @@
 {
-  "functions": {
-    "runtime": "nodejs20",
-    "source": "functions",
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint"
-    ]
-  },
+  "functions": [
+    {
+      "runtime": "nodejs20",
+      "source": "functions",
+      "codebase": "functions",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    },
+    {
+      "codebase": "functions-python",
+      "source": "functions-python"
+    }
+  ],
   "hosting": {
     "site": "transcripts-spsbtn",
     "source": ".",

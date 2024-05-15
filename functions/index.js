@@ -3,13 +3,27 @@
 const _ = require('lodash');
 const { parseISO, format } = require('date-fns');
 
-const {onRequest} = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 
 const admin = require("firebase-admin");
-const {getStorage} = require("firebase-admin/storage");
-admin.initializeApp();
+const { getStorage } = require("firebase-admin/storage");
 
 const pathDateFormat = 'yyyy-MM-dd';
+
+// Global intialization for process.
+admin.initializeApp();
+
+function getCategoryPublicDb(category) {
+  return admin.database().ref(`/transcripts/public/${category}`);
+}
+
+function getCategoryPrivateDb(category) {
+  return admin.database().ref(`/transcripts/private/${category}`);
+}
+
+function makeResponseJson(ok, message, data = {}) {
+  return { ok, message, data };
+}
 
 function basename(path) {
   return path.split('/').pop();
@@ -122,36 +136,36 @@ exports.speakerinfo = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
-       return res.status(400).send("Expects POST");
+       return res.status(400).send(makeResponseJson(false, "Expects POST"));
     }
 
     // Check request to ensure it looks like valid JSON request.
     if (req.headers['content-type'] !== 'application/json') {
-       return res.status(400).send("Expects JSON");
+       return res.status(400).send(makeResponseJson(false, "Expects JSON"));
     }
 
     let decodedIdToken = null;
     try {
       decodedIdToken = await admin.auth().verifyIdToken(req.body?.auth);
     } catch (error) {
-      return res.status(400).send("Did you forget to login?");
+      return res.status(400).send(makeResponseJson(false, "Did you forget to login?"));
     }
 
     const category = req.body?.category;
     if (!category || category.length > 20) {
-      return res.status(400).send("Invalid Category");
+      return res.status(400).send(makeResponseJson(false, "Invalid Category"));
     }
 
     const videoId = req.body?.videoId;
     if (!videoId || videoId.length > 12) {
        if (Buffer.from(videoId, 'base64').toString('base64') !== videoId) {
-         return res.status(400).send("Invalid VideoID");
+         return res.status(400).send(makeResponseJson(false, "Invalid VideoID"));
        }
     }
 
     const speakerInfo = req.body?.speakerInfo;
     if (!speakerInfo) {
-      return res.status(400).send("Expect speakerInfo");
+      return res.status(400).send(makeResponseJson(false, "Expect speakerInfo"));
     }
 
     // Validate request structure.
@@ -167,14 +181,14 @@ exports.speakerinfo = onRequest(
       const tags = info.tags;
       if (tags) {
         if (!Array.isArray(tags)) {
-          return res.status(400).send("Expect tags to be an array");
+          return res.status(400).send(makeResponseJson(false, "Expect tags to be an array"));
         }
         if (name) {
           recentTagsForName[name] = [...(new Set(tags))];
         }
         for (const tag of tags) {
           if (typeof(tag) !== 'string') {
-            return res.status(400).send("Expect tags to be strings");
+            return res.status(400).send(makeResponseJson(false, "Expect tags to be strings"));
           }
           allTags.add(tag);
         }
@@ -185,7 +199,7 @@ exports.speakerinfo = onRequest(
     try {
       const dbRoot = admin.database().ref(`/transcripts/${category}`);
       if ((await dbRoot.child('<enabled>').once('value')).val() !== 1) {
-        return res.status(400).send("Invalid Category");
+        return res.status(400).send(makeResponseJson(false, "Invalid Category"));
       }
 
       // Timestamp to close enough for txn id. Do not use PII as it is
@@ -207,6 +221,7 @@ exports.speakerinfo = onRequest(
       // Update the database stuff.
       const existingRef = dbRoot.child('existing');
       const existingOptions = (await existingRef.once('value')).val();
+
       // Add new tags.
       let existingOptionsUpdated = false;
       for (const name of allNames) {
@@ -227,14 +242,14 @@ exports.speakerinfo = onRequest(
         existingRef.set(existingOptions);
       }
 
-      res.status(200).send(JSON.stringify({
-        speakerInfo,
-        existingTags: Object.keys(existingOptions.tags),
-        existingNames: Object.keys(existingOptions.names)}));
+      res.status(200).send(makeResponseJson(true, "success",
+            { speakerInfo,
+              existingTags: Object.keys(existingOptions.tags),
+              existingNames: Object.keys(existingOptions.names)}));
 
     } catch(e) {
       console.error("Updating DB failed with: ", e);
-      return res.status(500).send("Internal error");
+      return res.status(500).send(makeResponseJson(false, "Internal error"));
     }
   }
 );
@@ -243,16 +258,16 @@ exports.metadata = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
-       return res.status(400).send("Expects POST");
+       return res.status(400).send(makeResponseJson(false, "Expects POST"));
     }
 
     // Check request to ensure it looks like valid JSON request.
     if (req.headers['content-type'] !== 'application/json') {
-       return res.status(400).send("Expects JSON");
+       return res.status(400).send(makeResponseJson(false, "Expects JSON"));
     }
 
     if (!req.body.category) {
-      return res.status(400).send("Expects category");
+      return res.status(400).send(makeResponseJson(false, "Expects category"));
     }
 
     if (req.body?.cmd === "regenerateMetadata") {
@@ -260,20 +275,69 @@ exports.metadata = onRequest(
         await regenerateMetadata(req.body.category, req.body.limit);
       } catch (e) {
         console.error(e);
-        return res.status(500).send("Exception");
+        return res.status(500).send(makeResponseJson(false, "Exception"));
       }
-      return res.status(200).send("done");
-    }
-    if (req.body?.cmd === "migrate") {
+      return res.status(200).send(makeResponseJson(true, "done"));
+    } else if (req.body?.cmd === "migrate") {
       try {
         await migrate(req.body.category, req.body.limit);
       } catch (e) {
         console.error(e);
-        return res.status(500).send("Exception");
+        return res.status(500).send(makeResponseJson(false, "Exception"));
       }
-      return res.status(200).send("done");
+      return res.status(200).send(makeResponseJson(true, "done"));
+    } else if (req.body?.cmd === "set") {
+      const category_public = getCategoryPublicDb(req.body.category);
+      if (!req.body?.metadata || !Object.keys(req.body.metadata).length) {
+        return res.status(400).send(makeResponseJson(false, "missing metadata"));
+      }
+      category_public.child('metadata').update(req.body.metadata);
+
+      // Add to the index.
+      for (const [vid, info] of Object.entries(req.body.metadata)) {
+         const published = new Date(info.publish_date).toISOString().split('T')[0];
+         category_public.child('index').child('date').child(published)
+             .child(vid).set(info);
+      }
+      return res.status(200).send(
+          makeResponseJson(
+              true,
+              `Added metadata for ${Object.keys(req.body.metadata)}`));
     }
 
     return res.status(400).send("Unknown command");
+  }
+);
+
+exports.process_vids = onRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+    if (req.method !== 'GET') {
+       return res.status(400).send(makeResponseJson(false, "Expects GET"));
+    }
+
+    const category = req.query.category;
+    if (!category || category.length > 20) {
+      return res.status(400).send(makeResponseJson(false, "Invalid Category"));
+    }
+
+    if (!req.query.vids) {
+       return res.status(400).send(makeResponseJson(false, "Expects vids"));
+    }
+
+    const public_category_ref = getCategoryPublicDb(category);
+    const metadata_snapshot = await public_category_ref.child('metadata').once("value");
+
+    const add_ts = new Date();
+    const new_video_ids = {};
+    for (const vid of req.query.vids) {
+      if (!metadata_snapshot.child(vid).exists()) {
+        console.log(metadata_snapshot.val());
+        new_video_ids[vid] =  { add: add_ts, start: null, instance: null };
+      }
+    }
+    getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
+
+    return res.status(200).send(makeResponseJson(true, "vids enqueued", new_video_ids));
   }
 );
