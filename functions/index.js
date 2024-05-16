@@ -1,20 +1,27 @@
 'use strict';
 
 const _ = require('lodash');
+const admin = require("firebase-admin");
+const { Innertube } = require('youtubei.js');
+const { PubSub } = require('@google-cloud/pubsub')
+const { getStorage } = require("firebase-admin/storage");
+const { onRequest } = require("firebase-functions/v2/https");
 const { parseISO, format } = require('date-fns');
 
-const { onRequest } = require("firebase-functions/v2/https");
-
-const admin = require("firebase-admin");
-const { getStorage } = require("firebase-admin/storage");
-
 const pathDateFormat = 'yyyy-MM-dd';
+
+let global_youtube;
+const pubSubClient = new PubSub();
 
 // Global intialization for process.
 admin.initializeApp();
 
+function getPublicDb() {
+  return admin.database().ref(`/transcripts/public`);
+}
+
 function getCategoryPublicDb(category) {
-  return admin.database().ref(`/transcripts/public/${category}`);
+  return getPublicDb().child(category);
 }
 
 function getCategoryPrivateDb(category) {
@@ -27,6 +34,40 @@ function makeResponseJson(ok, message, data = {}) {
 
 function basename(path) {
   return path.split('/').pop();
+}
+
+async function getYoutube() {
+  if (!global_youtube) {
+    global_youtube = await Innertube.create({generate_session_locally: true});
+  }
+  return global_youtube;
+}
+
+async function getVideosForCategory(category) {
+  const youtube = await getYoutube();
+
+  const results = [];
+  let feed = null;
+
+  if (category === "sps-board") {
+    const channel = await youtube.getChannel("UC07MVxpRKdDJmqwWDGYqotA");
+    const videos = await channel.getVideos();
+    results.push(...videos.videos);
+
+    if (videos.has_continuation) {
+      feed = await videos.getContinuation();
+    }
+  } else if (category === "seattle-city-council") {
+    const playlist = await youtube.getPlaylist("PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f");
+    feed = playlist.items();
+  }
+
+  while (feed?.has_continuation) {
+    feed = await feed.getContinuation();
+    results.push(...feed.videos);
+  }
+
+  return results;
 }
 
 async function regenerateMetadata(category, limit) {
@@ -310,35 +351,44 @@ exports.metadata = onRequest(
   }
 );
 
-exports.process_vids = onRequest(
+exports.find_new_videos = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'GET') {
        return res.status(400).send(makeResponseJson(false, "Expects GET"));
     }
 
-    const category = req.query.category;
-    if (!category || category.length > 20) {
-      return res.status(400).send(makeResponseJson(false, "Invalid Category"));
-    }
+    const public_ref = getPublicDb();
+    const all_data = (await public_ref.once("value")).val();
 
-    if (!req.query.vids) {
-       return res.status(400).send(makeResponseJson(false, "Expects vids"));
-    }
-
-    const public_category_ref = getCategoryPublicDb(category);
-    const metadata_snapshot = await public_category_ref.child('metadata').once("value");
-
+    const all_new_vid_ids = [];
     const add_ts = new Date();
-    const new_video_ids = {};
-    for (const vid of req.query.vids) {
-      if (!metadata_snapshot.child(vid).exists()) {
-        console.log(metadata_snapshot.val());
-        new_video_ids[vid] =  { add: add_ts, start: null, instance: null };
+    let limit = 0;
+    // Can be empty in test and initial bootstrap.
+    if (all_data) {
+      for (const category of Object.keys(all_data)) {
+        const public_category_ref = getCategoryPublicDb(category);
+        const metadata_snapshot = await public_category_ref.child('metadata').once("value");
+        const new_video_ids = {};
+
+        for (const vid of await getVideosForCategory(category)) {
+          if (limit++ > 5) {
+            break;
+          }
+
+          if (!metadata_snapshot.child(vid.id).exists()) {
+            console.log(metadata_snapshot.val());
+            new_video_ids[vid.id] =  { add: add_ts, start: "", instance: "" };
+          }
+        }
+
+        all_new_vid_ids.push(...Object.keys(new_video_ids));
+        getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
       }
     }
-    getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
 
-    return res.status(200).send(makeResponseJson(true, "vids enqueued", new_video_ids));
+    await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
+
+    return res.status(200).send(makeResponseJson(true, "vids enqueued", all_new_vid_ids));
   }
 );

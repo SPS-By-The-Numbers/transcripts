@@ -1,6 +1,15 @@
 {
   "rules": {
-    ".read": true,
-    ".write": false
+    "transcripts": {
+      ".read": true,
+      "public": {
+        ".read": true,
+        ".write": false
+      },
+      "private": {
+        ".read": false,
+        ".write": false
+      }
+    }
   }
 }
