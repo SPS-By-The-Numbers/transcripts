@@ -123,7 +123,6 @@ async function migrate(category, limit) {
       break;
     }
     n = n+1;
-//    console.log(`processing ${file.name}`);
 
     const origBasename = basename(file.name);
     const videoId = origBasename.split('.')[0];
@@ -351,6 +350,14 @@ exports.metadata = onRequest(
   }
 );
 
+exports.start_transcribe = onRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+  await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
+    return res.status(200).send(makeResponseJson(true, "transcription starte", ""));
+  }
+);
+
 exports.find_new_videos = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
@@ -361,30 +368,31 @@ exports.find_new_videos = onRequest(
     const public_ref = getPublicDb();
     const all_data = (await public_ref.once("value")).val();
 
+    if (!all_data) {
+       return res.status(500).send(makeResponseJson(false, "No Categories in DB"));
+    }
+
     const all_new_vid_ids = [];
     const add_ts = new Date();
     let limit = 0;
     // Can be empty in test and initial bootstrap.
-    if (all_data) {
-      for (const category of Object.keys(all_data)) {
-        const public_category_ref = getCategoryPublicDb(category);
-        const metadata_snapshot = await public_category_ref.child('metadata').once("value");
-        const new_video_ids = {};
+    for (const category of Object.keys(all_data)) {
+      const public_category_ref = getCategoryPublicDb(category);
+      const metadata_snapshot = await public_category_ref.child('metadata').once("value");
+      const new_video_ids = {};
 
-        for (const vid of await getVideosForCategory(category)) {
-          if (limit++ > 5) {
-            break;
-          }
-
-          if (!metadata_snapshot.child(vid.id).exists()) {
-            console.log(metadata_snapshot.val());
-            new_video_ids[vid.id] =  { add: add_ts, start: "", instance: "" };
-          }
+      for (const vid of await getVideosForCategory(category)) {
+        if (req.query.limit && ++limit > req.query.limit) {
+          break;
         }
 
-        all_new_vid_ids.push(...Object.keys(new_video_ids));
-        getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
+        if (!metadata_snapshot.child(vid.id).exists()) {
+          new_video_ids[vid.id] =  { add: add_ts, start: "", instance: "" };
+        }
       }
+
+      all_new_vid_ids.push(...Object.keys(new_video_ids));
+      getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
     }
 
     await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
