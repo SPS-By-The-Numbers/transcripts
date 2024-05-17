@@ -1,6 +1,6 @@
 import path from 'path';
 import { get, child } from "firebase/database"
-import { dbRoot } from 'utilities/firebase';
+import { dbPublicRoot } from 'utilities/firebase';
 import { readdir, readFile } from 'fs/promises';
 import { Dirent, existsSync } from 'fs';
 import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
@@ -25,14 +25,18 @@ function metadataToVideoData(entry: any): VideoData {
     };
 }
 
+export async function getCategoryPublicRoot(category: string): Promise<any> {
+    return (await get(dbPublicRoot)).child(category);
+}
+
 export async function getAllCategories(): Promise<string[]> {
-    const result = (await get(dbRoot)).child('public').val();
+    const result = (await get(dbPublicRoot)).val();
 
     return Object.keys(result);
 }
 
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
-    const result = (await get(dbRoot)).child(`public/${category}metadata`).val();
+    const result = (await getCategoryPublicRoot(category)).child(`metadata`).val();
     if (!result) {
       return [];
     }
@@ -45,7 +49,7 @@ export async function getAllVideosForCategory(category: string): Promise<VideoDa
 }
 
 export async function getDatesForCategory(category: string): Promise<string[]> {
-    const result = (await get(dbRoot)).child(`public/${category}/index/date`).val();
+    const result = (await getCategoryPublicRoot(category)).child(`index/date`).val();
     if (!result) {
       return [];
     }
@@ -53,21 +57,19 @@ export async function getDatesForCategory(category: string): Promise<string[]> {
 }
 
 export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoData[]> {
-    const result = (await get(dbRoot)).child(`public/${category}/index/date/${datePath}`).val();
+    const result = (await getCategoryPublicRoot(category)).child(`index/date/${datePath}`).val();
 
     return Object.entries(result).map(([videoId, metadata]) => metadataToVideoData(metadata));
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
-    return (await get(dbRoot)).child(`public/${category}/metadata/${id}`).val();
+    return (await getCategoryPublicRoot(category)).child(`metadata/${id}`).val();
 }
 
-export async function getSpeakerMapping(category: string, id: string): Promise<any> {
-/*
-    const speakersRootRef = Storage.ref(makeTranscriptsRootRef(category), 'speakers');
-    const speakerPath: string = path.join(buildTranscriptFolderPath(category, id), `${id}.speakers.json`);
-    */
+export async function getVideoRef(category: string, id: string): Promise<any> {
+    return (await getCategoryPublicRoot(category)).child(`v/${id}`);
+}
 
-
-    return {};
+export async function getExistingRef(category: string): Promise<any> {
+    return (await getCategoryPublicRoot(category)).child('existing');
 }
