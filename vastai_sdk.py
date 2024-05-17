@@ -4,7 +4,7 @@ import argparse
 from typing import Optional
 import io
 import contextlib
-from vastai_base import VastAIBase
+from .vastai_base import VastAIBase
 import requests
 
 
@@ -26,7 +26,7 @@ class VastAI(VastAIBase):
 
 
     def import_cli_functions(self):
-        vast = importlib.import_module("vast")
+        vast = importlib.import_module(".vast", package="vast_python")
         parser = vast.parser
 
         if hasattr(parser, 'subparsers_') and parser.subparsers_:
