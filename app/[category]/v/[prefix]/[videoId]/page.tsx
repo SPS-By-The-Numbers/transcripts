@@ -2,7 +2,7 @@ import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { Metadata, ResolvingMetadata } from "next"
 import { app } from 'utilities/firebase'
-import { getMetadata } from "utilities/metadata-utils"
+import { getExistingRef, getMetadata, getVideoRef } from "utilities/metadata-utils"
 import { getDatabase, ref, child, get } from "firebase/database"
 import { getTranscript } from "utilities/transcript"
 
@@ -24,12 +24,11 @@ type DbInfoEntry ={
 
 async function loadSpeakerControlInfo(category: string, videoId: string) {
   const database = getDatabase(app);
-  const categoryRoot = ref(database, `transcripts/${category}`);
-  const videoRef = child(categoryRoot, `v/${videoId}`);
-  const existingRef = child(categoryRoot, 'existing');
+  const videoRef = await getVideoRef(category, videoId);
+  const existingRef = await getExistingRef(category);
 
   const speakerInfo = {};
-  const videoData = (await get(videoRef)).val();
+  const videoData = videoRef.val();
   if (videoData && videoData.speakerInfo) {
     for (const [k,v] of Object.entries(videoData.speakerInfo)) {
       const entry = v as DbInfoEntry;
@@ -45,7 +44,7 @@ async function loadSpeakerControlInfo(category: string, videoId: string) {
     }
   }
 
-  const existingOptions = (await get(existingRef)).val();
+  const existingOptions = existingRef.val();
 
   const existingNames = {...existingOptions?.names};
   const existingTags = new Set<string>();

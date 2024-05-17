@@ -14,4 +14,5 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
-export const dbRoot = ref(database, '/transcripts');
+export const dbPublicRoot = ref(database, '/transcripts/public');
+export const dbPrivateRoot = ref(database, '/transcripts/private');
