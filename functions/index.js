@@ -15,7 +15,7 @@ import { pipeline } from 'node:stream/promises';
 
 const pathDateFormat = 'yyyy-MM-dd';
 
-const LANGUAGES = ['en'];
+const LANGUAGES = new Set(['en']);
 const STORAGE_BUCKET = 'sps-by-the-numbers.appspot.com';
 
 let global_youtube;
@@ -262,8 +262,8 @@ const transcript = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     try {
-      if (req.method !== 'POST') {
-         return res.status(400).send(makeResponseJson(false, "Expects POST"));
+      if (req.method !== 'PUT') {
+         return res.status(400).send(makeResponseJson(false, "Expects PUT"));
       }
 
       // Check request to ensure it looks like valid JSON request.
@@ -271,17 +271,12 @@ const transcript = onRequest(
          return res.status(400).send(makeResponseJson(false, "Expects JSON"));
       }
 
-      if (!req.body.user) {
-        return res.status(400).send(makeResponseJson(false, "missing user"));
+      if (!req.body.user_id) {
+        return res.status(400).send(makeResponseJson(false, "missing user_id"));
       }
 
-      const auth_code = 1; // TODO: DB Lookup here.
-
-      if (req.body.auth_code !== auth_code) {
-        return res.status(401).send(makeResponseJson(false, "invalid auth code"));
-      }
-
-      if (!req.body.category) {
+      const category = req.body.category;
+      if (!category || category.length > 20) {
         return res.status(400).send(makeResponseJson(false, "Expects category"));
       }
 
@@ -289,17 +284,24 @@ const transcript = onRequest(
         return res.status(400).send(makeResponseJson(false, 'Missing vid'));
       }
 
+      const auth_code = (await getCategoryPrivateDb(req.body.category)
+          .child('vast').child(req.body.user_id).once("value")).val();
+
+      if (req.body.auth_code !== auth_code) {
+        return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+      }
+
       const transcripts = req.body.transcripts || {};
       for (const lang of Object.keys(transcripts)) {
-        if (!(lang in LANGUAGES)) {
+        if (!LANGUAGES.has(lang)) {
           return res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
         }
       }
 
-      for (const [lang, contents] in transcripts) {
+      for (const [lang, contents] of Object.entries(transcripts)) {
         const bucket = getStorage().bucket(STORAGE_BUCKET);
-        const filename = `transcripts/public/${category}/${vid}.${lang}.json`;
-        const file = myBucket.file(filename);
+        const filename = `transcripts/public/${category}/${req.body.vid}.${lang}.json`;
+        const file = bucket.file(filename);
         const passthroughStream = new stream.PassThrough();
         passthroughStream.write(contents);
         passthroughStream.end();
@@ -376,4 +378,4 @@ const find_new_videos = onRequest(
   }
 );
 
-export default { speakerinfo, metadata, find_new_videos, start_transcribe, transcript };
+export { speakerinfo, metadata, find_new_videos, start_transcribe, transcript };
