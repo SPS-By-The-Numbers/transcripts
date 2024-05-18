@@ -1,23 +1,31 @@
 'use strict';
 
-const _ = require('lodash');
-const admin = require("firebase-admin");
-const { Innertube } = require('youtubei.js');
-const { PubSub } = require('@google-cloud/pubsub')
-const { getStorage } = require("firebase-admin/storage");
-const { onRequest } = require("firebase-functions/v2/https");
-const { parseISO, format } = require('date-fns');
+import isEqual from 'lodash.isequal';
+import stream from 'stream';
+import { Innertube } from 'youtubei.js';
+import { PubSub } from '@google-cloud/pubsub';
+import { createGzip } from 'zlib'
+import { getAuth } from 'firebase-admin/auth'
+import { getDatabase } from 'firebase-admin/database';
+import { getStorage } from "firebase-admin/storage";
+import { initializeApp } from 'firebase-admin/app';
+import { onRequest } from "firebase-functions/v2/https";
+import { parseISO, format } from 'date-fns';
+import { pipeline } from 'node:stream/promises';
 
 const pathDateFormat = 'yyyy-MM-dd';
+
+const LANGUAGES = ['en'];
+const STORAGE_BUCKET = 'sps-by-the-numbers.appspot.com';
 
 let global_youtube;
 const pubSubClient = new PubSub();
 
 // Global intialization for process.
-admin.initializeApp();
+initializeApp();
 
 function getPublicDb() {
-  return admin.database().ref(`/transcripts/public`);
+  return getDatabase().ref(`/transcripts/public`);
 }
 
 function getCategoryPublicDb(category) {
@@ -25,7 +33,7 @@ function getCategoryPublicDb(category) {
 }
 
 function getCategoryPrivateDb(category) {
-  return admin.database().ref(`/transcripts/private/${category}`);
+  return getDatabase().ref(`/transcripts/private/${category}`);
 }
 
 function makeResponseJson(ok, message, data = {}) {
@@ -70,101 +78,21 @@ async function getVideosForCategory(category) {
   return results;
 }
 
-async function regenerateMetadata(category, limit) {
-  const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
-  const options = {
-    prefix: `transcripts/public/${category}/metadata/`,
-    matchGlob: "**.metadata.json",
-    delimiter: "/",
-  };
-
-  const publicRoot = getCategoryPublicDb(category);
-
-  const [files] = await bucket.getFiles(options);
-  console.log(`found ${files.length}`);
-  let n = 0;
-  let outstanding = [];
-  for (const file of files) {
-    if (limit && n > limit) {
-      break;
+function setMetadata(category, metadata) {
+    const category_public = getCategoryPublicDb(category);
+    if (!metadata || !Object.keys(metadata).length) {
+      console.log(`Invalid metadata: `, metadata);
+      return false;
     }
-    n = n+1;
+    category_public.child('metadata').update(metadata);
 
-    outstanding.push((new Response(file.createReadStream())).json().then(async (metadata) => {
-      const publishDate = parseISO(metadata.publish_date);
-      const indexRef = publicRoot.child(`index/date/${format(publishDate, pathDateFormat)}/${metadata.video_id}`);
-      outstanding.push(indexRef.set(metadata));
-      const metadataRef = publicRoot.child(`metadata/${metadata.video_id}`);
-      outstanding.push(metadataRef.set(metadata));
-    }));
-
-    // Concurrency limit.
-    if (outstanding.length > 25) {
-      await Promise.allSettled(outstanding);
-      outstanding = [];
+    // Add to the index.
+    for (const [vid, info] of Object.entries(metadata)) {
+       const published = new Date(info.publish_date).toISOString().split('T')[0];
+       category_public.child('index').child('date').child(published)
+           .child(vid).set(info);
     }
-  }
-}
-
-async function migrate(category, limit) {
-  const bucket = getStorage().bucket('sps-by-the-numbers.appspot.com');
-  const options = {
-    prefix: `transcription/${category}`
-  };
-
-  const [files] = await bucket.getFiles(options);
-
-  console.log("Starting for files: " + files.length);
-  let n = 0;
-  let outstanding = [];
-  let numMetadata = 0;
-  for (const file of files) {
-    if (limit && n > limit) {
-      break;
-    }
-    n = n+1;
-
-    const origBasename = basename(file.name);
-    const videoId = origBasename.split('.')[0];
-    const makeDest = (type, videoId, suffix) => {
-      return bucket.file(`transcripts/public/${category}/${type}/${videoId}.${suffix}`);
-    }
-    let dest = undefined;
-    if (origBasename.endsWith('.metadata.json')) {
-      numMetadata = numMetadata+1;
-      dest = makeDest('metadata', videoId, 'metadata.json');
-    } else if (origBasename.endsWith('.json')) {
-      dest = makeDest('json', videoId, 'en.json');
-    } else if (origBasename.endsWith('.vtt')) {
-      dest = makeDest('vtt', videoId, 'en.vtt');
-    } else if (origBasename.endsWith('.srt')) {
-      dest = makeDest('srt', videoId, 'en.srt');
-    } else if (origBasename.endsWith('.txt')) {
-      dest = makeDest('txt', videoId, 'en.txt');
-    } else if (origBasename.endsWith('.tsv')) {
-      dest = makeDest('tsv', videoId, 'en.tsv');
-    }
-    if (dest) {
-      let shouldSkip = false;
-      outstanding.push(dest.exists()
-        .then(([exists]) => shouldSkip = exists)
-        .finally(async () => {
-            if (!shouldSkip) {
-              console.log(`copy ${file.name} to ${dest.name}`);
-              await file.copy(dest, { predefinedAcl: 'publicRead' });
-            }
-          })
-        .catch(console.error));
-    }
-
-    // Concurrency limit.
-    if (outstanding.length > 25) {
-      await Promise.allSettled(outstanding);
-      outstanding = [];
-    }
-  }
-  console.log('numMetadata', numMetadata);
-  await Promise.allSettled(outstanding);
+    return true;
 }
 
 // POST to speaker info with JSON body of type:
@@ -172,7 +100,7 @@ async function migrate(category, limit) {
 //    "videoId": "abcd",
 //    "speakerInfo": { "SPEAKER_00": { "name": "some name", "tags": [ "parent", "ptsa" ] }
 // }
-exports.speakerinfo = onRequest(
+const speakerinfo = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
@@ -186,7 +114,7 @@ exports.speakerinfo = onRequest(
 
     let decodedIdToken = null;
     try {
-      decodedIdToken = await admin.auth().verifyIdToken(req.body?.auth);
+      decodedIdToken = await getAuth().verifyIdToken(req.body?.auth);
     } catch (error) {
       return res.status(400).send(makeResponseJson(false, "Did you forget to login?"));
     }
@@ -268,7 +196,7 @@ exports.speakerinfo = onRequest(
       for (const name of allNames) {
         const recentTags = recentTagsForName[name];
         if (!Object.prototype.hasOwnProperty.call(existingOptions.names, name) ||
-            (recentTags && !_.isEqual(existingOptions.names[name].recentTags, recentTags))) {
+            (recentTags && !isEqual(existingOptions.names[name].recentTags, recentTags))) {
           existingOptions.names[name] = {txnId, recentTags: recentTags || []};
           existingOptionsUpdated = true;
         }
@@ -295,7 +223,7 @@ exports.speakerinfo = onRequest(
   }
 );
 
-exports.metadata = onRequest(
+const metadata = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
@@ -311,46 +239,90 @@ exports.metadata = onRequest(
       return res.status(400).send(makeResponseJson(false, "Expects category"));
     }
 
-    if (req.body?.cmd === "regenerateMetadata") {
-      try {
-        await regenerateMetadata(req.body.category, req.body.limit);
-      } catch (e) {
-        console.error(e);
-        return res.status(500).send(makeResponseJson(false, "Exception"));
-      }
-      return res.status(200).send(makeResponseJson(true, "done"));
-    } else if (req.body?.cmd === "migrate") {
-      try {
-        await migrate(req.body.category, req.body.limit);
-      } catch (e) {
-        console.error(e);
-        return res.status(500).send(makeResponseJson(false, "Exception"));
-      }
-      return res.status(200).send(makeResponseJson(true, "done"));
-    } else if (req.body?.cmd === "set") {
-      const category_public = getCategoryPublicDb(req.body.category);
+    if (req.body.cmd === "set") {
       if (!req.body?.metadata || !Object.keys(req.body.metadata).length) {
         return res.status(400).send(makeResponseJson(false, "missing metadata"));
       }
-      category_public.child('metadata').update(req.body.metadata);
-
-      // Add to the index.
-      for (const [vid, info] of Object.entries(req.body.metadata)) {
-         const published = new Date(info.publish_date).toISOString().split('T')[0];
-         category_public.child('index').child('date').child(published)
-             .child(vid).set(info);
+      if (!setMetadata(req.body.category, req.body.metadata)) {
+        return res.status(500).send(makeResponseJson(false, `Internal error`));
       }
+
       return res.status(200).send(
           makeResponseJson(
-              true,
-              `Added metadata for ${Object.keys(req.body.metadata)}`));
+            true,
+            `Added metadata for ${Object.keys(req.body.metadata)}`));
+
     }
 
     return res.status(400).send("Unknown command");
   }
 );
 
-exports.start_transcribe = onRequest(
+const transcript = onRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+    try {
+      if (req.method !== 'POST') {
+         return res.status(400).send(makeResponseJson(false, "Expects POST"));
+      }
+
+      // Check request to ensure it looks like valid JSON request.
+      if (req.headers['content-type'] !== 'application/json') {
+         return res.status(400).send(makeResponseJson(false, "Expects JSON"));
+      }
+
+      if (!req.body.user) {
+        return res.status(400).send(makeResponseJson(false, "missing user"));
+      }
+
+      const auth_code = 1; // TODO: DB Lookup here.
+
+      if (req.body.auth_code !== auth_code) {
+        return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+      }
+
+      if (!req.body.category) {
+        return res.status(400).send(makeResponseJson(false, "Expects category"));
+      }
+
+      if (!req.body.vid) {
+        return res.status(400).send(makeResponseJson(false, 'Missing vid'));
+      }
+
+      const transcripts = req.body.transcripts || {};
+      for (const lang of Object.keys(transcripts)) {
+        if (!(lang in LANGUAGES)) {
+          return res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
+        }
+      }
+
+      for (const [lang, contents] in transcripts) {
+        const bucket = getStorage().bucket(STORAGE_BUCKET);
+        const filename = `transcripts/public/${category}/${vid}.${lang}.json`;
+        const file = myBucket.file(filename);
+        const passthroughStream = new stream.PassThrough();
+        passthroughStream.write(contents);
+        passthroughStream.end();
+        await pipeline(passthroughStream, createGzip(), file.createWriteStream({
+          metadata: {
+            contentEncoding: 'gzip'
+          }
+          }));
+      }
+
+      if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
+        return res.status(500).send(makeResponseJson(false, `Internal error`));
+      }
+
+      return res.status(200).send(makeResponseJson(true, `update done`));
+    } catch(e) {
+      console.error("Transcript fail: ", e);
+      return res.status(500).send(makeResponseJson(false, "Internal error"));
+    }
+  }
+);
+
+const start_transcribe = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
   await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
@@ -358,7 +330,7 @@ exports.start_transcribe = onRequest(
   }
 );
 
-exports.find_new_videos = onRequest(
+const find_new_videos = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'GET') {
@@ -395,8 +367,13 @@ exports.find_new_videos = onRequest(
       getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
     }
 
-    await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
+    // If there are new video ids. Wake up the trasncription jobs.
+    if (all_new_vid_ids) {
+      await pubSubClient.topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
+    }
 
     return res.status(200).send(makeResponseJson(true, "vids enqueued", all_new_vid_ids));
   }
 );
+
+export default { speakerinfo, metadata, find_new_videos, start_transcribe, transcript };
