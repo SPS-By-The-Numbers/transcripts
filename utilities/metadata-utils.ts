@@ -1,9 +1,7 @@
-import path from 'path';
 import { get, child } from "firebase/database"
 import { dbPublicRoot } from 'utilities/firebase';
-import { readdir, readFile } from 'fs/promises';
-import { Dirent, existsSync } from 'fs';
-import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
+import { isAfter, isBefore, parseISO } from 'date-fns';
+import { parseDateFromPath } from './path-utils';
 
 const pathDateFormat = 'yyyy-MM-dd';
 
@@ -60,6 +58,39 @@ export async function getAllVideosForPublishDate(category: string, datePath: str
     const result = (await getCategoryPublicRoot(category)).child(`index/date/${datePath}`).val();
 
     return Object.entries(result).map(([videoId, metadata]) => metadataToVideoData(metadata));
+}
+
+export async function getAllVideosForDateRange(
+    category: string, startDate: string | null, endDate: string | null
+): Promise<VideoData[]> {
+    const allDates: string[] = await getDatesForCategory(category);
+    const start: Date | null = startDate !== null ?
+        parseDateFromPath(startDate) : null;
+    const end: Date | null = endDate !== null ?
+        parseDateFromPath(endDate) : null;
+
+    const filteredDates: string[] = allDates.filter((dateString: string): boolean => {
+        const date: Date = parseDateFromPath(dateString);
+
+        if (start !== null && isBefore(date, start)) {
+            return false;
+        }
+
+        if (end !== null && isAfter(date, end)) {
+            return false;
+        }
+
+        return true;
+    });
+
+    const filteredVideos: VideoData[] = [];
+
+    for (const date of filteredDates) {
+        const curVideos: VideoData[] = await getAllVideosForPublishDate(category, date);
+        filteredVideos.push(...curVideos);
+    }
+
+    return filteredVideos;
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
