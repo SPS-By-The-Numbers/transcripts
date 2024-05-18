@@ -324,6 +324,34 @@ const transcript = onRequest(
   }
 );
 
+const new_vids = onRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+    if (req.method !== 'GET') {
+       return res.status(400).send(makeResponseJson(false, "Expects GET"));
+    }
+
+    const category = req.query.category;
+    if (!category || category.length > 20) {
+      return res.status(400).send(makeResponseJson(false, "Expects category"));
+    }
+
+    if (!req.query.user_id) {
+      return res.status(400).send(makeResponseJson(false, "missing user_id"));
+    }
+
+    const auth_code = (await getCategoryPrivateDb(req.query.category)
+        .child('vast').child(req.query.user_id).once("value")).val();
+
+    if (req.query.auth_code !== auth_code) {
+      return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+    }
+
+    const new_vids = (await getCategoryPrivateDb(category).child('new_vids').once("value")).val();
+    return res.status(200).send(makeResponseJson(true, "New vids", new_vids));
+  }
+);
+
 const start_transcribe = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
@@ -378,4 +406,4 @@ const find_new_videos = onRequest(
   }
 );
 
-export { speakerinfo, metadata, find_new_videos, start_transcribe, transcript };
+export { speakerinfo, metadata, find_new_videos, start_transcribe, transcript, new_vids };
