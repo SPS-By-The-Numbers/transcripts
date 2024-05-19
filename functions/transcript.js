@@ -35,7 +35,7 @@ const transcript = onRequest(
         return res.status(400).send(makeResponseJson(false, 'Missing vid'));
       }
 
-      const auth_code = (await getCategoryPrivateDb(req.body.category)
+      const auth_code = (await getCategoryPrivateDb('_admin')
           .child('vast').child(req.body.user_id).once("value")).val();
 
       if (req.body.auth_code !== auth_code) {

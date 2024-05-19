@@ -17,4 +17,12 @@ function getAllCategories() {
   return [ 'sps-board', 'seattle-city-council'];
 }
 
-export { makeResponseJson, makePublicPath, makePrivatePath, getAllCategories };
+function sanitizeCategory(category) {
+  if (!category || category.length > 20) {
+    return undefined;
+  }
+
+  return category;
+}
+
+export { makeResponseJson, makePublicPath, makePrivatePath, getAllCategories, sanitizeCategory };
