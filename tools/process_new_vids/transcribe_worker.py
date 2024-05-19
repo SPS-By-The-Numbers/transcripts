@@ -6,16 +6,17 @@ import json
 import os
 import random
 import re
+import requests
 import subprocess
 import logging
 import sys
 import datetime
 import time
 
-WORKING_DIR='/usr/src/transcribe'
+WORKING_DIR='/workspace/app/transcribe'
 args = {}
 
-def ensure_environment():
+def init_app():
     # Ensure there's a working directory.
     os.makedirs(WORKING_DIR, exist_ok=True)
     
@@ -26,8 +27,14 @@ def ensure_environment():
 
 
 def get_vid_list():
+    api_url = os.environ['API_BASE_URL']
+    response = requests.get(f"{api_url}/new_vids")
+    #headers =  {"Content-Type":"application/json"}
+    #response = requests.post(api_url, data=json.dumps(todo), headers=headers)
+    response.json()
     #I'm hardcoding local files for testing
     return ['/usr/src/audio.wav']
+
 
 def process_vids(vid_list):
     for vid in vid_list:
@@ -87,7 +94,7 @@ def process_vids(vid_list):
                 "%s.new_download" % vid])
         """
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
             prog='WhisperX transcription worker.',
             description='Downloads audio from google cloud bucket tree and runs WhisperX on it')
@@ -97,7 +104,15 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
-    ensure_environment()
+    init_app()
+
     vid_list = get_vid_list()
-    #random.shuffle(vid_list)  # poorman race reduction between workers.
-    process_vids(vid_list)
+
+    # Poorman race reduction between workers.
+    #random.shuffle(vid_list) 
+
+    #process_vids(vid_list)
+
+
+if __name__ == "__main__":
+    main()

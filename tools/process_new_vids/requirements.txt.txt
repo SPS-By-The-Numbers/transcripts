@@ -1,2 +1,0 @@
-vastai==0.2.2
-firebase_admin
