@@ -84,6 +84,25 @@ async function removeItem(req, res) {
   return res.status(200).send(makeResponseJson(true, "Items removed"));
 }
 
+async function removeVastInstance(req, res) {
+  // TODO: Extract this auth check.
+  if (!req.body.user_id) {
+    return res.status(400).send(makeResponseJson(false, "missing user_id"));
+  }
+
+  const vast_ref = getCategoryPrivateDb('_admin')
+      .child('vast').child(req.body.user_id).once("value");
+  const auth_code = (await vast_ref.once("value")).val();
+
+  if (req.body.auth_code !== auth_code) {
+    return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+  }
+
+  await vast_ref.remove();
+
+  return res.status(200).send(makeResponseJson(true, "Instance removed"));
+}
+
 async function updateEntry(req, res) {
   const category = sanitizeCategory(req.body.category);
   if (!category) {
@@ -145,4 +164,16 @@ const video_queue = jsonOnRequest(
   }
 );
 
-export { video_queue }
+const vast = jsonOnRequest(
+  { cors: true, region: ["us-west1"] },
+  async (req, res) => {
+    if (req.method === 'DELETE') {
+       return removeVastInstance(req, res);
+    }
+
+    return res.status(405).send(makeResponseJson(false, 'Method Not Allowed'));
+  }
+);
+
+
+export { video_queue, vast }
