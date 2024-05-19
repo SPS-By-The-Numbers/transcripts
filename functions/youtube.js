@@ -24,8 +24,8 @@ async function getVideosForCategory(category) {
       feed = await videos.getContinuation();
     }
   } else if (category === "seattle-city-council") {
-    const playlist = await youtube.getPlaylist("PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f");
-    feed = playlist.items();
+    feed = await youtube.getPlaylist("PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f");
+    results.push(...feed.videos);
   }
 
   while (feed?.has_continuation) {
