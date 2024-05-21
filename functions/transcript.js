@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { getDefaultBucket } from './firebase_utils.js';
 import { makeResponseJson, makePublicPath } from './utils.js';
-import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient } from './firebase_utils.js';
+import { getCategoryPublicDb, getCategoryPrivateDb } from './firebase_utils.js';
 
 const LANGUAGES = new Set(['en']);
 
@@ -75,14 +75,6 @@ const transcript = onRequest(
   }
 );
 
-const start_transcribe = onRequest(
-  { cors: true, region: ["us-west1"] },
-  async (req, res) => {
-    await getPubSubClient().topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
-      return res.status(200).send(makeResponseJson(true, "transcription starte", ""));
-  }
-);
-
 function setMetadata(category, metadata) {
   const category_public = getCategoryPublicDb(category);
   if (!metadata || !Object.keys(metadata).length) {
@@ -134,4 +126,4 @@ const metadata = onRequest(
   }
 );
 
-export { metadata, transcript, start_transcribe };
+export { metadata, transcript };
