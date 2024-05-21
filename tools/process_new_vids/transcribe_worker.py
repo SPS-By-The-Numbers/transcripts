@@ -60,8 +60,8 @@ def process_vids(vid_list, args):
 
         # Download the audio file.
         outfile_name = f"{vid}.mp4"
-        audio_streams = YouTube.from_id(vid).streams.filter(
-                only_audio=True).order_by('abr')
+        video = YouTube.from_id(vid)
+        audio_streams = video.streams.filter(only_audio=True).order_by('abr')
         audio_streams.first().download(
                 output_path=str(args.workdir),
                 filename=outfile_name,
@@ -85,13 +85,25 @@ def process_vids(vid_list, args):
             str(args.workdir.joinpath(outfile_name))])
         end = time.time()
         logging.info("Whisper took: %d seconds" % (end - start))
-        
+
         # Upload json transcript.
+        metadata = {
+            'title': video.title,
+            'video_id': video.video_id,
+            'channel_id': video.channel_id,
+            'description': video.description,
+            'publish_date': video.publish_date.isoformat(),
+        }
         transcript_json = args.workdir.joinpath(f"{vid}.json").read_text()
         logging.info(f"Uploading transcript json {len(transcript_json)} bytes")
         response = requests.put(
             make_endpoint_url("transcript"),
-            json={**AUTH_PARAMS, 'category': category, 'transcripts': {"en": transcript_json}, 'vid': vid})
+            json={
+                **AUTH_PARAMS,
+                'category': category,
+                'transcripts': {"en": transcript_json},
+                'vid': vid,
+                'metadata'=metadata})
 
         if response.status_code != 200:
             logging.error(f"Unable to upload transcript {response.json()}");

@@ -11,8 +11,51 @@
     {
       "codebase": "functions-python",
       "source": "functions-python"
+    },
+    "rewrites": [
+    {
+      "source": "/api/metadata",
+      "function": {
+        "functionId": "metadata",
+        "region": "us-west1",
+        "pinTag": true
+      }
+    },
+    {
+      "source": "/api/speakerinfo",
+      "function": {
+        "functionId": "speakerinfo",
+        "region": "us-west1",
+        "pinTag": true
+      }
+    },
+    {
+      "source": "/api/transcript",
+      "function": {
+        "functionId": "transcript",
+        "region": "us-west1",
+        "pinTag": true
+      }
+    },
+    {
+      "source": "/api/vast",
+      "function": {
+        "functionId": "vast",
+        "region": "us-west1",
+        "pinTag": true
+      }
+    },
+    {
+      "source": "/api/video_queue",
+      "function": {
+        "functionId": "video_queue",
+        "region": "us-west1",
+        "pinTag": true
+      }
     }
+    ]
   ],
+
   "hosting": {
     "site": "transcripts-spsbtn",
     "source": ".",
@@ -25,12 +68,15 @@
       "region": "us-west1"
     }
   },
+
   "storage": {
     "rules": "storage.rules"
   },
+
   "database": {
     "rules": "database.rules.json"
   },
+
   "emulators": {
     "functions": {
       "port": 5001

@@ -128,9 +128,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
             ]))
     };
 
-    fetch(
-      'https://speakerinfo-rdcihhc4la-uw.a.run.app/sps-by-the-numbers/us-west1/speakerinfo',
-      //'http://127.0.0.1:5001/sps-by-the-numbers/us-west1/speakerinfo',
+    fetch('/api/speakerinfo',
       {
         method: "POST",
         headers: {
