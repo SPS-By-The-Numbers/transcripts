@@ -5,7 +5,7 @@ import { getStorage } from "firebase-admin/storage";
 import { getAuth } from 'firebase-admin/auth';
 import { onRequest } from "firebase-functions/v2/https";
 
-import { makePublicPath, makePrivatePath } from './utils.js';
+import { makePublicPath, makePrivatePath, makeResponseJson } from './utils.js';
 
 const STORAGE_BUCKET = 'sps-by-the-numbers.appspot.com';
 
