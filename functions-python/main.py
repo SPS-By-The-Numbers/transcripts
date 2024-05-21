@@ -44,14 +44,15 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
             # Create the instance
             create_result = json.loads(vast.create_instance(
                 ID=cheapest["ask_contract_id"],
-                image="pytorch/pytorch",
+                image="awongdev/transcribe:0.3",
                 label=INSTANCE_LABEL,
-                onstart_cmd=f"env | grep _ >> /etc/environment; echo 'starting up'",
+                # Kill the server after 2 hours if it's still running.
+                onstart_cmd=f"env | grep _ >> /etc/environment; /workspace/app/onstart.sh 120 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 {cheapest['cpu_cores_effective']}",
                 disk=DISK_GB,
                 args="",
                 cancel_unavail=True,
                 ssh=True,
-                env=f"-e DATA_DIRECTORY=/workspace/ -e JUPYTER_DIR=/ -e SPSBTN_PASSWORD={instance_password}"))
+                env=f"-e DATA_DIRECTORY=/workspace/ -e JUPYTER_DIR=/ -e API_PASSWORD={instance_password}"))
 
             if create_result['success']:
                 db.reference(f"/transcripts/private/{category}/vast/{create_result['new_contract']}").set({

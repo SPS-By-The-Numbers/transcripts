@@ -1,24 +1,32 @@
 #!python
 
+from pytube import YouTube
+
 import argparse
-import glob
 import json
 import os
+import pathlib
 import random
-import re
 import requests
 import subprocess
 import logging
-import sys
-import datetime
 import time
 
-WORKING_DIR='/workspace/app/transcribe'
-args = {}
+WORKING_DIR='/tmp/workspace/app/transcribe'
+AUTH_PARAMS = {
+    'user_id': os.environ['VAST_CONTAINERLABEL'],
+    'auth_code': os.environ['API_PASSWORD'],
+}
 
-def init_app():
+
+def make_endpoint_url(endpoint):
+    api_url = os.environ['API_BASE_URL']
+    return f"{api_url}/{endpoint}"
+
+
+def init_app(args):
     # Ensure there's a working directory.
-    os.makedirs(WORKING_DIR, exist_ok=True)
+    args.workdir.mkdir(parents=True, exist_ok=True)
     
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -27,91 +35,110 @@ def init_app():
 
 
 def get_vid_list():
-    api_url = os.environ['API_BASE_URL']
-    response = requests.get(f"{api_url}/new_vids")
-    #headers =  {"Content-Type":"application/json"}
-    #response = requests.post(api_url, data=json.dumps(todo), headers=headers)
-    response.json()
-    #I'm hardcoding local files for testing
-    return ['/usr/src/audio.wav']
+    response = requests.get(make_endpoint_url("video_queue"), params=AUTH_PARAMS)
+
+    if response.status_code != 200:
+      raise Exception(response.json())
+    return response.json()['data']
 
 
-def process_vids(vid_list):
-    for vid in vid_list:
-        logging.info("Clearing working dir at %s", WORKING_DIR);
-        subprocess.run(["rm", "-rf", os.path.join(WORKING_DIR, '*')])
-        os.chdir(WORKING_DIR)
+def process_vids(vid_list, args):
+    for category, vid in vid_list:
+        logging.info(f"Processing {category} {vid}")
 
-        # Extract all the path names.
-        vid_path = os.path.basename(vid)
-        gs_path = os.path.dirname(vid)
+        # Mark us as starting work on this video. Failure okay as transcription is
+        # semantically idempotent and this is just an advisory lease.
+        response = requests.patch(
+            make_endpoint_url("video_queue"),
+            json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
 
-        name = os.path.splitext(vid_path)[0]
+        if response.status_code != 200:
+            logging.error(f"{response.status_code} {response.text}: Server did not allow start. Someone else might have gotten to it first. Skip.");
+            continue
 
-        # Do the transcription
+        logging.info(f"Leased {category} {vid}. Downloading audio")
+
+        # Download the audio file.
+        outfile_name = f"{vid}.mp4"
+        audio_streams = YouTube.from_id(vid).streams.filter(
+                only_audio=True).order_by('abr')
+        audio_streams.first().download(
+                output_path=str(args.workdir),
+                filename=outfile_name,
+                max_retries=5,
+                skip_existing=args.cache)
+
+        # Run whisper for transcription
         start = time.time()
+        logging.info(f"Starting Whisper at {start} on {outfile_name} writing to {args.workdir}")
         result = subprocess.run([
-            "conda",
-            "run",
-            "--name",
             "whisperx",
-            "whisperx",
-            "--model",
-            "tiny.en",
+            f"--model={args.model}",
+            f"--compute_type={args.compute_type}",
             "--language=en",
-            "--thread=%d" % args.threads,
-            "--hf_token",
-            "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",
+            f"--thread={args.threads}",
+            f"--hf_token={args.hf_token}",
             "--diarize",
-            "--output_dir",
-            WORKING_DIR,
+            "--output_format=json",
+            f"--output_dir={str(args.workdir)}",
             "--",
-            vid_path])
+            str(args.workdir.joinpath(outfile_name))])
         end = time.time()
         logging.info("Whisper took: %d seconds" % (end - start))
         
-        #I don't need to toush gcloud in this script for now, so I'll just print the output
-        """
-        if result.returncode == 0:
-            logging.info("Uploading results")
-            result = subprocess.run([
-                "gcloud",
-                "storage",
-                "cp",
-                "%s.json" % name,
-                "%s.srt" % name,
-                "%s.tsv" % name,
-                "%s.txt" % name,
-                "%s.vtt" % name,
-                gs_path])
+        # Upload json transcript.
+        transcript_json = args.workdir.joinpath(f"{vid}.json").read_text()
+        logging.info(f"Uploading transcript json {len(transcript_json)} bytes")
+        response = requests.put(
+            make_endpoint_url("transcript"),
+            json={**AUTH_PARAMS, 'category': category, 'transcripts': {"en": transcript_json}, 'vid': vid})
 
-        if result.returncode == 0:
-            logging.info("Marking as processed")
-            subprocess.run([
-                "gcloud",
-                "storage",
-                "rm",
-                "%s.new_download" % vid])
-        """
+        if response.status_code != 200:
+            logging.error(f"Unable to upload transcript {response.json()}");
+            continue
+
+        logging.info(f"Deleting video from queue")
+        response = requests.delete(
+            make_endpoint_url("video_queue"),
+            json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
+        if response.status_code != 200:
+            logging.error(f"Unable to delete queue item {response.json()}");
+            continue
+
 
 def main():
     parser = argparse.ArgumentParser(
             prog='WhisperX transcription worker.',
             description='Downloads audio from google cloud bucket tree and runs WhisperX on it')
+    parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
+    parser.add_argument('-w', '--workdir', dest='workdir', metavar="WORK_DIR", type=pathlib.Path,
+                        help='working directory for temp files',
+                        required=True)
     parser.add_argument('-t', '--threads', dest='threads', metavar="NUM_THREADS", type=int,
                         help='number of threads to run',
                         required=True)
-    parser.add_argument('-d', '--debug', dest='debug', help='Enable debug logging', action=argparse.BooleanOptionalAction)
+    parser.add_argument('-x', '--hf_token', dest='hf_token', metavar="HF_TOKEN", type=str,
+                        help='Hugging Face token',
+                        required=True)
+    parser.add_argument('-m', '--model', dest='model', metavar="MODEL", type=str,
+                        help='Downloads whisper MODEL', default="large-v3")
+    parser.add_argument('--compute_type', dest='compute_type', metavar="COMPUTE_TYPE", type=str,
+                        help='The compute type to use', default="float16")
+    parser.add_argument('-s', '--shuffle', dest='shuffle', metavar="SHUFFLE", type=argparse.BooleanOptionalAction,
+                        help='Shuffle video list as poorman race reduction')
+    parser.add_argument('-c', '--cache', dest='cache', help='Do not redownload files if they are there', action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
-    init_app()
-
-    vid_list = get_vid_list()
+    init_app(args)
+    vid_list = [(category_tuple[0], vid) for category_tuple in get_vid_list().items() for vid in category_tuple[1] ]
 
     # Poorman race reduction between workers.
-    #random.shuffle(vid_list) 
+    if args.shuffle:
+        random.shuffle(vid_list)
+    logging.info(f"Found {len(vid_list)} videos")
+    logging.debug(vid_list)
 
-    #process_vids(vid_list)
+    process_vids(vid_list, args)
 
 
 if __name__ == "__main__":

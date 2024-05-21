@@ -3,23 +3,27 @@ import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnReque
 import { getVideosForCategory } from './youtube.js';
 
 async function getVideoQueue(req, res) {
-  const category = sanitizeCategory(req.query.category);
-  if (!category) {
-    return res.status(400).send(makeResponseJson(false, "Expects category"));
-  }
-
   if (!req.query.user_id) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const auth_code = (await getCategoryPrivateDb(req.query.category)
+  const auth_code = (await getCategoryPrivateDb('_admin')
       .child('vast').child(req.query.user_id).once("value")).val();
 
   if (req.query.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
   }
 
-  const new_vids = (await getCategoryPrivateDb(category).child('new_vids').once("value")).val();
+  const new_vids = {};
+  for (const category of getAllCategories()) {
+    const category_vids = (await getCategoryPrivateDb(category).child('new_vids').once("value")).val();
+    if (category_vids) {
+      new_vids[category] = category_vids;
+    } else {
+      new_vids[category] = [];
+    }
+  }
+
   return res.status(200).send(makeResponseJson(true, "New vids", new_vids));
 }
 
@@ -40,7 +44,7 @@ async function findNewVideos(req, res) {
       }
 
       if (!metadata_snapshot || !metadata_snapshot.child(vid.id).exists()) {
-        new_video_ids[vid.id] =  { add: add_ts, start: "", vast_instance: "" };
+        new_video_ids[vid.id] =  { add: add_ts, lease_expires: "", vast_instance: "" };
       }
     }
 
@@ -90,8 +94,7 @@ async function removeVastInstance(req, res) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const vast_ref = getCategoryPrivateDb('_admin')
-      .child('vast').child(req.body.user_id).once("value");
+  const vast_ref = getCategoryPrivateDb('_admin').child('vast').child(req.body.user_id);
   const auth_code = (await vast_ref.once("value")).val();
 
   if (req.body.auth_code !== auth_code) {
@@ -121,11 +124,8 @@ async function updateEntry(req, res) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
   }
 
-  if (!req.body.vast_instance) {
-    return res.status(400).send(makeResponseJson(false, "missing vast_instance"));
-  }
-
-  const started_ts = new Date();
+  const lease_expire_ts = new Date();
+  lease_expire_ts.setTime(lease_expire_ts.getTime() + (2*60*60*1000));
 
   const queue_ref = getCategoryPrivateDb(category).child('new_vids');
   const existing_vids = (await queue_ref.once("value")).val();
@@ -136,8 +136,8 @@ async function updateEntry(req, res) {
       updated_ids.push(vid);
       all_sets.push(queue_ref.child(vid).set(
             { ...existing_vids[vid],
-              vast_instance: req.body.vast_instance,
-              start: started_ts.toISOString(),
+              vast_instance: req.body.user_id,
+              lease_expires: lease_expire_ts.toISOString(),
             }));
     }
   }
