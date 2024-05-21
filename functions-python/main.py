@@ -56,7 +56,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
                 args="",
                 cancel_unavail=True,
                 ssh=True,
-                env=f"-e DATA_DIRECTORY=/workspace/ -e JUPYTER_DIR=/ -e API_PASSWORD={instance_password} -e 'rdcihhc4la-uw.a.run.app'"))
+                env=f"-e DATA_DIRECTORY=/workspace/ -e JUPYTER_DIR=/ -e API_PASSWORD={instance_password} -e API_BASE_URL=rdcihhc4la-uw.a.run.app"))
 
             if create_result['success']:
                 print(f"Created instance {create_result['new_contract']}")
