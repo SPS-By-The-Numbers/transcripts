@@ -16,7 +16,7 @@ const nextConfig = {
   images: {
     loader: 'akamai',
     path: '',
-  },
+  }
 }
 
 module.exports = withMDX(nextConfig)
