@@ -21,7 +21,7 @@ AUTH_PARAMS = {
 
 def make_endpoint_url(endpoint):
     api_url = os.environ['API_BASE_URL']
-    return f"{api_url}/{endpoint}"
+    return f"https://{endpoint}-{api_url}"
 
 
 def init_app(args):
