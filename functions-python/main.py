@@ -37,7 +37,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
                 break
 
             # Find an offer
-            offers_json = vast.search_offers(storage=DISK_GB, order="dph_total", query='cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=8 reliability>=0.95 dph<2')
+            offers_json = vast.search_offers(storage=DISK_GB, order="dph_total", query='cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=8 reliability>=0.95 dph<2 total_flops>=10')
             cheapest = json.loads(offers_json)[0]
             print(f"cheapest ask id {cheapest['ask_contract_id']} cost {json.dumps(cheapest)}")
 
@@ -48,10 +48,10 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
             # Create the instance
             create_result = json.loads(vast.create_instance(
                 ID=cheapest["ask_contract_id"],
-                image="awongdev/transcribe:0.3",
+                image="awongdev/transcribe:0.4",
                 label=INSTANCE_LABEL,
-                # Kill the server after 2 hours if it's still running.
-                onstart_cmd=f"env | grep _ >> /etc/environment; /workspace/app/onstart.sh 120 {int(cheapest['cpu_cores_effective'])} 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",
+                # Kill the server after 30 mins if it's still running.
+                onstart_cmd=f"env | grep _ >> /etc/environment; nohup /workspace/app/onstart_hook.sh {int(cheapest['cpu_cores_effective'])} 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 30 10 &",
                 disk=DISK_GB,
                 args="",
                 cancel_unavail=True,

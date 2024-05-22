@@ -12,4 +12,4 @@ read -r -d '' DATA << EOF
 EOF
 
 curl -v -X DELETE -H "Content-Type: application/json" --data "${DATA}" ${API_BASE_URL}/vast
-vastai stop instance $VAST_CONTAINERLABEL
+vastai stop instance $VAST_CONTAINERID
