@@ -2,6 +2,10 @@
 
 from pytube import YouTube
 
+# Hackk around age-restriction on videos: https://stackoverflow.com/a/78267693
+from pytube.innertube import _default_clients
+_default_clients["ANDROID_MUSIC"] = _default_clients["ANDROID_CREATOR"]
+
 import argparse
 import json
 import os
