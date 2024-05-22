@@ -70,8 +70,7 @@ async function removeItem(req, res) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const auth_code = (await getCategoryPrivateDb('_admin')
-      .child('vast').child(req.body.user_id).once("value")).val();
+  const auth_code = (await getAuthCode(req.body.user_id));
 
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
