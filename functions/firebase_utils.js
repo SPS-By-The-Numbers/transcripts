@@ -42,8 +42,10 @@ function initializeFirebase() {
   initializeApp();
 }
 
-async function verifyIdToken(token) {
-  return await getAuth().verifyIdToken(token);
+async function getUser(token) {
+  const decodedIdToken = await getAuth().verifyIdToken(token);
+  console.error("decoded Id Token", decodedIdToken);
+  return getAuth().getUser(decodedIdToken.uid);
 }
 
 async function getAuthCode(user_id) {
@@ -52,4 +54,4 @@ async function getAuthCode(user_id) {
 }
 
 
-export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, verifyIdToken, jsonOnRequest, getAuthCode };
+export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, getUser, jsonOnRequest, getAuthCode };
