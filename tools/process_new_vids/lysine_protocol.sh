@@ -11,5 +11,5 @@ read -r -d '' DATA << EOF
 {"user_id": "${CONTAINER_ID}", "auth_code": "${API_PASSWORD}"}
 EOF
 
-curl -v -X DELETE -H "Content-Type: application/json" --data "${DATA}" ${API_BASE_URL}/vast
+curl -v -X DELETE -H "Content-Type: application/json" --data "${DATA}" https://vast-${API_BASE_URL}
 vastai destroy instance $CONTAINER_ID
