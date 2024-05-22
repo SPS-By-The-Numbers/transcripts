@@ -12,6 +12,8 @@ RUN <<EOF bash
   whisperx --model=large-v3 --language=en --thread=4 --hf_token=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 --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 
+RUN pip install vastai
+
 COPY requirements.txt /workspace/app/
 RUN  pip install -r requirements.txt
 
