@@ -14,7 +14,7 @@ import time
 
 WORKING_DIR='/tmp/workspace/app/transcribe'
 AUTH_PARAMS = {
-    'user_id': os.environ['VAST_CONTAINERLABEL'],
+    'user_id': os.environ['CONTAINER_ID'],
     'auth_code': os.environ['API_PASSWORD'],
 }
 
@@ -35,10 +35,10 @@ def init_app(args):
 
 
 def get_vid_list():
-    response = requests.get(make_endpoint_url("video_queue"), params=AUTH_PARAMS)
+    response = requests.get(make_endpoint_url("video-queue"), params=AUTH_PARAMS)
 
     if response.status_code != 200:
-      raise Exception(response.json())
+      raise Exception(response.text)
     return response.json()['data']
 
 
@@ -49,7 +49,7 @@ def process_vids(vid_list, args):
         # Mark us as starting work on this video. Failure okay as transcription is
         # semantically idempotent and this is just an advisory lease.
         response = requests.patch(
-            make_endpoint_url("video_queue"),
+            make_endpoint_url("video-queue"),
             json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
 
         if response.status_code != 200:
@@ -103,7 +103,7 @@ def process_vids(vid_list, args):
                 'category': category,
                 'transcripts': {"en": transcript_json},
                 'vid': vid,
-                'metadata'=metadata})
+                'metadata': metadata})
 
         if response.status_code != 200:
             logging.error(f"Unable to upload transcript {response.json()}");
@@ -111,7 +111,7 @@ def process_vids(vid_list, args):
 
         logging.info(f"Deleting video from queue")
         response = requests.delete(
-            make_endpoint_url("video_queue"),
+            make_endpoint_url("video-queue"),
             json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
         if response.status_code != 200:
             logging.error(f"Unable to delete queue item {response.json()}");

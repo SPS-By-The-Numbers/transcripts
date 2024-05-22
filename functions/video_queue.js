@@ -2,13 +2,17 @@ import { makeResponseJson, getAllCategories, sanitizeCategory } from './utils.js
 import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest } from './firebase_utils.js';
 import { getVideosForCategory } from './youtube.js';
 
+async function getAuthCode(user_id) {
+  return (await getCategoryPrivateDb('_admin')
+      .child('vast').child(user_id).child('password').once("value")).val();
+}
+
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const auth_code = (await getCategoryPrivateDb('_admin')
-      .child('vast').child(req.query.user_id).once("value")).val();
+  const auth_code = (await getAuthCode(req.query.user_id));
 
   if (req.query.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
@@ -95,7 +99,7 @@ async function removeVastInstance(req, res) {
   }
 
   const vast_ref = getCategoryPrivateDb('_admin').child('vast').child(req.body.user_id);
-  const auth_code = (await vast_ref.once("value")).val();
+  const auth_code = (await getAuthCode(req.query.user_id));
 
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
@@ -117,8 +121,7 @@ async function updateEntry(req, res) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const auth_code = (await getCategoryPrivateDb('_admin')
-      .child('vast').child(req.body.user_id).once("value")).val();
+  const auth_code = (await getAuthCode(req.query.user_id));
 
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
