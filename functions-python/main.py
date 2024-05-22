@@ -60,7 +60,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
 
             if create_result['success']:
                 print(f"Created instance {create_result['new_contract']}")
-                db.reference(f"/transcripts/private/{category}/vast/{create_result['new_contract']}").set({
+                db.reference(f"/transcripts/private/_admin/vast/{create_result['new_contract']}").set({
                   'password': instance_password,
                   'start': start_time,
                   })

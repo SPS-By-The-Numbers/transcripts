@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { getDefaultBucket } from './firebase_utils.js';
 import { makeResponseJson, makePublicPath } from './utils.js';
-import { getCategoryPublicDb, getCategoryPrivateDb } from './firebase_utils.js';
+import { getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
 
 const LANGUAGES = new Set(['en']);
 
@@ -35,8 +35,7 @@ const transcript = onRequest(
         return res.status(400).send(makeResponseJson(false, 'Missing vid'));
       }
 
-      const auth_code = (await getCategoryPrivateDb('_admin')
-          .child('vast').child(req.body.user_id).once("value")).val();
+      const auth_code = (await getAuthCode(req.body.user_id));
 
       if (req.body.auth_code !== auth_code) {
         return res.status(401).send(makeResponseJson(false, "invalid auth code"));

@@ -46,4 +46,10 @@ async function verifyIdToken(token) {
   return await getAuth().verifyIdToken(token);
 }
 
-export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, verifyIdToken, jsonOnRequest };
+async function getAuthCode(user_id) {
+  return (await getCategoryPrivateDb('_admin')
+      .child('vast').child(user_id).child('password').once("value")).val();
+}
+
+
+export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, verifyIdToken, jsonOnRequest, getAuthCode };
