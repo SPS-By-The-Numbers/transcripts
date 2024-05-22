@@ -136,8 +136,8 @@ def main():
                         help='Downloads whisper MODEL', default="large-v3")
     parser.add_argument('--compute_type', dest='compute_type', metavar="COMPUTE_TYPE", type=str,
                         help='The compute type to use', default="float16")
-    parser.add_argument('-s', '--shuffle', dest='shuffle', metavar="SHUFFLE", type=argparse.BooleanOptionalAction,
-                        help='Shuffle video list as poorman race reduction')
+    parser.add_argument('-s', '--shuffle', dest='shuffle', help='Shuffle video list as poorman race reduction',
+                        action=argparse.BooleanOptionalAction)
     parser.add_argument('-c', '--cache', dest='cache', help='Do not redownload files if they are there', action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
