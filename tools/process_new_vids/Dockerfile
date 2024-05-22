@@ -18,4 +18,4 @@ COPY requirements.txt /workspace/app/
 RUN  pip install -r requirements.txt
 
 
-COPY --chmod=755 transcribe_worker.py lysine_protocol.sh onstart.sh /workspace/app
+COPY --chmod=755 transcribe_worker.py lysine_protocol.sh onstart_hook.sh /workspace/app
