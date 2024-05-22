@@ -2,7 +2,7 @@ import isEqual from 'lodash.isequal';
 import { onRequest } from "firebase-functions/v2/https";
 import { makeResponseJson } from './utils.js';
 
-import { getCategoryPublicDb, getCategoryPrivateDb, verifyIdToken } from './firebase_utils.js';
+import { getCategoryPublicDb, getCategoryPrivateDb, getUser } from './firebase_utils.js';
 
 // POST to speaker info with JSON body of type:
 // {
@@ -21,9 +21,9 @@ const speakerinfo = onRequest(
        return res.status(400).send(makeResponseJson(false, "Expects JSON"));
     }
 
-    let decodedIdToken = null;
+    let user = null;
     try {
-      decodedIdToken = verifyIdToken(req.body?.auth);
+      user = getUser(req.body?.auth);
     } catch (error) {
       return res.status(400).send(makeResponseJson(false, "Did you forget to login?"));
     }
@@ -84,13 +84,14 @@ const speakerinfo = onRequest(
       // by public.
       const txnId = `${(new Date).toISOString().split('.')[0]}Z`;
       const auditRef = privateRoot.child(`audit/${txnId}`);
+      console.error("User ", user);
       auditRef.set({
         name: 'speakerinfo POST',
         headers: req.headers,
         body: req.body,
-        email: decodedIdToken.email,
-        emailVerified: decodedIdToken.email_verified,
-        uid: decodedIdToken.uid
+        email: user.email || "",
+        emailVerified: user.emailVerified || false,
+        uid: user.uid || ""
         });
 
       const videoRef = publicRoot.child(`v/${videoId}/speakerInfo`);
