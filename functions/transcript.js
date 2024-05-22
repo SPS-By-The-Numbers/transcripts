@@ -50,11 +50,14 @@ const transcript = onRequest(
 
       for (const [lang, contents] of Object.entries(transcripts)) {
         const bucket = getDefaultBucket();
-        const filename = makePublicPath(category, `${req.body.vid}.${lang}.json`);
+        const filename = makePublicPath(category, 'json', `${req.body.vid}.${lang}.json`);
         const file = bucket.file(filename);
+        console.log(`Writing ${lang} json with ${contents.length} to ${filename}`);
+
         const passthroughStream = new stream.PassThrough();
         passthroughStream.write(contents);
         passthroughStream.end();
+
         await pipeline(passthroughStream, createGzip(), file.createWriteStream({
           metadata: {
             contentEncoding: 'gzip'
@@ -76,18 +79,19 @@ const transcript = onRequest(
 
 function setMetadata(category, metadata) {
   const category_public = getCategoryPublicDb(category);
-  if (!metadata || !Object.keys(metadata).length) {
+  if (!metadata || !metadata['video_id']) {
     console.log(`Invalid metadata: `, metadata);
     return false;
   }
-  category_public.child('metadata').update(metadata);
+
+  const video_id = metadata['video_id'];
+  category_public.child('metadata').child(video_id).set(metadata);
 
   // Add to the index.
-  for (const [vid, info] of Object.entries(metadata)) {
-     const published = new Date(info.publish_date).toISOString().split('T')[0];
-     category_public.child('index').child('date').child(published)
-         .child(vid).set(info);
-  }
+  const published = new Date(metadata['publish_date']).toISOString().split('T')[0];
+  category_public.child('index').child('date').child(published)
+    .child(video_id).set(metadata);
+
   return true;
 }
 
