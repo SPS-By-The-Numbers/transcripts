@@ -128,7 +128,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
             ]))
     };
 
-    fetch('/api/speakerinfo',
+    fetch('https://speakerinfo-rdcihhc4la-uw.a.run.app',
       {
         method: "POST",
         headers: {
