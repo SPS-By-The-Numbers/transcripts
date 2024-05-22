@@ -45,7 +45,7 @@ function initializeFirebase() {
 async function getUser(token) {
   const decodedIdToken = await getAuth().verifyIdToken(token);
   console.error("decoded Id Token", decodedIdToken);
-  return getAuth().getUser(decodedIdToken.uid);
+  return await getAuth().getUser(decodedIdToken.uid);
 }
 
 async function getAuthCode(user_id) {
