@@ -14,6 +14,12 @@ import { useTranscriptContext } from 'components/TranscriptControlProvider'
 
 const useMount = (fun) => useEffect(fun, []);
 
+type SpeakerInfoSubmitStatus = {
+  has_submitted: boolean;
+  last_status: number;
+  in_progress: boolean;
+};
+
 type DbInfoEntry ={
   name : string;
   tags : Array<string>;
@@ -38,6 +44,22 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 let appCheck;
 
+function makeSubmitStatusSuffix(submitStatus: SpeakerInfoSubmitStatus): String {
+  if (!submitStatus.has_submitted) {
+    return '';
+  }
+
+  if (submitStatus.in_progress) {
+    return ' - submitting';
+  }
+
+  if (submitStatus.last_status == 200) {
+    return ' - success!';
+  }
+
+  return ` - failed: ${submitStatus.last_status}`;
+}
+
 // speakerInfo has the name, tags, etc.
 // number is a list of speaker keys like [0, 1, 2, .. ]
 export default function SpeakerInfoControl({category, className, speakerNums, videoId, initialExistingNames, initialExistingTags} : SpeakerInfoControlParams) {
@@ -45,6 +67,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   const [existingTags, setExistingTags] = useState<Set<string>>(initialExistingTags);
   const [authState, setAuthState] = useState<object>({});
   const {speakerInfo, setSpeakerInfo} = useTranscriptContext();
+  const [submitStatus, setSubmitStatus] = useState<SpeakerInfoSubmitStatus>({last_status: 0});
 
   function handleNameChange(speakerNum : number, selectedOption : OptionType) {
     const newSpeakerInfo = {...speakerInfo};
@@ -128,6 +151,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
             ]))
     };
 
+    setSubmitStatus({...submitStatus, has_submitted: true, in_progress: true});
     fetch('https://speakerinfo-rdcihhc4la-uw.a.run.app',
       {
         method: "POST",
@@ -136,7 +160,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-      });
+      }).then(response => setSubmitStatus({has_submitted: true, in_progress: false, last_status: response.status}));
   }
 
   // Must be deleted once
@@ -217,7 +241,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
         <button key="submit-button"
           className="px-4 py-2 m-2 bg-red-500 rounded"
           onClick={handleSubmit}>
-            Submit Changes as {auth.currentUser.email}
+            Submit Changes as {auth.currentUser.email}{makeSubmitStatusSuffix(submitStatus)}
         </button>
       );
     } else {
