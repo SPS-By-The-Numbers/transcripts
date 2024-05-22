@@ -44,78 +44,81 @@ def get_vid_list():
 
 def process_vids(vid_list, args):
     for category, vid in vid_list:
-        logging.info(f"Processing {category} {vid}")
+        try:
+            logging.info(f"Processing {category} {vid}")
 
-        # Mark us as starting work on this video. Failure okay as transcription is
-        # semantically idempotent and this is just an advisory lease.
-        response = requests.patch(
-            make_endpoint_url("video-queue"),
-            json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
+            # Mark us as starting work on this video. Failure okay as transcription is
+            # semantically idempotent and this is just an advisory lease.
+            response = requests.patch(
+                make_endpoint_url("video-queue"),
+                json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
 
-        if response.status_code != 200:
-            logging.error(f"{response.status_code} {response.text}: Server did not allow start. Someone else might have gotten to it first. Skip.");
-            continue
+            if response.status_code != 200:
+                logging.error(f"{response.status_code} {response.text}: Server did not allow start. Someone else might have gotten to it first. Skip.");
+                continue
 
-        logging.info(f"Leased {category} {vid}. Downloading audio")
+            logging.info(f"Leased {category} {vid}. Downloading audio")
 
-        # Download the audio file.
-        outfile_name = f"{vid}.mp4"
-        video = YouTube.from_id(vid)
-        audio_streams = video.streams.filter(only_audio=True).order_by('abr')
-        audio_streams.first().download(
-                output_path=str(args.workdir),
-                filename=outfile_name,
-                max_retries=5,
-                skip_existing=args.cache)
+            # Download the audio file.
+            outfile_name = f"{vid}.mp4"
+            video = YouTube.from_id(vid)
+            audio_streams = video.streams.filter(only_audio=True).order_by('abr')
+            audio_streams.first().download(
+                    output_path=str(args.workdir),
+                    filename=outfile_name,
+                    max_retries=5,
+                    skip_existing=args.cache)
 
-        # Run whisper for transcription
-        start = time.time()
-        logging.info(f"Starting Whisper at {start} on {outfile_name} writing to {args.workdir}")
-        result = subprocess.run([
-            "whisperx",
-            f"--model={args.model}",
-            f"--compute_type={args.compute_type}",
-            "--language=en",
-            f"--thread={args.threads}",
-            f"--hf_token={args.hf_token}",
-            "--diarize",
-            "--output_format=json",
-            f"--output_dir={str(args.workdir)}",
-            "--",
-            str(args.workdir.joinpath(outfile_name))])
-        end = time.time()
-        logging.info("Whisper took: %d seconds" % (end - start))
+            # Run whisper for transcription
+            start = time.time()
+            logging.info(f"Starting Whisper at {start} on {outfile_name} writing to {args.workdir}")
+            result = subprocess.run([
+                "whisperx",
+                f"--model={args.model}",
+                f"--compute_type={args.compute_type}",
+                "--language=en",
+                f"--thread={args.threads}",
+                f"--hf_token={args.hf_token}",
+                "--diarize",
+                "--output_format=json",
+                f"--output_dir={str(args.workdir)}",
+                "--",
+                str(args.workdir.joinpath(outfile_name))])
+            end = time.time()
+            logging.info("Whisper took: %d seconds" % (end - start))
 
-        # Upload json transcript.
-        metadata = {
-            'title': video.title,
-            'video_id': video.video_id,
-            'channel_id': video.channel_id,
-            'description': video.description,
-            'publish_date': video.publish_date.isoformat(),
-        }
-        transcript_json = args.workdir.joinpath(f"{vid}.json").read_text()
-        logging.info(f"Uploading transcript json {len(transcript_json)} bytes")
-        response = requests.put(
-            make_endpoint_url("transcript"),
-            json={
-                **AUTH_PARAMS,
-                'category': category,
-                'transcripts': {"en": transcript_json},
-                'vid': vid,
-                'metadata': metadata})
+            # Upload json transcript.
+            metadata = {
+                'title': video.title,
+                'video_id': video.video_id,
+                'channel_id': video.channel_id,
+                'description': video.description,
+                'publish_date': video.publish_date.isoformat(),
+            }
+            transcript_json = args.workdir.joinpath(f"{vid}.json").read_text()
+            logging.info(f"Uploading transcript json {len(transcript_json)} bytes")
+            response = requests.put(
+                make_endpoint_url("transcript"),
+                json={
+                    **AUTH_PARAMS,
+                    'category': category,
+                    'transcripts': {"en": transcript_json},
+                    'vid': vid,
+                    'metadata': metadata})
 
-        if response.status_code != 200:
-            logging.error(f"Unable to upload transcript {response.json()}");
-            continue
+            if response.status_code != 200:
+                logging.error(f"Unable to upload transcript {response.json()}");
+                continue
 
-        logging.info(f"Deleting video from queue")
-        response = requests.delete(
-            make_endpoint_url("video-queue"),
-            json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
-        if response.status_code != 200:
-            logging.error(f"Unable to delete queue item {response.json()}");
-            continue
+            logging.info(f"Deleting video from queue")
+            response = requests.delete(
+                make_endpoint_url("video-queue"),
+                json={**AUTH_PARAMS, 'category': category, 'video_ids': [vid]})
+            if response.status_code != 200:
+                logging.error(f"Unable to delete queue item {response.json()}");
+                continue
+        except Exception:
+            logging.exception("Transcribe failed for " + vid)
 
 
 def main():
