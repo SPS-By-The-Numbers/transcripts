@@ -51,7 +51,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
                 image="awongdev/transcribe:0.3",
                 label=INSTANCE_LABEL,
                 # Kill the server after 2 hours if it's still running.
-                onstart_cmd=f"env | grep _ >> /etc/environment; /workspace/app/onstart.sh 120 {cheapest['cpu_cores_effective']} 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",
+                onstart_cmd=f"env | grep _ >> /etc/environment; /workspace/app/onstart.sh 120 {int(cheapest['cpu_cores_effective'])} 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",
                 disk=DISK_GB,
                 args="",
                 cancel_unavail=True,
