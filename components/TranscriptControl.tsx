@@ -7,9 +7,14 @@ type TranscriptControlParams = {
 
 export default function TranscriptControl({onTimeStampSelected, children} : TranscriptControlParams) {
   function handleClick(e): void {
-    if (e.target.tagName === 'SPAN' && e.target.id) {
-      onTimeStampSelected(e.target.id);
+    if (e.target.tagName !== 'SPAN') {
     }
+    const tsClassName = Array.from(e.target.classList).find(e=>e.startsWith('ts-'));
+    if (!tsClassName) {
+      return;
+    }
+
+    onTimeStampSelected(tsClassName.slice(3));
   }
 
   return (

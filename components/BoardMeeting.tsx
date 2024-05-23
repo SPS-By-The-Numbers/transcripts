@@ -36,45 +36,27 @@ export default function BoardMeeting({
     initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
 
-  const speakerBubbles : React.ReactNode[] = [];
-  let speakerNum : number = UnknownSpeakerNum;
-  let curWordAnchors : React.ReactNode[] = []
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  for (const [i, segment] of Object.entries(Object.values(transcript.segments))) {
-    // If speaker changed, create a SpeakerBubble and reset curWordAnchors.
-    if (speakerNum && speakerNum !== segment.speakerNum && curWordAnchors.length > 0) {
-      speakerBubbles.push(
+  const speakerBubbles = transcript.segments.map((segment, segmentNum) => {
+      speakerNums.add(segment.speakerNum);
+
+      return (
         <SpeakerBubble
-            key={i}
-            speakerNum={ speakerNum }>
-          {curWordAnchors}
+            key={ segmentNum }
+            speakerNum={ segment.speakerNum }>
+          {
+            segment.words.map((word, wordNum) => (
+                <span key={ `${segmentNum}-${wordNum}` }
+                  className={ `ts-${toTimeAnchor(segment.starts[wordNum])}` }>
+                  { word }
+                </span>
+            ))
+          }
         </SpeakerBubble>
       );
-      curWordAnchors = [];
-    }
-    speakerNum = segment.speakerNum;
-    speakerNums.add(speakerNum);
-    for (let wordNum = 0; wordNum < segment.words.length; wordNum++) {
-      curWordAnchors.push(
-        <span key={`${i}-${wordNum}`}
-          id={toTimeAnchor(segment.starts[wordNum])}>
-          { segment.words[wordNum] }
-        </span>);
-    }
-  }
-
-  // Catch the last bubble.
-  if (curWordAnchors.length > 0) {
-    speakerBubbles.push(
-      <SpeakerBubble
-          key={'last'}
-          speakerNum={ speakerNum }>
-        {curWordAnchors}
-      </SpeakerBubble>
-    );
-  }
+  });
 
   const transcriptHeader = <TranscriptHeader
             category={category}

@@ -72,7 +72,7 @@ export async function generateMetadata(
 
 export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
-    const transcript = await getTranscript(params.category, params.videoId, false);
+    const transcript = await getTranscript(params.category, params.videoId, 'en', true, false);
     const speakerControlInfo = await loadSpeakerControlInfo(params.category, params.videoId);
 
     return (

@@ -51,11 +51,12 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
     if (event.target) {
       ytElement.current = event.target;
       if (window.location.hash) {
-        const selString = `span[id="${window.location.hash.substr(1)}"]`;
-        const el = document.querySelector(selString) as HTMLSpanElement;
-        if (el) {
+        const hhmmss = window.location.hash.substr(1);
+        const tsClassName = `ts-${window.location.hash.substr(1)}`;
+        const spans = document.getElementsByClassName(tsClassName) as HTMLSpanElement[];
+        for (const el of spans) {
           el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-          jumpToTimeInternal(toSec(el.id));
+          jumpToTimeInternal(toSec(hhmmss));
         }
       }
     }
