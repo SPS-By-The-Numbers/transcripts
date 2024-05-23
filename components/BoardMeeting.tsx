@@ -2,6 +2,7 @@ import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
 import BoardMeetingControl from 'components/BoardMeetingControl';
 import type { TranscriptData } from 'utilities/transcript'
+import { toHhmmss } from 'utilities/transcript'
 import { UnknownSpeakerNum } from 'utilities/speaker-info'
 
 type BoardMeetingParams = {
@@ -14,8 +15,7 @@ type BoardMeetingParams = {
 
 function toTimeAnchor(seconds) {
     if (seconds) {
-        const hhmmss = new Date(seconds * 1000).toISOString().slice(11, 19);
-        return `${hhmmss}`;
+        return `${toHhmmss(seconds)}`;
     }
     return '';
 }

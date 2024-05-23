@@ -98,3 +98,11 @@ export async function getTranscript(category: string, id: string, language: stri
   return { segments: [], language };
 }
 
+export function toHhmmss(seconds: number) {
+  return new Date(seconds * 1000).toISOString().slice(11, 19);
+}
+
+export function fromHhmmss(hhmmss: string): number {
+    const parts = hhmmss.split(':');
+    return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
+}
