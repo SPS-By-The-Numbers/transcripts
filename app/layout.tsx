@@ -3,6 +3,9 @@ import Nav from 'components/Nav'
 import Script from 'next/script'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-static';
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'SPS By The Numbers - Transcriptions',
   description: 'Public meeting transcriptions from SPS By The Numbers',
