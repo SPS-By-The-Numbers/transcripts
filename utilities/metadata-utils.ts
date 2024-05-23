@@ -1,9 +1,6 @@
-import { get, child } from "firebase/database"
+import { get, child, QueryConstraint, startAt, endAt, query, DataSnapshot, orderByKey } from "firebase/database"
 import { dbPublicRoot } from 'utilities/firebase';
-import { isAfter, isBefore, parseISO } from 'date-fns';
-import { parseDateFromPath } from './path-utils';
-
-const pathDateFormat = 'yyyy-MM-dd';
+import { parseISO } from 'date-fns';
 
 export type VideoData = {
     videoId: string,
@@ -63,34 +60,28 @@ export async function getAllVideosForPublishDate(category: string, datePath: str
 export async function getAllVideosForDateRange(
     category: string, startDate: string | null, endDate: string | null
 ): Promise<VideoData[]> {
-    const allDates: string[] = await getDatesForCategory(category);
-    const start: Date | null = startDate !== null ?
-        parseDateFromPath(startDate) : null;
-    const end: Date | null = endDate !== null ?
-        parseDateFromPath(endDate) : null;
+    const constraints: QueryConstraint[] = [orderByKey()];
 
-    const filteredDates: string[] = allDates.filter((dateString: string): boolean => {
-        const date: Date = parseDateFromPath(dateString);
-
-        if (start !== null && isBefore(date, start)) {
-            return false;
-        }
-
-        if (end !== null && isAfter(date, end)) {
-            return false;
-        }
-
-        return true;
-    });
-
-    const filteredVideos: VideoData[] = [];
-
-    for (const date of filteredDates) {
-        const curVideos: VideoData[] = await getAllVideosForPublishDate(category, date);
-        filteredVideos.push(...curVideos);
+    if (startDate !== null) {
+        constraints.push(startAt(startDate));
     }
 
-    return filteredVideos;
+    if (endDate !== null) {
+        constraints.push(endAt(endDate));
+    }
+
+    const data: DataSnapshot = await get(query(child(dbPublicRoot, `${category}/index/date`), ...constraints));
+    const videosByDate: {
+        [dateString: string]: {
+            [videoId: string]: VideoData
+        }
+    } = data.val();
+
+    const videos: VideoData[] = Object.entries(videosByDate).flatMap(([dateString, videosById]) =>
+        Object.entries(videosById).map(([videoId, videoData]) => metadataToVideoData(videoData))
+    );
+
+    return videos;
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {

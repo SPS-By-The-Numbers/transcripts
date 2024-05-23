@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { VideoData, getAllCategories } from '../utilities/metadata-utils';
+import { VideoData, getAllCategories, getAllVideosForDateRange } from '../utilities/metadata-utils';
 import { formatDateForPath, getVideoPath } from 'utilities/path-utils';
 
 type DateSelection = {
-  start: Date | null,
-  end: Date | null
+  start: string | null,
+  end: string | null
 }
 
 export default function Index() {
@@ -15,7 +15,7 @@ export default function Index() {
     useState('sps-board');
 
   const [dateSelection, updateDateSelection]: [DateSelection, any] =
-    useState({start: new Date(2024, 2, 1), end: null});
+    useState({start: '2024-03-01', end: null});
 
   const [videos, setVideos]: [VideoData[], any] = useState([]);
 
@@ -25,31 +25,18 @@ export default function Index() {
       return () => {};
     }
 
-    const searchUrl: URL = new URL(`${window.location.origin}/api/search`);
+    let ignore = false;
 
-    if (category !== null) {
-      searchUrl.searchParams.append('category', category);
-    }
-
-    if (dateSelection.start !== null) {
-      searchUrl.searchParams.append('start', formatDateForPath(dateSelection.start));
-    }
-
-    if (dateSelection.end !== null) {
-      searchUrl.searchParams.append('end', formatDateForPath(dateSelection.end));
-    }
-
-    const abortController = new AbortController();
-    const signal: AbortSignal = abortController.signal;
-    fetch(searchUrl, { signal })
-      .then((response: Response) => response.json())
-      .then((responseJson) => {
-        setVideos(responseJson.data as VideoData[]);
+    getAllVideosForDateRange(category, dateSelection.start, dateSelection.end)
+      .then(videoData => {
+        if (!ignore) {
+          setVideos(videoData);
+        }
       });
 
-    return () => {
-      abortController.abort('parameters changed')
-    }
+      return () => {
+        ignore = true;
+      }
   }, [category, dateSelection])
 
   const videoLinks: React.ReactNode[] = videos.map(
