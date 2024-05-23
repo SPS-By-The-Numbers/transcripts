@@ -20,9 +20,9 @@
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/parser": "^7.9.0",
-    "@typescript-eslint/typescript-estree": "^7.9.0",
-    "@visx/visx": "^3.10.2",
+    "@typescript-eslint/parser": "^7.10.0",
+    "@typescript-eslint/typescript-estree": "^7.10.0",
+    "@visx/visx": "^3.10.3",
     "accessibility": "^5.0.7",
     "autoprefixer": "^10.4.19",
     "csv-reader": "^1.0.12",
@@ -31,9 +31,9 @@
     "distinct-colors": "^3.0.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
-    "firebase": "^10.12.0",
-    "firebase-admin": "^12.1.0",
-    "firebase-tools": "^13.9.0",
+    "firebase": "^10.12.1",
+    "firebase-admin": "^12.1.1",
+    "firebase-tools": "^13.10.0",
     "jstat": "^1.9.6",
     "lodash-es": "^4.17.21",
     "next": "^14.2.3",
@@ -47,13 +47,14 @@
     "react-measure": "^2.5.2",
     "react-select": "^5.8.0",
     "react-youtube": "^10.1.0",
-    "sass": "^1.77.1",
+    "sass": "^1.77.2",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
     "@types/youtube-player": "^5.5.11",
+    "react-query": "^3.39.3",
     "type-fest": "^4.18.2"
   }
 }

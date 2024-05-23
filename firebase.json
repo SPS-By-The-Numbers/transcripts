@@ -13,6 +13,7 @@
       "source": "functions-python"
     }
   ],
+
   "hosting": {
     "site": "transcripts-spsbtn",
     "source": ".",
@@ -25,12 +26,15 @@
       "region": "us-west1"
     }
   },
+
   "storage": {
     "rules": "storage.rules"
   },
+
   "database": {
     "rules": "database.rules.json"
   },
+
   "emulators": {
     "functions": {
       "port": 5001

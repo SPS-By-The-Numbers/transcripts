@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { getDefaultBucket } from './firebase_utils.js';
 import { makeResponseJson, makePublicPath } from './utils.js';
-import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient } from './firebase_utils.js';
+import { getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
 
 const LANGUAGES = new Set(['en']);
 
@@ -35,8 +35,7 @@ const transcript = onRequest(
         return res.status(400).send(makeResponseJson(false, 'Missing vid'));
       }
 
-      const auth_code = (await getCategoryPrivateDb('_admin')
-          .child('vast').child(req.body.user_id).once("value")).val();
+      const auth_code = (await getAuthCode(req.body.user_id));
 
       if (req.body.auth_code !== auth_code) {
         return res.status(401).send(makeResponseJson(false, "invalid auth code"));
@@ -51,11 +50,14 @@ const transcript = onRequest(
 
       for (const [lang, contents] of Object.entries(transcripts)) {
         const bucket = getDefaultBucket();
-        const filename = makePublicPath(category, `${req.body.vid}.${lang}.json`);
+        const filename = makePublicPath(category, 'json', `${req.body.vid}.${lang}.json`);
         const file = bucket.file(filename);
+        console.log(`Writing ${lang} json with ${contents.length} to ${filename}`);
+
         const passthroughStream = new stream.PassThrough();
         passthroughStream.write(contents);
         passthroughStream.end();
+
         await pipeline(passthroughStream, createGzip(), file.createWriteStream({
           metadata: {
             contentEncoding: 'gzip'
@@ -75,28 +77,21 @@ const transcript = onRequest(
   }
 );
 
-const start_transcribe = onRequest(
-  { cors: true, region: ["us-west1"] },
-  async (req, res) => {
-    await getPubSubClient().topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
-      return res.status(200).send(makeResponseJson(true, "transcription starte", ""));
-  }
-);
-
 function setMetadata(category, metadata) {
   const category_public = getCategoryPublicDb(category);
-  if (!metadata || !Object.keys(metadata).length) {
+  if (!metadata || !metadata['video_id']) {
     console.log(`Invalid metadata: `, metadata);
     return false;
   }
-  category_public.child('metadata').update(metadata);
+
+  const video_id = metadata['video_id'];
+  category_public.child('metadata').child(video_id).set(metadata);
 
   // Add to the index.
-  for (const [vid, info] of Object.entries(metadata)) {
-     const published = new Date(info.publish_date).toISOString().split('T')[0];
-     category_public.child('index').child('date').child(published)
-         .child(vid).set(info);
-  }
+  const published = new Date(metadata['publish_date']).toISOString().split('T')[0];
+  category_public.child('index').child('date').child(published)
+    .child(video_id).set(metadata);
+
   return true;
 }
 
@@ -134,4 +129,4 @@ const metadata = onRequest(
   }
 );
 
-export { metadata, transcript, start_transcribe };
+export { metadata, transcript };

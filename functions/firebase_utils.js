@@ -5,7 +5,7 @@ import { getStorage } from "firebase-admin/storage";
 import { getAuth } from 'firebase-admin/auth';
 import { onRequest } from "firebase-functions/v2/https";
 
-import { makePublicPath, makePrivatePath } from './utils.js';
+import { makePublicPath, makePrivatePath, makeResponseJson } from './utils.js';
 
 const STORAGE_BUCKET = 'sps-by-the-numbers.appspot.com';
 
@@ -42,8 +42,16 @@ function initializeFirebase() {
   initializeApp();
 }
 
-async function verifyIdToken(token) {
-  return await getAuth().verifyIdToken(token);
+async function getUser(token) {
+  const decodedIdToken = await getAuth().verifyIdToken(token);
+  console.error("decoded Id Token", decodedIdToken);
+  return await getAuth().getUser(decodedIdToken.uid);
 }
 
-export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, verifyIdToken, jsonOnRequest };
+async function getAuthCode(user_id) {
+  return (await getCategoryPrivateDb('_admin')
+      .child('vast').child(user_id).child('password').once("value")).val();
+}
+
+
+export { getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, getUser, jsonOnRequest, getAuthCode };
