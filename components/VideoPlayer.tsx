@@ -47,22 +47,28 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
 
   function scrollTranscriptTo(hhmmss) {
     const tsClassName = `ts-${hhmmss}`;
-    const spans = document.getElementsByClassName(tsClassName) as HTMLSpanElement[];
-    // Found timestamp spans. Update mark.
+    const spans : HTMLCollectionOf<Element> = document.getElementsByClassName(tsClassName);
+
     if (spans.length) {
+      // Found timestamp spans. Update mark.
+
       // HACKHACK: This is a no-no modifying the underlying dom element in React. But it's fast.
-      const oldSpans = document.getElementsByClassName(markedSpan) as HTMLSpanElement[];
-      for (const el of oldSpans) {
+      const oldSpans : HTMLCollectionOf<Element> = document.getElementsByClassName(markedSpan);
+      for (const el of Array.from(oldSpans)) {
         const markElement = el.parentElement;
-        markElement.replaceWith(el);
+        if (markElement) {
+          markElement.replaceWith(el);
+        }
       }
 
       markedSpan = tsClassName;
-      for (const el of spans) {
+      for (const el of Array.from(spans)) {
         const markElement = document.createElement('mark');
-        el.parentNode.insertBefore(markElement, el);
-        markElement.appendChild(el);
-        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        if (el.parentNode) {
+          el.parentNode.insertBefore(markElement, el);
+          markElement.appendChild(el);
+          el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        }
       }
     }
   }

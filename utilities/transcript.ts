@@ -75,8 +75,9 @@ export async function getTranscript(category: string, id: string, language: stri
 
         // Merge speaker
         if (mergeSpeaker && acc.lastSpeaker === speakerNum) {
-          acc.segments.at(-1).words.push(...words);
-          acc.segments.at(-1).starts.push(...starts);
+          const segment : SegmentData = acc.segments.at(-1) as SegmentData;
+          segment?.words.push(...words);
+          segment?.starts.push(...starts);
         } else {
           acc.segments.push({speakerNum, words, starts});
           acc.lastSpeaker = speakerNum;
@@ -85,8 +86,8 @@ export async function getTranscript(category: string, id: string, language: stri
         return acc;
       },
       {
-        lastSpeaker: undefined,
-        segments: [],
+        lastSpeaker: <number | undefined> undefined,
+        segments: <SegmentData[]> [],
       }
     );
 

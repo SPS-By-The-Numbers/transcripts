@@ -8,8 +8,11 @@ type TranscriptControlParams = {
 export default function TranscriptControl({onTimeStampSelected, children} : TranscriptControlParams) {
   function handleClick(e): void {
     if (e.target.tagName !== 'SPAN') {
+      return;
     }
-    const tsClassName = Array.from(e.target.classList).find(e=>e.startsWith('ts-'));
+
+    const classList = Array.from(e.target.classList) as string[];
+    const tsClassName: string | undefined = classList.find((e: string) => e.startsWith('ts-'));
     if (!tsClassName) {
       return;
     }
