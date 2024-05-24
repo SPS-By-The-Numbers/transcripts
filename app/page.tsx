@@ -10,9 +10,6 @@ import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/pa
 import TranscriptFilter, { TranscriptFilterSelection } from 'components/TranscriptFilter';
 
 export default function Index() {
-  const [category, updateCategory]: [string | null, any] =
-    useState('sps-board');
-
   const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(
     {
       category: 'sps-board',
@@ -37,7 +34,7 @@ export default function Index() {
     const startDateString = filters.dateRange.start !== null ? formatDateForPath(filters.dateRange.start) : null;
     const endDateString = filters.dateRange.end !== null ? formatDateForPath(filters.dateRange.end) : null;
 
-    getAllVideosForDateRange(category, startDateString, endDateString)
+    getAllVideosForDateRange(filters.category, startDateString, endDateString)
       .then(videoData => {
         if (!ignore) {
           setLoading(false);
@@ -53,7 +50,7 @@ export default function Index() {
   const videoLinks: React.ReactNode[] = videos.map(
     video => (
       <li key={video.videoId} className="mx-3 list-disc">
-        <Link href={getVideoPath(category, video.videoId)}>
+        <Link href={getVideoPath(filters.category, video.videoId)}>
           {video.title}
         </Link>
       </li>
