@@ -1,17 +1,13 @@
 'use client'
 
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { VideoData, getAllCategories, getAllVideosForDateRange } from '../utilities/metadata-utils';
+import { TailSpin } from 'react-loader-spinner';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import { content, theme } from '../tailwind.config.js';
+import { VideoData, getAllVideosForDateRange } from '../utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
-import { formatISO, isAfter, isBefore } from 'date-fns';
-import DateRangePicker from 'components/DateRangePicker';
 import TranscriptFilter, { TranscriptFilterSelection } from 'components/TranscriptFilter';
-
-type DateSelection = {
-  start: Date | null,
-  end: Date | null
-}
 
 export default function Index() {
   const [category, updateCategory]: [string | null, any] =
@@ -63,23 +59,27 @@ export default function Index() {
       </li>
     ));
 
-  const resultsSection: React.ReactNode = isLoading ?
-    <h2>Loading</h2> :
-    <>
-      <h2 className="my-4 text-lg">
-        Transcripts:
-      </h2>
-      <ul className="flex flex-col flex-wrap h-screen">
-        {videoLinks}
-      </ul>
-    </>
+  // Get access to the tailwind theme colors to pass to the loading spinner
+  // Specifying only content and theme keys is a workaround for a type error pertaining
+  // to the "future" key
+  const fullConfig = resolveConfig({ content, theme });
+  const loadingSection = <section className="my-4 flex flex-row">
+    <TailSpin wrapperClass="justify-center" color={fullConfig.theme.colors.blue['500']} />
+  </section>;
+
+  const resultsSection: React.ReactNode = <section>
+    <h2 className="my-4 text-lg">
+      Transcripts:
+    </h2>
+    <ul className="flex flex-col flex-wrap h-screen">
+      {videoLinks}
+    </ul>
+  </section>;
 
   return (
-    <main className="mx-5 my-5">
+    <main className="mx-5 my-5 max-w-screen-md">
       <TranscriptFilter selection={filters} onFilterChange={handleFilterChange} />
-      <section>
-        {resultsSection}
-      </section>
+      {isLoading ? loadingSection : resultsSection}
     </main>
   );
 }
