@@ -125,14 +125,23 @@ async function updateEntry(req, res) {
 
   const lease_expire_ts = new Date();
   lease_expire_ts.setTime(lease_expire_ts.getTime() + (2*60*60*1000));
+  const now = new Date().toISOString();
 
   const queue_ref = getCategoryPrivateDb(category).child('new_vids');
   const existing_vids = (await queue_ref.once("value")).val();
   const all_sets = [];
   const updated_ids = [];
+  if (req.body.video_ids.length != 1) {
+    return res.status(400).send(makeResponseJson(false, "only supports one video_ids"));
+  }
   for (const vid of req.body.video_ids) {
     if (vid in existing_vids) {
       updated_ids.push(vid);
+      if (existing_vids[vid].lease_expires > now) {
+        return res.status(403).send(
+            makeResponseJson(false, `${vid} leased until ${existing_vids[vid].lease_expires}`));
+      }
+
       all_sets.push(queue_ref.child(vid).set(
             { ...existing_vids[vid],
               vast_instance: req.body.user_id,
