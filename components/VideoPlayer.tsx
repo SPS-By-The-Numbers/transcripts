@@ -1,7 +1,8 @@
 'use client'
 
-import { forwardRef, MutableRefObject, useRef } from 'react';
+import { forwardRef, MutableRefObject, useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube'
+import { fromHhmmss, toHhmmss } from 'utilities/transcript'
 import { Options } from 'youtube-player/dist/types';
 
 type VideoPlayerParams = {
@@ -22,17 +23,55 @@ const youtubeOpts : Options = {
     }
 };
 
-function toSec(hhmmss: string): number {
-    const parts = hhmmss.split(':');
-    return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
-}
-
 export interface VideoPlayerControl {
   jumpToTime(hhmmss: string): void;
 }
 
+let markedSpan = '';
+
 export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, ref: MutableRefObject<VideoPlayerControl>) {
   const ytElement = useRef<any>(null);
+
+  useEffect(() => {
+    //Implementing the setInterval method
+    const interval = setInterval(() => {
+        if (ytElement.current) {
+          const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
+          scrollTranscriptTo(hhmmss);
+        }
+    }, 1000);
+
+    //Clearing the interval
+    return () => clearInterval(interval);
+  }, []);
+
+  function scrollTranscriptTo(hhmmss) {
+    const tsClassName = `ts-${hhmmss}`;
+    const spans : HTMLCollectionOf<Element> = document.getElementsByClassName(tsClassName);
+
+    if (spans.length) {
+      // Found timestamp spans. Update mark.
+
+      // HACKHACK: This is a no-no modifying the underlying dom element in React. But it's fast.
+      const oldSpans : HTMLCollectionOf<Element> = document.getElementsByClassName(markedSpan);
+      for (const el of Array.from(oldSpans)) {
+        const markElement = el.parentElement;
+        if (markElement) {
+          markElement.replaceWith(el);
+        }
+      }
+
+      markedSpan = tsClassName;
+      for (const el of Array.from(spans)) {
+        const markElement = document.createElement('mark');
+        if (el.parentNode) {
+          el.parentNode.insertBefore(markElement, el);
+          markElement.appendChild(el);
+          el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        }
+      }
+    }
+  }
 
   function jumpToTimeInternal(timeSec: number) {
     if (ytElement.current) {
@@ -43,7 +82,7 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
 
   ref.current = {
     jumpToTime: (hhmmss: string) => {
-      jumpToTimeInternal(toSec(hhmmss));
+      jumpToTimeInternal(fromHhmmss(hhmmss));
     }
   };
 
@@ -51,12 +90,9 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
     if (event.target) {
       ytElement.current = event.target;
       if (window.location.hash) {
-        const selString = `span[id="${window.location.hash.substr(1)}"]`;
-        const el = document.querySelector(selString) as HTMLSpanElement;
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-          jumpToTimeInternal(toSec(el.id));
-        }
+        const hhmmss = window.location.hash.substr(1);
+        scrollTranscriptTo(hhmmss);
+        jumpToTimeInternal(fromHhmmss(hhmmss));
       }
     }
   }

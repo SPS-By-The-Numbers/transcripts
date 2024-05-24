@@ -20,12 +20,12 @@ function jsonOnRequest(options, func) {
   });
 }
 
-function getCategoryPublicDb(category) {
-  return getDatabase().ref(makePublicPath(category));
+function getCategoryPublicDb(...parts) {
+  return getDatabase().ref(makePublicPath(...parts));
 }
 
-function getCategoryPrivateDb(category) {
-  return getDatabase().ref(makePrivatePath(category));
+function getCategoryPrivateDb(...parts) {
+  return getDatabase().ref(makePrivatePath(...parts));
 }
 
 const pubSubClient = new PubSub();

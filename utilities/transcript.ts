@@ -43,47 +43,67 @@ export type TranscriptData = {
   language : string;
 };
 
-function makeTranscriptsPath(category: string, path: string): string {
-  return `/transcripts/public/${category}/${path}`;
+function makeTranscriptsPath(category: string, id: string, language:string): string {
+  return `/transcripts/public/${category}/json/${id}.${language}.json`;
 }
 
-export async function getTranscript(category: string, id: string, wordTimes: boolean): Promise<TranscriptData> {
-    const transcriptsPath = makeTranscriptsPath(category, `json/${id}.en.json`);
-    try {
-      const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
-      const whisperXTranscript : WhisperXTranscriptData = JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
-      const transcriptData : TranscriptData = {
-        segments: [],
-        language: whisperXTranscript.language,
-      };
+export async function getTranscript(category: string, id: string, language: string,
+    mergeSpeaker: boolean, wordTimes: boolean): Promise<TranscriptData> {
+  try {
+    const transcriptsPath = makeTranscriptsPath(category, id, language);
+    const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
+    const whisperXTranscript : WhisperXTranscriptData =
+        JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
 
-      if (wordTimes) {
-        transcriptData.segments = whisperXTranscript.segments.map(s => {
-          const speakerNum = toSpeakerNum(s.speaker);
-          const words : string[] = [];
-          const starts : number[] = [];
+    const { segments } = whisperXTranscript.segments.reduce(
+      (acc, s) => {
+        const speakerNum = toSpeakerNum(s.speaker);
+        const words : string[] = [];
+        const starts : number[] = [];
+
+        if (wordTimes) {
           let lastStart : number = s.words[0].start || 0;
           for (const w of s.words) {
             words.push(w.word);
             lastStart = w.start || lastStart;
             starts.push(lastStart);
           }
+        } else {
+          words.push(s.text);
+          starts.push(s.start);
+        }
 
-          return { speakerNum, words, starts };
-        });
-      } else {
-        transcriptData.segments = whisperXTranscript.segments.map(s => { return {
-          speakerNum: toSpeakerNum(s.speaker),
-          words: [ s.text ],
-          starts: [ s.start ]
-        }});
+        // Merge speaker
+        if (mergeSpeaker && acc.lastSpeaker === speakerNum) {
+          const segment : SegmentData = acc.segments.at(-1) as SegmentData;
+          segment?.words.push(...words);
+          segment?.starts.push(...starts);
+        } else {
+          acc.segments.push({speakerNum, words, starts});
+          acc.lastSpeaker = speakerNum;
+        }
+
+        return acc;
+      },
+      {
+        lastSpeaker: <number | undefined> undefined,
+        segments: <SegmentData[]> [],
       }
+    );
 
-      return transcriptData;
-    } catch (e) {
-      console.error(e);
-    }
+    return {segments, language};
+  } catch (e) {
+    console.error(e);
+  }
 
-    return { segments: [], language: 'en' };
+  return { segments: [], language };
 }
 
+export function toHhmmss(seconds: number) {
+  return new Date(seconds * 1000).toISOString().slice(11, 19);
+}
+
+export function fromHhmmss(hhmmss: string): number {
+    const parts = hhmmss.split(':');
+    return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
+}
