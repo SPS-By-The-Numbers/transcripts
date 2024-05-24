@@ -42,10 +42,12 @@ async function findNewVideos(req, res) {
         break;
       }
 
-      if (!metadata_snapshot || !metadata_snapshot.child(vid.id).exists()) {
+      if (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists()) {
         new_video_ids[vid.id] =  { add: add_ts, lease_expires: "", vast_instance: "" };
       }
     }
+
+    console.log(`${category} adding ${new_video_ids}`);
 
     all_new_vid_ids.push(...Object.keys(new_video_ids));
     getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
