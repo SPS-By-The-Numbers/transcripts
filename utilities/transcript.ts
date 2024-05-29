@@ -32,6 +32,14 @@ export type WhisperXTranscriptData = {
   language : string;
 };
 
+// Use array to compress size of keys in json serialization.
+export type SegmentData = [
+  string,  // Id string that is unique to one transcript.
+  string,  // Text of the segment.
+  number,  // Start time
+  number   // End time.
+  ];
+/*
 export type SegmentData = {
   id: string;  // Id string that is unique to one transcript.
 
@@ -41,6 +49,7 @@ export type SegmentData = {
   start: number;
   end: number;
 };
+*/
 
 export type SpeakerBubble = {
   speaker: string;
@@ -77,7 +86,7 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
 
   let curSpeakerNum = -1;
   let segments = null;
-  for (const rawSegment of whisperXTranscript.segments) {
+  for (const [segmentIndex, rawSegment] of whisperXTranscript.segments.entries()) {
     const newSpeaker = toSpeakerNum(rawSegment.speaker);
     if (newSpeaker !== curSpeakerNum) {
       if (segments) {
@@ -90,24 +99,27 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
 
     if (wordsAreSegments) {
       let lastStart : number = rawSegment.words[0].start || 0;
-      for (const word of rawSegment.words) {
+      for (const [wordIndex, word] of rawSegment.words.entries()) {
         const segmentData = new SegmentData();
-        segmentData.text = word.word;
-        segments.text.push(word.word);
+        segmentData[0] = wordIndex;
+        segmentData[1] = word.word;
 
         // Hack for missing start time. Move forward by 0.1 milliseconds.
         lastStart = word.start || lastStart + SMALL_TS_INCREMENT;
-        segmentData.start = lastStart;
-        segmentData.end = word.end || lastStart + SMALL_TS_INCREMENT;
+        segmentData[2] = lastStart;
+        segmentData[3] = word.end || lastStart + SMALL_TS_INCREMENT;
 
         segments.push(segmentData);
       }
     } else {
-      segments.push({
-        text: rawSegment.text,
-        start: rawSegment.start,
-        end: rawSegment.end,
-      });
+      if (rawSegment.text) {
+        segments.push([
+          segmentIndex,
+          rawSegment.text,
+          rawSegment.start,
+          rawSegment.end,
+          ]);
+      }
     }
   }
 

@@ -46,9 +46,9 @@ export default function BoardMeeting({
         <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
           {
             bubble.segments.map(segment => (
-                <span key={ `${i}-${segment.id}` }
-                  className={ `ts-${toTimeAnchor(segment.start)}` }>
-                  { segment.text }
+                <span key={ `${i}-${segment[0]}` }
+                  className={ `ts-${toTimeAnchor(segment[2])}` }>
+                  { segment[1] }
                 </span>
             ))
           }
