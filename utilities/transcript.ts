@@ -39,20 +39,9 @@ export type SegmentData = [
   number,  // Start time
   number   // End time.
   ];
-/*
-export type SegmentData = {
-  id: string;  // Id string that is unique to one transcript.
-
-  // Parallel arrays for words and the start timestamps of each word.
-  // Arrays are in timestamp order.
-  text: string;
-  start: number;
-  end: number;
-};
-*/
 
 export type SpeakerBubble = {
-  speaker: string;
+  speaker: number;
   segments : SegmentData[];
 };
 
@@ -69,13 +58,13 @@ function makeTranscriptsPath(category: string, id: string, language:string): str
 // Takes a `transcript` and produces an array of documents suitable for sending to
 // Meilisearch.
 export function toSearchDocuments(vid: string, transcript: TranscriptData) {
-  return transcript.segments.map((segment, i) => ({
+  return transcript.speakerBubbles.map((bubble, i) => ({
     id: `${vid}/${i}`,
     vid,
-    speaker: segment.speakerNum,
+    speaker: bubble.speaker,
     language: transcript.language,
-    text: segment.words.join(' '),
-    start: segment.starts[0],
+    text: bubble.segments.map(s => s[1]).join(' '),
+    start: bubble.segments[0][2],
     segmentId: i,
   }));
 }
@@ -85,8 +74,10 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
   const speakerBubbles = new Array<SpeakerBubble>();
 
   let curSpeakerNum = -1;
-  let segments = null;
-  for (const [segmentIndex, rawSegment] of whisperXTranscript.segments.entries()) {
+  let segments;
+  let segmentIndex = 0;
+  for (const rawSegment of whisperXTranscript.segments) {
+    segmentIndex++;
     const newSpeaker = toSpeakerNum(rawSegment.speaker);
     if (newSpeaker !== curSpeakerNum) {
       if (segments) {
@@ -99,17 +90,18 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
 
     if (wordsAreSegments) {
       let lastStart : number = rawSegment.words[0].start || 0;
-      for (const [wordIndex, word] of rawSegment.words.entries()) {
-        const segmentData = new SegmentData();
-        segmentData[0] = wordIndex;
-        segmentData[1] = word.word;
+      let wordIndex = 0;
+      for (const word of rawSegment.words) {
+        wordIndex++;
+        const start = word.start || lastStart + SMALL_TS_INCREMENT;
 
-        // Hack for missing start time. Move forward by 0.1 milliseconds.
-        lastStart = word.start || lastStart + SMALL_TS_INCREMENT;
-        segmentData[2] = lastStart;
-        segmentData[3] = word.end || lastStart + SMALL_TS_INCREMENT;
-
-        segments.push(segmentData);
+        let end = word.end;
+        if (!end) {
+          // Hack for missing start time. Move forward by 0.1 milliseconds.
+          end = start + SMALL_TS_INCREMENT;
+        }
+        lastStart = end;
+        segments.push([wordIndex, word.word, start, end]);
       }
     } else {
       if (rawSegment.text) {
