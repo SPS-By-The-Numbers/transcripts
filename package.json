@@ -2,6 +2,7 @@
   "name": "transcripts.sps-by-the-numbers",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "deploy": "firebase deploy --only hosting:transcripts",
@@ -54,6 +55,7 @@
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
     "@types/youtube-player": "^5.5.11",
+    "meilisearch": "^0.40.0",
     "react-query": "^3.39.3",
     "type-fest": "^4.18.2"
   }

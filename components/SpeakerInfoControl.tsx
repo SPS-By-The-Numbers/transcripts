@@ -12,7 +12,7 @@ import { toSpeakerNum } from "utilities/speaker-info"
 import { useEffect, useState } from 'react'
 import { useTranscriptContext } from 'components/TranscriptControlProvider'
 
-const useMount = (fun) => useEffect(fun, []);
+const useMount = (fun) => useEffect(fun);
 
 type SpeakerInfoSubmitStatus = {
   has_submitted: boolean;

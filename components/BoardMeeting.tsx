@@ -39,18 +39,16 @@ export default function BoardMeeting({
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  const speakerBubbles = transcript.segments.map((segment, segmentNum) => {
-      speakerNums.add(segment.speakerNum);
+  const speakerBubbles = transcript.speakerBubbles.map((bubble, i) => {
+      speakerNums.add(bubble.speaker);
 
       return (
-        <SpeakerBubble
-            key={ segmentNum }
-            speakerNum={ segment.speakerNum }>
+        <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
           {
-            segment.words.map((word, wordNum) => (
-                <span key={ `${segmentNum}-${wordNum}` }
-                  className={ `ts-${toTimeAnchor(segment.starts[wordNum])}` }>
-                  { word }
+            bubble.segments.map(segment => (
+                <span key={ `${i}-${segment.id}` }
+                  className={ `ts-${toTimeAnchor(segment.start)}` }>
+                  { segment.text }
                 </span>
             ))
           }

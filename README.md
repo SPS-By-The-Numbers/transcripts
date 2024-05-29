@@ -100,10 +100,29 @@ probably it.
 | Key | Description |
 | --- | --- |
 | audit | List of all updates made by the public including identity information of poster. Key is the timestamp of the change. |
-| queue | Workqueue of tasks for backend processing. |
+| `new_vids` | Workqueue of tasks for backend processing. |
 
-### Storage
+## Storage
 ### Public data for channel
 | Key | Description |
 | --- | --- |
 | json | Transcript in json. File format is `${video_id}.${lang}.json` where `lang` is an ISO639 code. |`
+
+### Transcript format.
+Transcripts are stored as a JSON blob that is a modification of the
+JSON data coming out of WhisperX. There is one JSON file per language.
+The structure is:
+
+```
+{
+  "segments" [
+    { "id": 1, "start": 3.123, "end": 4.542, "text": "ohai" },
+    ...
+  ],
+  "language": "en"
+}
+```
+
+The `id` field uniquely identifies the segment within one array of segments.
+This can be used to match up segments across translations or for annotating
+corrections and notes.

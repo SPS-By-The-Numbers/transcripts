@@ -2,6 +2,10 @@ import * as Storage from "firebase/storage"
 import { app } from 'utilities/firebase'
 import { toSpeakerNum } from 'utilities/speaker-info'
 
+// SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
+// advance time if time timestamps are missing.
+const SMALL_TS_INCREMENT = 0.0001;
+
 // The WhisperX json data is very verbose and contains redundant information
 // which bloats the size of the transcript compared to raw words by over 10x.
 //
@@ -29,74 +33,106 @@ export type WhisperXTranscriptData = {
 };
 
 export type SegmentData = {
-  speakerNum: number;  // The speaker number.
+  id: string;  // Id string that is unique to one transcript.
 
   // Parallel arrays for words and the start timestamps of each word.
-  // It is possible for starts timestamps to have nulls if no start time was recorded.
   // Arrays are in timestamp order.
-  words: string[];
-  starts: number[];
+  text: string;
+  start: number;
+  end: number;
+};
+
+export type SpeakerBubble = {
+  speaker: string;
+  segments : SegmentData[];
 };
 
 export type TranscriptData = {
-  segments : SegmentData[];
+  speakerBubbles : SpeakerBubble[];
   language : string;
 };
 
+// Returns the path to the json transcript data for the identified file.
 function makeTranscriptsPath(category: string, id: string, language:string): string {
   return `/transcripts/public/${category}/json/${id}.${language}.json`;
 }
 
+// Takes a `transcript` and produces an array of documents suitable for sending to
+// Meilisearch.
+export function toSearchDocuments(vid: string, transcript: TranscriptData) {
+  return transcript.segments.map((segment, i) => ({
+    id: `${vid}/${i}`,
+    vid,
+    speaker: segment.speakerNum,
+    language: transcript.language,
+    text: segment.words.join(' '),
+    start: segment.starts[0],
+    segmentId: i,
+  }));
+}
+
+export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData, 
+    wordsAreSegments: boolean): SpeakerBubble[] {
+  const speakerBubbles = new Array<SpeakerBubble>();
+
+  let curSpeakerNum = -1;
+  let segments = null;
+  for (const rawSegment of whisperXTranscript.segments) {
+    const newSpeaker = toSpeakerNum(rawSegment.speaker);
+    if (newSpeaker !== curSpeakerNum) {
+      if (segments) {
+        speakerBubbles.push({speaker: curSpeakerNum, segments});
+      }
+
+      curSpeakerNum = newSpeaker;
+      segments = new Array<SegmentData>();
+    }
+
+    if (wordsAreSegments) {
+      let lastStart : number = rawSegment.words[0].start || 0;
+      for (const word of rawSegment.words) {
+        const segmentData = new SegmentData();
+        segmentData.text = word.word;
+        segments.text.push(word.word);
+
+        // Hack for missing start time. Move forward by 0.1 milliseconds.
+        lastStart = word.start || lastStart + SMALL_TS_INCREMENT;
+        segmentData.start = lastStart;
+        segmentData.end = word.end || lastStart + SMALL_TS_INCREMENT;
+
+        segments.push(segmentData);
+      }
+    } else {
+      segments.push({
+        text: rawSegment.text,
+        start: rawSegment.start,
+        end: rawSegment.end,
+      });
+    }
+  }
+
+  if (segments) {
+    speakerBubbles.push({speaker: curSpeakerNum, segments});
+  }
+
+  return speakerBubbles;
+}
+
 export async function getTranscript(category: string, id: string, language: string,
-    mergeSpeaker: boolean, wordTimes: boolean): Promise<TranscriptData> {
+    wordsAreSegments: boolean = false): Promise<TranscriptData> {
   try {
     const transcriptsPath = makeTranscriptsPath(category, id, language);
     const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
     const whisperXTranscript : WhisperXTranscriptData =
         JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
+    const speakerBubbles = toSpeakerBubbles(whisperXTranscript, wordsAreSegments);
 
-    const { segments } = whisperXTranscript.segments.reduce(
-      (acc, s) => {
-        const speakerNum = toSpeakerNum(s.speaker);
-        const words : string[] = [];
-        const starts : number[] = [];
-
-        if (wordTimes) {
-          let lastStart : number = s.words[0].start || 0;
-          for (const w of s.words) {
-            words.push(w.word);
-            lastStart = w.start || lastStart;
-            starts.push(lastStart);
-          }
-        } else {
-          words.push(s.text);
-          starts.push(s.start);
-        }
-
-        // Merge speaker
-        if (mergeSpeaker && acc.lastSpeaker === speakerNum) {
-          const segment : SegmentData = acc.segments.at(-1) as SegmentData;
-          segment?.words.push(...words);
-          segment?.starts.push(...starts);
-        } else {
-          acc.segments.push({speakerNum, words, starts});
-          acc.lastSpeaker = speakerNum;
-        }
-
-        return acc;
-      },
-      {
-        lastSpeaker: <number | undefined> undefined,
-        segments: <SegmentData[]> [],
-      }
-    );
-
-    return {segments, language};
+    return {speakerBubbles, language};
   } catch (e) {
     console.error(e);
   }
 
-  return { segments: [], language };
+  return { speakerBubbles: [], language };
 }
 
 export function toHhmmss(seconds: number) {
