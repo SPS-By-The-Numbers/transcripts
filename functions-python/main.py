@@ -36,7 +36,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
         # TODO: Retry loop.
         vast = VastAI('14d2615319906234466013432944c5049f7b90829e72f414a0ca35f2300f3cb0', raw=True)
 
-        target_num_instances = int(num_new_videos / VIDS_PER_MACHINE)
+        target_num_instances = max(1, int(num_new_videos / VIDS_PER_MACHINE))
 
         # Do not create new instance if one is running.
         all_instances = json.loads(vast.show_instances())
