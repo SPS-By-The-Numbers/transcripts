@@ -11,10 +11,12 @@ const withMDX = nextMdx({
   },
 })
 
-const nextConfig = {
+const baseNextConfig = {
   // Append the default value with md extensions
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   reactStrictMode: true
 }
 
-export default withMDX(nextConfig);
+const nextConfig = withMDX(baseNextConfig);
+
+export default nextConfig;
