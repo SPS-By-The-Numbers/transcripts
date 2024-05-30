@@ -101,13 +101,13 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
           end = start + SMALL_TS_INCREMENT;
         }
         lastStart = end;
-        segments.push([wordIndex, word.word, start, end]);
+        segments.push([wordIndex, word.word.trim(), start, end]);
       }
     } else {
       if (rawSegment.text) {
         segments.push([
           segmentIndex,
-          rawSegment.text,
+          rawSegment.text.trim(),
           rawSegment.start,
           rawSegment.end,
           ]);
