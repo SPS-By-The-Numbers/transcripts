@@ -1,6 +1,6 @@
-import { makeResponseJson, getAllCategories, sanitizeCategory } from './utils.js';
 import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser } from './firebase_utils.js';
 import { getVideosForCategory } from './youtube.js';
+import { makeResponseJson, getAllCategories, sanitizeCategory } from './utils.js';
 
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
@@ -119,7 +119,7 @@ async function addNewVideo(req, res) {
     return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
   }
 
-  if (!req.body.video_id.match(/^[0-9A-Za-z]{11}$/)) {
+  if (!req.body.video_id.match(/^[0-9A-Za-z-]{11}$/)) {
     return res.status(400).send(makeResponseJson(false, "invalid video id"));
   }
 
@@ -138,6 +138,7 @@ async function addNewVideo(req, res) {
   getCategoryPrivateDb(category).child('new_vids').update({
       [req.body.video_id]:  { add: new Date(), lease_expires: "", vast_instance: "" }
   });
+  await getPubSubClient().topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
   return res.status(200).send(makeResponseJson(true, `added ${req.body.video_id}`));
 }
 
