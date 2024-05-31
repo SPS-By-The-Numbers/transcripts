@@ -40,7 +40,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
 
         # Do not create new instance if one is running.
         all_instances = json.loads(vast.show_instances())
-        running_transcribers = [x for x in all_instances if x['label'] == INSTANCE_LABEL]
+        running_transcribers = [x for x in all_instances if x.get('label') == INSTANCE_LABEL]
         if len(running_transcribers) >= target_num_instances:
             print(f"Instances already running {repr([x['id'] for x in running_transcribers])}.")
             return
