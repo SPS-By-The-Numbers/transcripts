@@ -25,7 +25,7 @@ const speakerinfo = onRequest(
     try {
       user = getUser(req.body?.auth);
     } catch (error) {
-      return res.status(400).send(makeResponseJson(false, "Did you forget to login?"));
+      return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
     }
 
     const category = req.body?.category;

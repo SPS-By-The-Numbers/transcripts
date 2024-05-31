@@ -1,5 +1,5 @@
 import { makeResponseJson, getAllCategories, sanitizeCategory } from './utils.js';
-import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode } from './firebase_utils.js';
+import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser } from './firebase_utils.js';
 import { getVideosForCategory } from './youtube.js';
 
 async function getVideoQueue(req, res) {
@@ -106,6 +106,41 @@ async function removeVastInstance(req, res) {
   return res.status(200).send(makeResponseJson(true, "Instance removed"));
 }
 
+async function addNewVideo(req, res) {
+  const category = sanitizeCategory(req.body.category);
+  if (!category) {
+    return res.status(400).send(makeResponseJson(false, "Expects category"));
+  }
+
+  let user = null;
+  try {
+    user = getUser(req.body?.auth);
+  } catch (error) {
+    return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
+  }
+
+  if (!req.body.video_id.match(/^[0-9A-Za-z]{11}$/)) {
+    return res.status(400).send(makeResponseJson(false, "invalid video id"));
+  }
+
+  const txnId = `${(new Date).toISOString().split('.')[0]}Z`;
+  const auditRef = getCategoryPrivateDb(category).child(`audit/${txnId}`);
+  console.error("User ", user);
+  auditRef.set({
+    name: 'video POST',
+    headers: req.headers,
+    body: req.body,
+    email: user.email || "",
+    emailVerified: user.emailVerified || false,
+    uid: user.uid || ""
+    });
+
+  getCategoryPrivateDb(category).child('new_vids').update({
+      [req.body.video_id]:  { add: new Date(), lease_expires: "", vast_instance: "" }
+  });
+  return res.status(200).send(makeResponseJson(true, `added ${req.body.video_id}`));
+}
+
 async function updateEntry(req, res) {
   const category = sanitizeCategory(req.body.category);
   if (!category) {
@@ -160,6 +195,8 @@ const video_queue = jsonOnRequest(
   async (req, res) => {
     if (req.method === 'GET') {
        return getVideoQueue(req, res);
+    } else if (req.method === 'PUT') {
+       return addNewVideo(req, res);
     } else if (req.method === 'POST') {
        return findNewVideos(req, res);
     } else if (req.method === 'PATCH') {
