@@ -27,7 +27,7 @@ export type WhisperXSegmentData = {
   words: WhisperXWordData[];
 };
 
-export type WhisperXTranscriptData = {
+export type WhisperXTranscript = {
   segments : WhisperXSegmentData[];
   language : string;
 };
@@ -45,20 +45,24 @@ export type SpeakerBubble = {
   segments : SegmentData[];
 };
 
-export type TranscriptData = {
-  speakerBubbles : SpeakerBubble[];
+export type DiarizedTranscript = {
+  diarized : SpeakerBubble[];
   language : string;
 };
 
-// Returns the path to the json transcript data for the identified file.
-function makeTranscriptsPath(category: string, id: string, language:string): string {
-  return `/transcripts/public/${category}/json/${id}.${language}.json`;
+// Returns the path to the transcript data for the identified file. Data is 
+function makeDiarizedTranscriptsPath(category: string, id: string, language:string): string {
+  return `/transcripts/public/${category}/diarized/${id}.${language}.json`;
+}
+
+function makeWhisperXTranscriptsPath(category: string, id: string, language:string): string {
+  return `/transcripts/public/${category}/archive/whisperx/${id}.${language}.json.xz`;
 }
 
 // Takes a `transcript` and produces an array of documents suitable for sending to
 // Meilisearch.
-export function toSearchDocuments(vid: string, transcript: TranscriptData) {
-  return transcript.speakerBubbles.map((bubble, i) => ({
+export function toSearchDocuments(vid: string, transcript: DiarizedTranscript) {
+  return transcript.diarized.map((bubble, i) => ({
     id: `${vid}/${i}`,
     vid,
     speaker: bubble.speaker,
@@ -69,7 +73,7 @@ export function toSearchDocuments(vid: string, transcript: TranscriptData) {
   }));
 }
 
-export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData, 
+export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscript, 
     wordsAreSegments: boolean): SpeakerBubble[] {
   const speakerBubbles = new Array<SpeakerBubble>();
 
@@ -89,7 +93,7 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
     }
 
     if (wordsAreSegments) {
-      let lastStart : number = rawSegment.words[0].start || 0;
+      let lastStart : number = rawSegment.words[0].start || 1;
       let wordIndex = 0;
       for (const word of rawSegment.words) {
         wordIndex++;
@@ -122,21 +126,32 @@ export function toSpeakerBubbles(whisperXTranscript: WhisperXTranscriptData,
   return speakerBubbles;
 }
 
-export async function getTranscript(category: string, id: string, language: string,
-    wordsAreSegments: boolean = false): Promise<TranscriptData> {
+export async function getCompressedWhisperXTranscript(category: string, id: string, language: string): Promise<object> {
   try {
-    const transcriptsPath = makeTranscriptsPath(category, id, language);
-    const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
-    const whisperXTranscript : WhisperXTranscriptData =
-        JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
-    const speakerBubbles = toSpeakerBubbles(whisperXTranscript, wordsAreSegments);
-
-    return {speakerBubbles, language};
+    const path = makeWhisperXTranscriptsPath(category, id, language);
+    const fileRef = Storage.ref(Storage.getStorage(), path);
+    return Storage.getBytes(fileRef);
   } catch (e) {
     console.error(e);
   }
 
-  return { speakerBubbles: [], language };
+  return [];
+}
+
+export async function getDiarizedTranscript(category: string, id: string, language: string): Promise<DiarizedTranscript> {
+  try {
+    const path = makeDiarizedTranscriptsPath(category, id, language);
+    const fileRef = Storage.ref(Storage.getStorage(), path);
+    const raw_bytes = await Storage.getBytes(fileRef);
+    const diarizedTranscript : DiarizedTranscript =
+        JSON.parse(new TextDecoder().decode(raw_bytes));
+
+    return diarizedTranscript;
+  } catch (e) {
+    console.error(e);
+  }
+
+  return { diarized: [], language };
 }
 
 export function toHhmmss(seconds: number) {

@@ -7,7 +7,7 @@ import TranscriptControl from './TranscriptControl';
 
 type BoardMeetingLayoutParams = {
   header: ReactNode,
-  transcript: ReactNode,
+  transcriptNode: ReactNode,
   category: string,
   videoId: string,
   initialExistingNames: object,
@@ -22,7 +22,7 @@ type BoardMeetingLayoutParams = {
 // the server, and not just a single "children" section.
 export default function BoardMeetingControl({
   header,
-  transcript,
+  transcriptNode,
   category,
   videoId,
   initialExistingNames,
@@ -52,7 +52,7 @@ export default function BoardMeetingControl({
               videoId={videoId} />
         </section>
         <TranscriptControl onTimeStampSelected={handleTimeStampSelected}>
-          { transcript }
+          { transcriptNode }
         </TranscriptControl>
     </>
   );
