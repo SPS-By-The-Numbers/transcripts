@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers";
 import { formatDateForPath } from "utilities/path-utils";
 
 export type DatePickerProps = {
@@ -14,11 +15,12 @@ export default function DatePicker({ date, label, onDateChange }: DatePickerProp
     onDateChange(e.target.valueAsDate);
   }
 
-  return <div className="flex flex-col space-y-1">
-    <label htmlFor="date">{label}</label>
-    <input
-      name="date" type="date"
-      className="rounded-md border-2 border-gray-300"
-      value={dateString} onChange={handleDateChange} />
-  </div>
+  return <MuiDatePicker />
+  // return <div className="flex flex-col space-y-1">
+  //   <label htmlFor="date">{label}</label>
+  //   <input
+  //     name="date" type="date"
+  //     className="rounded-md border-2 border-gray-300"
+  //     value={dateString} onChange={handleDateChange} />
+  // </div>
 }
