@@ -1,4 +1,4 @@
-import stream from 'stream';
+import * as stream from 'stream';
 import { onRequest } from "firebase-functions/v2/https";
 import { createGzip } from 'zlib'
 import { pipeline } from 'node:stream/promises';
@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 import { getDefaultBucket, getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
 import { makePublicPath } from './utils/path.js';
 import { makeResponseJson } from './utils/response.js';
-import { makeWhisperXTranscriptsPath } from './utils/whisperx.ts';
+//import { makeWhisperXTranscriptsPath } from './utils/whisperx.ts';
 
 const LANGUAGES = new Set(['en']);
 
@@ -15,41 +15,48 @@ const transcript = onRequest(
   async (req, res) => {
     try {
       if (req.method !== 'PUT') {
-         return res.status(400).send(makeResponseJson(false, "Expects PUT"));
+         res.status(400).send(makeResponseJson(false, "Expects PUT"));
+         return;
       }
 
       // Check request to ensure it looks like valid JSON request.
       if (req.headers['content-type'] !== 'application/json') {
-         return res.status(400).send(makeResponseJson(false, "Expects JSON"));
+        res.status(400).send(makeResponseJson(false, "Expects JSON"));
+        return;
       }
 
       if (!req.body.user_id) {
-        return res.status(400).send(makeResponseJson(false, "missing user_id"));
+        res.status(400).send(makeResponseJson(false, "missing user_id"));
+        return;
       }
 
       const category = req.body.category;
       if (!category || category.length > 20) {
-        return res.status(400).send(makeResponseJson(false, "Expects category"));
+        res.status(400).send(makeResponseJson(false, "Expects category"));
+        return;
       }
 
       if (!req.body.vid) {
-        return res.status(400).send(makeResponseJson(false, 'Missing vid'));
+        res.status(400).send(makeResponseJson(false, 'Missing vid'));
+        return;
       }
 
       const auth_code = (await getAuthCode(req.body.user_id));
 
       if (req.body.auth_code !== auth_code) {
-        return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+        res.status(401).send(makeResponseJson(false, "invalid auth code"));
+        return;
       }
 
       const transcripts = req.body.transcripts || {};
       for (const lang of Object.keys(transcripts)) {
         if (!LANGUAGES.has(lang)) {
-          return res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
+          res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
+          return;
         }
       }
 
-      for (const [lang, contents] of Object.entries(transcripts)) {
+      for (const [lang, contents] of Object.entries(transcripts) as [string, string][]) {
         const bucket = getDefaultBucket();
         const filename = makePublicPath(category, 'archive/whisperx', `${req.body.vid}.${lang}.json.xz`);
         const file = bucket.file(filename);
@@ -67,13 +74,16 @@ const transcript = onRequest(
       }
 
       if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
-        return res.status(500).send(makeResponseJson(false, `Internal error`));
+        res.status(500).send(makeResponseJson(false, `Internal error`));
+        return;
       }
 
-      return res.status(200).send(makeResponseJson(true, `update done`));
+      res.status(200).send(makeResponseJson(true, `update done`));
+      return;
     } catch(e) {
       console.error("Transcript fail: ", e);
-      return res.status(500).send(makeResponseJson(false, "Internal error"));
+      res.status(500).send(makeResponseJson(false, "Internal error"));
+      return;
     }
   }
 );
@@ -81,7 +91,7 @@ const transcript = onRequest(
 function setMetadata(category, metadata) {
   const category_public = getCategoryPublicDb(category);
   if (!metadata || !metadata['video_id']) {
-    console.log(`Invalid metadata: `, metadata);
+    console.log('Invalid metadata: ', metadata);
     return false;
   }
 
@@ -100,33 +110,40 @@ const metadata = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
-       return res.status(400).send(makeResponseJson(false, "Expects POST"));
+       res.status(400).send(makeResponseJson(false, "Expects POST"));
+       return;
     }
 
     // Check request to ensure it looks like valid JSON request.
     if (req.headers['content-type'] !== 'application/json') {
-       return res.status(400).send(makeResponseJson(false, "Expects JSON"));
+       res.status(400).send(makeResponseJson(false, "Expects JSON"));
+       return;
     }
 
     if (!req.body.category) {
-      return res.status(400).send(makeResponseJson(false, "Expects category"));
+       res.status(400).send(makeResponseJson(false, "Expects category"));
+       return;
     }
 
     if (req.body.cmd === "set") {
       if (!req.body?.metadata || !Object.keys(req.body.metadata).length) {
-        return res.status(400).send(makeResponseJson(false, "missing metadata"));
+         res.status(400).send(makeResponseJson(false, "missing metadata"));
+         return;
       }
       if (!setMetadata(req.body.category, req.body.metadata)) {
-        return res.status(500).send(makeResponseJson(false, `Internal error`));
+         res.status(500).send(makeResponseJson(false, `Internal error`));
+         return;
       }
 
-      return res.status(200).send(
+      res.status(200).send(
           makeResponseJson(
             true,
             `Added metadata for ${Object.keys(req.body.metadata)}`));
+      return;
     }
 
-    return res.status(400).send("Unknown command");
+    res.status(400).send("Unknown command");
+    return;
   }
 );
 

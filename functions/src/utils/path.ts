@@ -1,6 +1,7 @@
 const PATH_APP_SCOPE = 'transcripts';
 
 // Makes the path string for public data. The prefix is the same in storage as it is in the database.
+
 export function makePublicPath(...parts) {
   return [ PATH_APP_SCOPE, 'public', ...parts].join('/');
 }
