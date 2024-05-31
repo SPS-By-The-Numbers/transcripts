@@ -16,9 +16,9 @@ const CATEGORIES = ['sps-board', 'seattle-city-council'];
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-let appCheck = null;
+let appCheck : any = null;
 
-function makeSubmitStatusSuffix(submitStatus: SpeakerInfoSubmitStatus): String {
+function makeSubmitStatusSuffix(submitStatus: SubmitStatus): String {
   if (!submitStatus.has_submitted) {
     return '';
   }
@@ -35,8 +35,8 @@ function makeSubmitStatusSuffix(submitStatus: SpeakerInfoSubmitStatus): String {
 }
 
 export default function AddVideo() {
-  const [videoId, setVideoId] = useState<String>("");
-  const [category, setCategory] = useState<String>(CATEGORIES[0]);
+  const [videoId, setVideoId] = useState<string>("");
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>(
       { has_submitted: false, in_progress: false, last_status: 0 });
   const [authState, setAuthState] = useState<object>({});
@@ -122,7 +122,7 @@ export default function AddVideo() {
         <div>
           <div>
           <label className="m-2 px-2 py-2">Video Id to Transcribe<br />
-          <input className="m-2 px-2 py-2 border-solid border-2" placeholder="abcd123" border="1" name="videoId" type="text" value={videoId} onChange={e => setVideoId(e.target.value)} />
+          <input className="m-2 px-2 py-2 border-solid border-2" placeholder="abcd123" name="videoId" type="text" value={videoId} onChange={e => setVideoId(e.target.value)} />
           </label>
           </div>
           <div>
