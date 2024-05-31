@@ -1,6 +1,6 @@
 import isEqual from 'lodash.isequal';
 import { onRequest } from "firebase-functions/v2/https";
-import { makeResponseJson } from './utils.js';
+import { makeResponseJson } from './utils/response.js';
 
 import { getCategoryPublicDb, getCategoryPrivateDb, getUser } from './firebase_utils.js';
 

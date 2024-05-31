@@ -3,9 +3,10 @@ import { onRequest } from "firebase-functions/v2/https";
 import { createGzip } from 'zlib'
 import { pipeline } from 'node:stream/promises';
 
-import { getDefaultBucket } from './firebase_utils.js';
-import { makeResponseJson, makePublicPath } from './utils.js';
-import { getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
+import { getDefaultBucket, getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
+import { makePublicPath } from './utils/path.js';
+import { makeResponseJson } from './utils/response.js';
+import { makeWhisperXTranscriptsPath } from './utils/whisperx.ts';
 
 const LANGUAGES = new Set(['en']);
 
@@ -50,7 +51,7 @@ const transcript = onRequest(
 
       for (const [lang, contents] of Object.entries(transcripts)) {
         const bucket = getDefaultBucket();
-        const filename = makePublicPath(category, 'json', `${req.body.vid}.${lang}.json`);
+        const filename = makePublicPath(category, 'archive/whisperx', `${req.body.vid}.${lang}.json.xz`);
         const file = bucket.file(filename);
         console.log(`Writing ${lang} json with ${contents.length} to ${filename}`);
 
