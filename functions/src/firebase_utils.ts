@@ -10,7 +10,7 @@ import { makePublicPath, makePrivatePath} from './utils/path.js';
 
 const STORAGE_BUCKET = 'sps-by-the-numbers.appspot.com';
 
-function jsonOnRequest(options, func) {
+function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
     try {
       return func(req, res);
@@ -21,11 +21,11 @@ function jsonOnRequest(options, func) {
   });
 }
 
-function getCategoryPublicDb(...parts) {
+function getCategoryPublicDb(...parts : string[]) {
   return getDatabase().ref(makePublicPath(...parts));
 }
 
-function getCategoryPrivateDb(...parts) {
+function getCategoryPrivateDb(...parts : string[]) {
   return getDatabase().ref(makePrivatePath(...parts));
 }
 

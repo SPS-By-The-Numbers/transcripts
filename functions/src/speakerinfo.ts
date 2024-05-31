@@ -13,43 +13,49 @@ const speakerinfo = onRequest(
   { cors: true, region: ["us-west1"] },
   async (req, res) => {
     if (req.method !== 'POST') {
-       return res.status(400).send(makeResponseJson(false, "Expects POST"));
+      res.status(400).send(makeResponseJson(false, "Expects POST"));
+      return;
     }
 
     // Check request to ensure it looks like valid JSON request.
     if (req.headers['content-type'] !== 'application/json') {
-       return res.status(400).send(makeResponseJson(false, "Expects JSON"));
+      res.status(400).send(makeResponseJson(false, "Expects JSON"));
+      return;
     }
 
     let user = null;
     try {
       user = getUser(req.body?.auth);
     } catch (error) {
-      return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
+      res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
+      return;
     }
 
     const category = req.body?.category;
     if (!category || category.length > 20) {
-      return res.status(400).send(makeResponseJson(false, "Invalid Category"));
+      res.status(400).send(makeResponseJson(false, "Invalid Category"));
+      return;
     }
 
     const videoId = req.body?.videoId;
     if (!videoId || videoId.length > 12) {
        if (Buffer.from(videoId, 'base64').toString('base64') !== videoId) {
-         return res.status(400).send(makeResponseJson(false, "Invalid VideoID"));
+         res.status(400).send(makeResponseJson(false, "Invalid VideoID"));
+         return;
        }
     }
 
     const speakerInfo = req.body?.speakerInfo;
     if (!speakerInfo) {
-      return res.status(400).send(makeResponseJson(false, "Expect speakerInfo"));
+      res.status(400).send(makeResponseJson(false, "Expect speakerInfo"));
+      return;
     }
 
     // Validate request structure.
-    const allTags = new Set();
-    const allNames = new Set();
+    const allTags = new Set<string>();
+    const allNames = new Set<string>();
     const recentTagsForName = {};
-    for (const info of Object.values(speakerInfo)) {
+    for (const info of Object.values(speakerInfo) as {name: string, tags: string[]}[]) {
       const name = info.name;
       if (name) {
         allNames.add(name);
@@ -58,14 +64,16 @@ const speakerinfo = onRequest(
       const tags = info.tags;
       if (tags) {
         if (!Array.isArray(tags)) {
-          return res.status(400).send(makeResponseJson(false, "Expect tags to be an array"));
+          res.status(400).send(makeResponseJson(false, "Expect tags to be an array"));
+          return;
         }
         if (name) {
           recentTagsForName[name] = [...(new Set(tags))];
         }
         for (const tag of tags) {
           if (typeof(tag) !== 'string') {
-            return res.status(400).send(makeResponseJson(false, "Expect tags to be strings"));
+            res.status(400).send(makeResponseJson(false, "Expect tags to be strings"));
+            return;
           }
           allTags.add(tag);
         }
@@ -77,7 +85,8 @@ const speakerinfo = onRequest(
       const privateRoot = getCategoryPrivateDb(category);
       const publicRoot = getCategoryPublicDb(category);
       if ((await publicRoot.child('<enabled>').once('value')).val() !== 1) {
-        return res.status(400).send(makeResponseJson(false, "Invalid Category"));
+        res.status(400).send(makeResponseJson(false, "Invalid Category"));
+        return;
       }
 
       // Timestamp to close enough for txn id. Do not use PII as it is
@@ -128,7 +137,7 @@ const speakerinfo = onRequest(
 
     } catch(e) {
       console.error("Updating DB failed with: ", e);
-      return res.status(500).send(makeResponseJson(false, "Internal error"));
+      res.status(500).send(makeResponseJson(false, "Internal error"));
     }
   }
 );

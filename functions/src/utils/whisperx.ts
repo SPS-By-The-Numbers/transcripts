@@ -1,6 +1,10 @@
 import * as Storage from "firebase/storage"
-import type { SpeakerSegments } from 'utilities/transcript'
-import { toSpeakerNum } from 'utilities/speaker-info'
+import type { DiarizedTranscript, SpeakerSegments, SegmentData } from '../../../utilities/transcript'
+import { toSpeakerNum } from '../../../utilities/speaker-info'
+
+// SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
+// advance time if time timestamps are missing.
+const SMALL_TS_INCREMENT = 0.0001;
 
 // The WhisperX json data is very verbose and contains redundant information
 // which bloats the size of the transcript compared to raw words by over 10x.

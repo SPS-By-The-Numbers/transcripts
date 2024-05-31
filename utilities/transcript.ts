@@ -1,9 +1,5 @@
 import * as Storage from "firebase/storage"
 
-// SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
-// advance time if time timestamps are missing.
-const SMALL_TS_INCREMENT = 0.0001;
-
 // Use array to compress size of keys in json serialization.
 export type SegmentData = [
   string,  // Id string that is unique to one transcript.
