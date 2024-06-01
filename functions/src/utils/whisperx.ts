@@ -1,7 +1,7 @@
 import * as Storage from "firebase/storage";
 import type {DiarizedTranscript, SpeakerSegments, SegmentData} from "../../../utilities/transcript";
 import {toSpeakerNum} from "../../../utilities/speaker-info";
-import {makeWhisperXTranscriptsPath} from "utils/path.js";
+import {makeWhisperXTranscriptsPath} from "./path.js";
 
 // SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
 // advance time if time timestamps are missing.

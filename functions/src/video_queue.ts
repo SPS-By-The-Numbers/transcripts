@@ -1,7 +1,7 @@
-import {getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser} from "utils/firebase";
+import {getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser} from "./utils/firebase";
 import {getVideosForCategory} from "./youtube.js";
-import {getAllCategories, sanitizeCategory} from "utils/path";
-import {makeResponseJson} from "utils/response";
+import {getAllCategories, sanitizeCategory} from "./utils/path";
+import {makeResponseJson} from "./utils/response";
 
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
