@@ -1,8 +1,8 @@
 import isEqual from "lodash.isequal";
 import {onRequest} from "firebase-functions/v2/https";
-import {makeResponseJson} from "utils/response";
+import {makeResponseJson} from "./utils/response";
 
-import {getCategoryPublicDb, getCategoryPrivateDb, getUser} from "utils/firebase";
+import {getCategoryPublicDb, getCategoryPrivateDb, getUser} from "./utils/firebase";
 
 // POST to speaker info with JSON body of type:
 // {
