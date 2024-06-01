@@ -1,6 +1,7 @@
-import * as Storage from "firebase/storage"
-import type { DiarizedTranscript, SpeakerSegments, SegmentData } from '../../../utilities/transcript'
-import { toSpeakerNum } from '../../../utilities/speaker-info'
+import * as Storage from "firebase/storage";
+import type {DiarizedTranscript, SpeakerSegments, SegmentData} from "../../../utilities/transcript";
+import {toSpeakerNum} from "../../../utilities/speaker-info";
+import {makeWhisperXTranscriptsPath} from "utils/path.js";
 
 // SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
 // advance time if time timestamps are missing.
@@ -32,10 +33,6 @@ export type WhisperXTranscript = {
   language : string;
 };
 
-export function makeWhisperXTranscriptsPath(category: string, id: string, language:string): string {
-  return `/transcripts/public/${category}/archive/whisperx/${id}.${language}.json.xz`;
-}
-
 // Takes a `transcript` and produces an array of documents suitable for sending to
 // Meilisearch.
 //
@@ -46,14 +43,14 @@ export function toSearchDocuments(vid: string, transcript: DiarizedTranscript) {
     vid,
     speaker: bubble.speaker,
     language: transcript.language,
-    text: bubble.segments.map(s => s[1]).join(' '),
+    text: bubble.segments.map((s) => s[1]).join(" "),
     start: bubble.segments[0][2],
     segmentId: i,
   }));
 }
 
-export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript, 
-    wordsAreSegments: boolean): DiarizedTranscript {
+export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript,
+  wordsAreSegments: boolean): DiarizedTranscript {
   const speakerSegments = new Array<SpeakerSegments>();
 
   let curSpeakerNum = -1;
@@ -93,7 +90,7 @@ export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript,
           rawSegment.text.trim(),
           rawSegment.start,
           rawSegment.end,
-          ]);
+        ]);
       }
     }
   }
@@ -102,7 +99,7 @@ export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript,
     speakerSegments.push({speaker: curSpeakerNum, segments});
   }
 
-  return { language: whisperXTranscript.language, diarized: speakerSegments};
+  return {language: whisperXTranscript.language, diarized: speakerSegments};
 }
 
 export async function getCompressedWhisperXTranscript(category: string, id: string, language: string): Promise<object> {

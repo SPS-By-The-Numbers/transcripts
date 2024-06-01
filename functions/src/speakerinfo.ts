@@ -1,8 +1,8 @@
-import isEqual from 'lodash.isequal';
-import { onRequest } from "firebase-functions/v2/https";
-import { makeResponseJson } from './utils/response.js';
+import isEqual from "lodash.isequal";
+import {onRequest} from "firebase-functions/v2/https";
+import {makeResponseJson} from "utils/response";
 
-import { getCategoryPublicDb, getCategoryPrivateDb, getUser } from './firebase_utils.js';
+import {getCategoryPublicDb, getCategoryPrivateDb, getUser} from "utils/firebase";
 
 // POST to speaker info with JSON body of type:
 // {
@@ -10,15 +10,15 @@ import { getCategoryPublicDb, getCategoryPrivateDb, getUser } from './firebase_u
 //    "speakerInfo": { "SPEAKER_00": { "name": "some name", "tags": [ "parent", "ptsa" ] }
 // }
 const speakerinfo = onRequest(
-  { cors: true, region: ["us-west1"] },
+  {cors: true, region: ["us-west1"]},
   async (req, res) => {
-    if (req.method !== 'POST') {
+    if (req.method !== "POST") {
       res.status(400).send(makeResponseJson(false, "Expects POST"));
       return;
     }
 
     // Check request to ensure it looks like valid JSON request.
-    if (req.headers['content-type'] !== 'application/json') {
+    if (req.headers["content-type"] !== "application/json") {
       res.status(400).send(makeResponseJson(false, "Expects JSON"));
       return;
     }
@@ -39,10 +39,10 @@ const speakerinfo = onRequest(
 
     const videoId = req.body?.videoId;
     if (!videoId || videoId.length > 12) {
-       if (Buffer.from(videoId, 'base64').toString('base64') !== videoId) {
-         res.status(400).send(makeResponseJson(false, "Invalid VideoID"));
-         return;
-       }
+      if (Buffer.from(videoId, "base64").toString("base64") !== videoId) {
+        res.status(400).send(makeResponseJson(false, "Invalid VideoID"));
+        return;
+      }
     }
 
     const speakerInfo = req.body?.speakerInfo;
@@ -71,7 +71,7 @@ const speakerinfo = onRequest(
           recentTagsForName[name] = [...(new Set(tags))];
         }
         for (const tag of tags) {
-          if (typeof(tag) !== 'string') {
+          if (typeof(tag) !== "string") {
             res.status(400).send(makeResponseJson(false, "Expect tags to be strings"));
             return;
           }
@@ -84,31 +84,31 @@ const speakerinfo = onRequest(
     try {
       const privateRoot = getCategoryPrivateDb(category);
       const publicRoot = getCategoryPublicDb(category);
-      if ((await publicRoot.child('<enabled>').once('value')).val() !== 1) {
+      if ((await publicRoot.child("<enabled>").once("value")).val() !== 1) {
         res.status(400).send(makeResponseJson(false, "Invalid Category"));
         return;
       }
 
       // Timestamp to close enough for txn id. Do not use PII as it is
       // by public.
-      const txnId = `${(new Date).toISOString().split('.')[0]}Z`;
+      const txnId = `${(new Date).toISOString().split(".")[0]}Z`;
       const auditRef = privateRoot.child(`audit/${txnId}`);
       console.error("User ", user);
       auditRef.set({
-        name: 'speakerinfo POST',
+        name: "speakerinfo POST",
         headers: req.headers,
         body: req.body,
         email: user.email || "",
         emailVerified: user.emailVerified || false,
-        uid: user.uid || ""
-        });
+        uid: user.uid || "",
+      });
 
       const videoRef = publicRoot.child(`v/${videoId}/speakerInfo`);
       videoRef.set(speakerInfo);
 
       // Update the database stuff.
-      const existingRef = publicRoot.child('existing');
-      const existingOptions = (await existingRef.once('value')).val();
+      const existingRef = publicRoot.child("existing");
+      const existingOptions = (await existingRef.once("value")).val();
 
       // Add new tags.
       let existingOptionsUpdated = false;
@@ -131,15 +131,14 @@ const speakerinfo = onRequest(
       }
 
       res.status(200).send(makeResponseJson(true, "success",
-            { speakerInfo,
-              existingTags: Object.keys(existingOptions.tags),
-              existingNames: Object.keys(existingOptions.names)}));
-
-    } catch(e) {
+        {speakerInfo,
+          existingTags: Object.keys(existingOptions.tags),
+          existingNames: Object.keys(existingOptions.names)}));
+    } catch (e) {
       console.error("Updating DB failed with: ", e);
       res.status(500).send(makeResponseJson(false, "Internal error"));
     }
   }
 );
 
-export { speakerinfo };
+export {speakerinfo};

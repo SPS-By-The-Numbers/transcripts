@@ -6,7 +6,10 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": false,
-    "target": "es2017"
+    "target": "es2017",
+    "paths": {
+      "utils/*": ["./src/utils/*"]
+    }
   },
   "compileOnSave": true,
   "include": [

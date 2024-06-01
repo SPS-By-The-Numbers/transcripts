@@ -1,4 +1,4 @@
-import { Innertube } from 'youtubei.js';
+import {Innertube} from "youtubei.js";
 
 let global_youtube : Innertube | null;
 
@@ -36,4 +36,4 @@ async function getVideosForCategory(category : string) {
   return results;
 }
 
-export { getVideosForCategory };
+export {getVideosForCategory};

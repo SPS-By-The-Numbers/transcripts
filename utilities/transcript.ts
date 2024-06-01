@@ -19,7 +19,7 @@ export type DiarizedTranscript = {
 };
 
 // Returns the path to the transcript data for the identified file. Data is 
-function makeDiarizedTranscriptsPath(category: string, id: string, language:string): string {
+export function makeDiarizedTranscriptsPath(category: string, id: string, language:string): string {
   return `/transcripts/public/${category}/diarized/${id}.${language}.json`;
 }
 

@@ -1,26 +1,38 @@
-import * as stream from 'stream';
-import { onRequest } from "firebase-functions/v2/https";
-import { createGzip } from 'zlib'
-import { pipeline } from 'node:stream/promises';
+import * as stream from "stream";
+import * as lzma from "lzma-native";
+import {onRequest} from "firebase-functions/v2/https";
+import {createGzip} from "zlib";
+import {pipeline} from "node:stream/promises";
 
-import { getDefaultBucket, getCategoryPublicDb, getAuthCode } from './firebase_utils.js';
-import { makePublicPath } from './utils/path.js';
-import { makeResponseJson } from './utils/response.js';
-//import { makeWhisperXTranscriptsPath } from './utils/whisperx.ts';
+import {getDefaultBucket, getCategoryPublicDb, getAuthCode} from "utils/firebase";
+import {makeDiarizedTranscriptsPath} from "../../utilities/transcript";
+import {makeResponseJson} from "utils/response";
+import {makeWhisperXTranscriptsPath} from "utils/path";
+import type {WhisperXTranscript} from "utils/whisperx";
+import {toDiarizedTranscript} from "utils/whisperx";
 
-const LANGUAGES = new Set(['en']);
+
+const LANGUAGES = new Set(["en"]);
+
+async function writeToStorage(path: string, filter: any, contents: string, fileOptions: object = {}) {
+  const file = getDefaultBucket().file(path);
+  const passthroughStream = new stream.PassThrough();
+  passthroughStream.write(contents);
+  passthroughStream.end();
+  await pipeline(passthroughStream, filter, file.createWriteStream(fileOptions));
+}
 
 const transcript = onRequest(
-  { cors: true, region: ["us-west1"] },
+  {cors: true, region: ["us-west1"]},
   async (req, res) => {
     try {
-      if (req.method !== 'PUT') {
-         res.status(400).send(makeResponseJson(false, "Expects PUT"));
-         return;
+      if (req.method !== "PUT") {
+        res.status(400).send(makeResponseJson(false, "Expects PUT"));
+        return;
       }
 
       // Check request to ensure it looks like valid JSON request.
-      if (req.headers['content-type'] !== 'application/json') {
+      if (req.headers["content-type"] !== "application/json") {
         res.status(400).send(makeResponseJson(false, "Expects JSON"));
         return;
       }
@@ -37,7 +49,7 @@ const transcript = onRequest(
       }
 
       if (!req.body.vid) {
-        res.status(400).send(makeResponseJson(false, 'Missing vid'));
+        res.status(400).send(makeResponseJson(false, "Missing vid"));
         return;
       }
 
@@ -56,31 +68,28 @@ const transcript = onRequest(
         }
       }
 
-      for (const [lang, contents] of Object.entries(transcripts) as [string, string][]) {
-        const bucket = getDefaultBucket();
-        const filename = makePublicPath(category, 'archive/whisperx', `${req.body.vid}.${lang}.json.xz`);
-        const file = bucket.file(filename);
-        console.log(`Writing ${lang} json with ${contents.length} to ${filename}`);
+      for (const [lang, whisperXTranscriptJson] of Object.entries(transcripts) as [string, string][]) {
+        const whisperXTranscript = JSON.parse(whisperXTranscriptJson) as WhisperXTranscript;
+        const diarizedTranscript = toDiarizedTranscript(whisperXTranscript, false);
 
-        const passthroughStream = new stream.PassThrough();
-        passthroughStream.write(contents);
-        passthroughStream.end();
+        const archivePath = makeWhisperXTranscriptsPath(category, req.body.vid, lang);
+        console.log(`Writing ${lang} json with ${whisperXTranscriptJson.length} to ${archivePath}`);
+        await writeToStorage(archivePath, lzma.createCompressor(), whisperXTranscriptJson);
 
-        await pipeline(passthroughStream, createGzip(), file.createWriteStream({
-          metadata: {
-            contentEncoding: 'gzip'
-          }
-          }));
+        const diarizedJson = JSON.stringify(diarizedTranscript);
+        const diarizedPath = makeDiarizedTranscriptsPath(category, req.body.vid, lang);
+        console.log(`Writing ${lang} json with ${diarizedJson.length} to ${diarizedPath}`);
+        await writeToStorage(diarizedPath, createGzip(), diarizedJson, {metadata: {contentEncoding: "gzip"}});
       }
 
       if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
-        res.status(500).send(makeResponseJson(false, `Internal error`));
+        res.status(500).send(makeResponseJson(false, "Internal error"));
         return;
       }
 
-      res.status(200).send(makeResponseJson(true, `update done`));
+      res.status(200).send(makeResponseJson(true, "update done"));
       return;
-    } catch(e) {
+    } catch (e) {
       console.error("Transcript fail: ", e);
       res.status(500).send(makeResponseJson(false, "Internal error"));
       return;
@@ -90,55 +99,55 @@ const transcript = onRequest(
 
 function setMetadata(category, metadata) {
   const category_public = getCategoryPublicDb(category);
-  if (!metadata || !metadata['video_id']) {
-    console.log('Invalid metadata: ', metadata);
+  if (!metadata || !metadata["video_id"]) {
+    console.log("Invalid metadata: ", metadata);
     return false;
   }
 
-  const video_id = metadata['video_id'];
-  category_public.child('metadata').child(video_id).set(metadata);
+  const video_id = metadata["video_id"];
+  category_public.child("metadata").child(video_id).set(metadata);
 
   // Add to the index.
-  const published = new Date(metadata['publish_date']).toISOString().split('T')[0];
-  category_public.child('index').child('date').child(published)
+  const published = new Date(metadata["publish_date"]).toISOString().split("T")[0];
+  category_public.child("index").child("date").child(published)
     .child(video_id).set(metadata);
 
   return true;
 }
 
 const metadata = onRequest(
-  { cors: true, region: ["us-west1"] },
+  {cors: true, region: ["us-west1"]},
   async (req, res) => {
-    if (req.method !== 'POST') {
-       res.status(400).send(makeResponseJson(false, "Expects POST"));
-       return;
+    if (req.method !== "POST") {
+      res.status(400).send(makeResponseJson(false, "Expects POST"));
+      return;
     }
 
     // Check request to ensure it looks like valid JSON request.
-    if (req.headers['content-type'] !== 'application/json') {
-       res.status(400).send(makeResponseJson(false, "Expects JSON"));
-       return;
+    if (req.headers["content-type"] !== "application/json") {
+      res.status(400).send(makeResponseJson(false, "Expects JSON"));
+      return;
     }
 
     if (!req.body.category) {
-       res.status(400).send(makeResponseJson(false, "Expects category"));
-       return;
+      res.status(400).send(makeResponseJson(false, "Expects category"));
+      return;
     }
 
     if (req.body.cmd === "set") {
       if (!req.body?.metadata || !Object.keys(req.body.metadata).length) {
-         res.status(400).send(makeResponseJson(false, "missing metadata"));
-         return;
+        res.status(400).send(makeResponseJson(false, "missing metadata"));
+        return;
       }
       if (!setMetadata(req.body.category, req.body.metadata)) {
-         res.status(500).send(makeResponseJson(false, `Internal error`));
-         return;
+        res.status(500).send(makeResponseJson(false, "Internal error"));
+        return;
       }
 
       res.status(200).send(
-          makeResponseJson(
-            true,
-            `Added metadata for ${Object.keys(req.body.metadata)}`));
+        makeResponseJson(
+          true,
+          `Added metadata for ${Object.keys(req.body.metadata)}`));
       return;
     }
 
@@ -147,4 +156,4 @@ const metadata = onRequest(
   }
 );
 
-export { metadata, transcript };
+export {metadata, transcript};
