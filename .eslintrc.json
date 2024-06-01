@@ -3,6 +3,7 @@
   "ignorePatterns": [
     "pages/**",
     "tools/**",
+    "functions/**",
     "functions-python/**"
   ],
   "rules": {
