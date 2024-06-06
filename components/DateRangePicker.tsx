@@ -1,5 +1,5 @@
 import { isAfter, isBefore } from "date-fns";
-import DatePicker from "./DatePicker";
+import { DatePicker } from "@mui/x-date-pickers";
 
 export type DateRange = {
   start: Date | null,
@@ -44,8 +44,8 @@ export default function DateRangePicker({ range, onDateRangeChange }) {
     onDateRangeChange(newRange);
   }
 
-  return <search className="flex flex-row space-x-5">
-    <DatePicker label="Start Date" date={range.start} onDateChange={handleStartChange} />
-    <DatePicker label="End Date" date={range.end} onDateChange={handleEndChange} />
-  </search>;
+  return <div className="flex flex-row space-x-5">
+    <DatePicker label="Start Date" value={range.start} onChange={handleStartChange} />
+    <DatePicker label="End Date" value={range.end} onChange={handleEndChange} />
+  </div>;
 }

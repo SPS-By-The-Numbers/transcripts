@@ -9,13 +9,16 @@ export type DatePickerProps = {
 };
 
 export default function DatePicker({ date, label, onDateChange }: DatePickerProps) {
-  const dateString: string = date !== null ? formatDateForPath(date) : '';
+  // const dateString: string = date !== null ? formatDateForPath(date) : '';
 
-  function handleDateChange(e: ChangeEvent<HTMLInputElement>): void {
-    onDateChange(e.target.valueAsDate);
-  }
+  // function handleDateChange(e: ChangeEvent<HTMLInputElement>): void {
+  //   onDateChange(e.target.valueAsDate);
+  // }
 
-  return <MuiDatePicker />
+  return <MuiDatePicker
+    label={label}
+    value={date}
+    onChange={onDateChange}/>
   // return <div className="flex flex-col space-y-1">
   //   <label htmlFor="date">{label}</label>
   //   <input
