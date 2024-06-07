@@ -5,7 +5,14 @@
       "source": "functions",
       "codebase": "functions",
       "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint"
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
       ]
     },
     {
@@ -13,7 +20,6 @@
       "source": "functions-python"
     }
   ],
-
   "hosting": {
     "site": "transcripts-spsbtn",
     "source": ".",
@@ -26,15 +32,12 @@
       "region": "us-west1"
     }
   },
-
   "storage": {
     "rules": "storage.rules"
   },
-
   "database": {
     "rules": "database.rules.json"
   },
-
   "emulators": {
     "functions": {
       "port": 5001

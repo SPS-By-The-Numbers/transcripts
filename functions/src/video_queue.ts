@@ -1,6 +1,7 @@
-import { makeResponseJson, getAllCategories, sanitizeCategory } from './utils.js';
-import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode } from './firebase_utils.js';
-import { getVideosForCategory } from './youtube.js';
+import {getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser} from "./utils/firebase";
+import {getVideosForCategory} from "./youtube.js";
+import {getAllCategories, sanitizeCategory} from "./utils/path";
+import {makeResponseJson} from "./utils/response";
 
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
@@ -15,7 +16,7 @@ async function getVideoQueue(req, res) {
 
   const new_vids = {};
   for (const category of getAllCategories()) {
-    const category_vids = (await getCategoryPrivateDb(category).child('new_vids').once("value")).val();
+    const category_vids = (await getCategoryPrivateDb(category).child("new_vids").once("value")).val();
     if (category_vids) {
       new_vids[category] = category_vids;
     } else {
@@ -33,7 +34,7 @@ async function findNewVideos(req, res) {
   let limit = 0;
   // Can be empty in test and initial bootstrap.
   for (const category of getAllCategories()) {
-    const metadata_ref = getCategoryPublicDb(category, 'metadata');
+    const metadata_ref = getCategoryPublicDb(category, "metadata");
     const metadata_snapshot = await metadata_ref.once("value");
     const new_video_ids = {};
 
@@ -43,14 +44,14 @@ async function findNewVideos(req, res) {
       }
 
       if (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists()) {
-        new_video_ids[vid.id] =  { add: add_ts, lease_expires: "", vast_instance: "" };
+        new_video_ids[vid.id] = {add: add_ts, lease_expires: "", vast_instance: ""};
       }
     }
 
     console.log(`${category} adding ${new_video_ids}`);
 
     all_new_vid_ids.push(...Object.keys(new_video_ids));
-    getCategoryPrivateDb(category).child('new_vids').update(new_video_ids);
+    getCategoryPrivateDb(category).child("new_vids").update(new_video_ids);
   }
 
   // If there are new video ids. Wake up the trasncription jobs.
@@ -78,9 +79,9 @@ async function removeItem(req, res) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
   }
 
-  const removes = []
+  const removes = [];
   for (const vid of req.body.video_ids) {
-    removes.push(getCategoryPrivateDb(category).child('new_vids').child(vid).remove());
+    removes.push(getCategoryPrivateDb(category).child("new_vids").child(vid).remove());
   }
 
   await Promise.all(removes);
@@ -94,7 +95,7 @@ async function removeVastInstance(req, res) {
     return res.status(400).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const vast_ref = getCategoryPrivateDb('_admin').child('vast').child(req.body.user_id);
+  const vast_ref = getCategoryPrivateDb("_admin").child("vast").child(req.body.user_id);
   const auth_code = (await getAuthCode(req.body.user_id));
 
   if (req.body.auth_code !== auth_code) {
@@ -104,6 +105,42 @@ async function removeVastInstance(req, res) {
   await vast_ref.remove();
 
   return res.status(200).send(makeResponseJson(true, "Instance removed"));
+}
+
+async function addNewVideo(req, res) {
+  const category = sanitizeCategory(req.body.category);
+  if (!category) {
+    return res.status(400).send(makeResponseJson(false, "Expects category"));
+  }
+
+  let user = null;
+  try {
+    user = getUser(req.body?.auth);
+  } catch (error) {
+    return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
+  }
+
+  if (!req.body.video_id.match(/^[0-9A-Za-z-]{11}$/)) {
+    return res.status(400).send(makeResponseJson(false, "invalid video id"));
+  }
+
+  const txnId = `${(new Date).toISOString().split(".")[0]}Z`;
+  const auditRef = getCategoryPrivateDb(category).child(`audit/${txnId}`);
+  console.error("User ", user);
+  auditRef.set({
+    name: "video POST",
+    headers: req.headers,
+    body: req.body,
+    email: user.email || "",
+    emailVerified: user.emailVerified || false,
+    uid: user.uid || "",
+  });
+
+  getCategoryPrivateDb(category).child("new_vids").update({
+    [req.body.video_id]: {add: new Date(), lease_expires: "", vast_instance: ""},
+  });
+  await getPubSubClient().topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
+  return res.status(200).send(makeResponseJson(true, `added ${req.body.video_id}`));
 }
 
 async function updateEntry(req, res) {
@@ -125,19 +162,28 @@ async function updateEntry(req, res) {
 
   const lease_expire_ts = new Date();
   lease_expire_ts.setTime(lease_expire_ts.getTime() + (2*60*60*1000));
+  const now = new Date().toISOString();
 
-  const queue_ref = getCategoryPrivateDb(category).child('new_vids');
+  const queue_ref = getCategoryPrivateDb(category).child("new_vids");
   const existing_vids = (await queue_ref.once("value")).val();
   const all_sets = [];
   const updated_ids = [];
+  if (req.body.video_ids.length != 1) {
+    return res.status(400).send(makeResponseJson(false, "only supports one video_ids"));
+  }
   for (const vid of req.body.video_ids) {
     if (vid in existing_vids) {
       updated_ids.push(vid);
+      if (existing_vids[vid].lease_expires > now) {
+        return res.status(403).send(
+          makeResponseJson(false, `${vid} leased until ${existing_vids[vid].lease_expires}`));
+      }
+
       all_sets.push(queue_ref.child(vid).set(
-            { ...existing_vids[vid],
-              vast_instance: req.body.user_id,
-              lease_expires: lease_expire_ts.toISOString(),
-            }));
+        {...existing_vids[vid],
+          vast_instance: req.body.user_id,
+          lease_expires: lease_expire_ts.toISOString(),
+        }));
     }
   }
 
@@ -147,32 +193,34 @@ async function updateEntry(req, res) {
 }
 
 const video_queue = jsonOnRequest(
-  { cors: true, region: ["us-west1"] },
+  {cors: true, region: ["us-west1"]},
   async (req, res) => {
-    if (req.method === 'GET') {
-       return getVideoQueue(req, res);
-    } else if (req.method === 'POST') {
-       return findNewVideos(req, res);
-    } else if (req.method === 'PATCH') {
-       return updateEntry(req, res);
-    } else if (req.method === 'DELETE') {
-       return removeItem(req, res);
+    if (req.method === "GET") {
+      return getVideoQueue(req, res);
+    } else if (req.method === "PUT") {
+      return addNewVideo(req, res);
+    } else if (req.method === "POST") {
+      return findNewVideos(req, res);
+    } else if (req.method === "PATCH") {
+      return updateEntry(req, res);
+    } else if (req.method === "DELETE") {
+      return removeItem(req, res);
     }
 
-    return res.status(405).send(makeResponseJson(false, 'Method Not Allowed'));
+    return res.status(405).send(makeResponseJson(false, "Method Not Allowed"));
   }
 );
 
 const vast = jsonOnRequest(
-  { cors: true, region: ["us-west1"] },
+  {cors: true, region: ["us-west1"]},
   async (req, res) => {
-    if (req.method === 'DELETE') {
-       return removeVastInstance(req, res);
+    if (req.method === "DELETE") {
+      return removeVastInstance(req, res);
     }
 
-    return res.status(405).send(makeResponseJson(false, 'Method Not Allowed'));
+    return res.status(405).send(makeResponseJson(false, "Method Not Allowed"));
   }
 );
 
 
-export { video_queue, vast }
+export {video_queue, vast};

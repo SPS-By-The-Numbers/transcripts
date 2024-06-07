@@ -1,102 +1,42 @@
 import * as Storage from "firebase/storage"
-import { app } from 'utilities/firebase'
-import { toSpeakerNum } from 'utilities/speaker-info'
 
-// The WhisperX json data is very verbose and contains redundant information
-// which bloats the size of the transcript compared to raw words by over 10x.
-//
-// It must be reduced before passing into React props otherwise there will
-// be a LOT of unecessary download to the client.
-export type WhisperXWordData = {
-  word: string;
-  start: number;
-  end: number;
-  score: number;
-  speaker: string;
-};
+// Use array to compress size of keys in json serialization.
+export type SegmentData = [
+  string,  // Id string that is unique to one transcript.
+  string,  // Text of the segment.
+  number,  // Start time
+  number   // End time.
+  ];
 
-export type WhisperXSegmentData = {
-  start: number;
-  end: number;
-  text: string;
-  speaker: string;
-  words: WhisperXWordData[];
-};
-
-export type WhisperXTranscriptData = {
-  segments : WhisperXSegmentData[];
-  language : string;
-};
-
-export type SegmentData = {
-  speakerNum: number;  // The speaker number.
-
-  // Parallel arrays for words and the start timestamps of each word.
-  // It is possible for starts timestamps to have nulls if no start time was recorded.
-  // Arrays are in timestamp order.
-  words: string[];
-  starts: number[];
-};
-
-export type TranscriptData = {
+export type SpeakerSegments = {
+  speaker: number;
   segments : SegmentData[];
+};
+
+export type DiarizedTranscript = {
+  diarized : SpeakerSegments[];
   language : string;
 };
 
-function makeTranscriptsPath(category: string, id: string, language:string): string {
-  return `/transcripts/public/${category}/json/${id}.${language}.json`;
+// Returns the path to the transcript data for the identified file. Data is 
+export function makeDiarizedTranscriptsPath(category: string, id: string, language:string): string {
+  return `transcripts/public/${category}/diarized/${id}.${language}.json`;
 }
 
-export async function getTranscript(category: string, id: string, language: string,
-    mergeSpeaker: boolean, wordTimes: boolean): Promise<TranscriptData> {
+export async function getDiarizedTranscript(category: string, id: string, language: string): Promise<DiarizedTranscript> {
   try {
-    const transcriptsPath = makeTranscriptsPath(category, id, language);
-    const fileRef = Storage.ref(Storage.getStorage(), transcriptsPath);
-    const whisperXTranscript : WhisperXTranscriptData =
-        JSON.parse(new TextDecoder().decode(await Storage.getBytes(fileRef)));
+    const path = makeDiarizedTranscriptsPath(category, id, language);
+    const fileRef = Storage.ref(Storage.getStorage(), path);
+    const raw_bytes = await Storage.getBytes(fileRef);
+    const diarizedTranscript : DiarizedTranscript =
+        JSON.parse(new TextDecoder().decode(raw_bytes));
 
-    const { segments } = whisperXTranscript.segments.reduce(
-      (acc, s) => {
-        const speakerNum = toSpeakerNum(s.speaker);
-        const words : string[] = [];
-        const starts : number[] = [];
-
-        if (wordTimes) {
-          let lastStart : number = s.words[0].start || 0;
-          for (const w of s.words) {
-            words.push(w.word);
-            lastStart = w.start || lastStart;
-            starts.push(lastStart);
-          }
-        } else {
-          words.push(s.text);
-          starts.push(s.start);
-        }
-
-        // Merge speaker
-        if (mergeSpeaker && acc.lastSpeaker === speakerNum) {
-          const segment : SegmentData = acc.segments.at(-1) as SegmentData;
-          segment?.words.push(...words);
-          segment?.starts.push(...starts);
-        } else {
-          acc.segments.push({speakerNum, words, starts});
-          acc.lastSpeaker = speakerNum;
-        }
-
-        return acc;
-      },
-      {
-        lastSpeaker: <number | undefined> undefined,
-        segments: <SegmentData[]> [],
-      }
-    );
-
-    return {segments, language};
+    return diarizedTranscript;
   } catch (e) {
     console.error(e);
   }
 
-  return { segments: [], language };
+  return { diarized: [], language };
 }
 
 export function toHhmmss(seconds: number) {

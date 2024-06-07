@@ -4,7 +4,7 @@ import { Metadata, ResolvingMetadata } from "next"
 import { app } from 'utilities/firebase'
 import { getExistingRef, getMetadata, getVideoRef } from "utilities/metadata-utils"
 import { getDatabase, ref, child, get } from "firebase/database"
-import { getTranscript } from "utilities/transcript"
+import { getDiarizedTranscript } from "utilities/transcript"
 
 type VideoParams = {
     category: string,
@@ -72,7 +72,7 @@ export async function generateMetadata(
 
 export default async function Index({params}: {params: VideoParams}) {
     const metadata = await getMetadata(params.category, params.videoId);
-    const transcript = await getTranscript(params.category, params.videoId, 'en', true, false);
+    const diarizedTranscript = await getDiarizedTranscript(params.category, params.videoId, 'en');
     const speakerControlInfo = await loadSpeakerControlInfo(params.category, params.videoId);
 
     return (
@@ -80,7 +80,7 @@ export default async function Index({params}: {params: VideoParams}) {
         <BoardMeeting
             metadata={ metadata }
             category={ params.category }
-            transcript={ transcript }
+            diarizedTranscript={ diarizedTranscript }
             initialExistingNames={ speakerControlInfo.existingNames }
             initialExistingTags={ speakerControlInfo.existingTags } />
       </TranscriptControlProvider>

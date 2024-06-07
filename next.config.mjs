@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
-const withMDX = require('@next/mdx')({
+import nextMdx from '@next/mdx';
+
+const withMDX = nextMdx({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: [],
@@ -9,7 +11,7 @@ const withMDX = require('@next/mdx')({
   },
 })
 
-const nextConfig = {
+const baseNextConfig = {
   // Append the default value with md extensions
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   reactStrictMode: true,
@@ -31,4 +33,6 @@ const nextConfig = {
   }
 }
 
-module.exports = withMDX(nextConfig)
+const nextConfig = withMDX(baseNextConfig);
+
+export default nextConfig;

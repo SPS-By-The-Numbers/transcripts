@@ -1,7 +1,7 @@
 import TranscriptHeader from 'components/TranscriptHeader'
 import SpeakerBubble from 'components/SpeakerBubble'
 import BoardMeetingControl from 'components/BoardMeetingControl';
-import type { TranscriptData } from 'utilities/transcript'
+import type { DiarizedTranscript } from 'utilities/transcript'
 import { toHhmmss } from 'utilities/transcript'
 import { UnknownSpeakerNum } from 'utilities/speaker-info'
 
@@ -10,7 +10,7 @@ type BoardMeetingParams = {
   category: string,
   initialExistingNames: object,
   initialExistingTags: Set<string>,
-  transcript: TranscriptData,
+  diarizedTranscript: DiarizedTranscript,
 };
 
 function toTimeAnchor(seconds) {
@@ -31,7 +31,7 @@ const mainStyle = {
 export default function BoardMeeting({
     metadata,
     category,
-    transcript,
+    diarizedTranscript,
     initialExistingNames,
     initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
@@ -39,18 +39,16 @@ export default function BoardMeeting({
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  const speakerBubbles = transcript.segments.map((segment, segmentNum) => {
-      speakerNums.add(segment.speakerNum);
+  const speakerBubbles = diarizedTranscript.diarized.map((bubble, i) => {
+      speakerNums.add(bubble.speaker);
 
       return (
-        <SpeakerBubble
-            key={ segmentNum }
-            speakerNum={ segment.speakerNum }>
+        <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
           {
-            segment.words.map((word, wordNum) => (
-                <span key={ `${segmentNum}-${wordNum}` }
-                  className={ `ts-${toTimeAnchor(segment.starts[wordNum])}` }>
-                  { word }
+            bubble.segments.map(segment => (
+                <span key={ `${i}-${segment[0]}` }
+                  className={ `ts-${toTimeAnchor(segment[2])}` }>
+                  { segment[1] }
                 </span>
             ))
           }
@@ -73,7 +71,7 @@ export default function BoardMeeting({
       <main style={mainStyle}>
         <BoardMeetingControl
           header={transcriptHeader}
-          transcript={transcriptSection}
+          transcriptNode={transcriptSection}
           category={category}
           videoId={videoId}
           initialExistingNames={initialExistingNames}

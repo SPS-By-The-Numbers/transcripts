@@ -106,7 +106,7 @@ def process_vids(vid_list, args):
                 json={
                     **AUTH_PARAMS,
                     'category': category,
-                    'transcripts': {"en": transcript_json},
+                    'transcripts': {"en": json.loads(transcript_json)},
                     'vid': vid,
                     'metadata': metadata})
 
