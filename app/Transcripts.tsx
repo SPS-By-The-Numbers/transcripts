@@ -9,6 +9,7 @@ import { content, theme } from '../tailwind.config.js';
 import { VideoData, getAllVideosForDateRange } from '../utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
+import { isValid } from 'date-fns';
 
 function useFilterParameters(allCategories: string[]): TranscriptFilterSelection {
   const searchParams: URLSearchParams = useSearchParams();
@@ -28,8 +29,8 @@ function useFilterParameters(allCategories: string[]): TranscriptFilterSelection
   const startParam: string | null = searchParams.get('start');
 
   if (startParam !== null) {
-    const parsedStart: Date | undefined = parseDateFromPath(startParam);
-    if (parsedStart !== undefined) {
+    const parsedStart: Date = parseDateFromPath(startParam);
+    if (isValid(parsedStart)) {
       start = parsedStart;
     }
   }
@@ -38,8 +39,8 @@ function useFilterParameters(allCategories: string[]): TranscriptFilterSelection
   const endParam: string | null = searchParams.get('end');
 
   if (endParam !== null) {
-    const parsedEnd: Date | undefined = parseDateFromPath(endParam);
-    if (parsedEnd !== undefined) {
+    const parsedEnd: Date = parseDateFromPath(endParam);
+    if (isValid(parsedEnd)) {
       end = parsedEnd;
     }
   }
