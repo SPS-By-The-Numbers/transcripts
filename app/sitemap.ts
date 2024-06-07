@@ -34,27 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })));
   }
 
-  const datePages: SiteMapEntry[] = [];
-
-  for (const category of categories) {
-    const dates = await getDatesForCategory(category);
-
-    datePages.push(...dates.map(d => ({
-      url: buildUrl(getDatePath(category, d)),
-      lastModified: d,
-      changeFrequency: 'weekly' as ChangeFrequency,
-    })));
-  }
-
-  const categoryPages: SiteMapEntry[] = categories.map(c => ({
-    url: buildUrl(getCategoryPath(c)),
-    changeFrequency: 'monthly' as ChangeFrequency,
-    // TODO: Add last-modified, either a hard-coded value, or something determined from changelog
-  }));
-
   return [
-    ...categoryPages,
-    ...datePages,
     ...videoPages
   ];
 }
