@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation.js';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { TailSpin } from 'react-loader-spinner';
 import resolveConfig from 'tailwindcss/resolveConfig';
@@ -11,8 +11,13 @@ import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/pa
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
 import { isValid } from 'date-fns';
 
-function useFilterParameters(allCategories: string[]): TranscriptFilterSelection {
+function useFilterParams(allCategories: string[]): {
+   filterParams: TranscriptFilterSelection,
+   updateFilterParams: (newFilters: TranscriptFilterSelection) => void
+} {
   const searchParams: URLSearchParams = useSearchParams();
+  const pathName: string = usePathname();
+  const { push } = useRouter();
 
   const categoryParam: string | null = searchParams.get('category');
 
@@ -54,12 +59,34 @@ function useFilterParameters(allCategories: string[]): TranscriptFilterSelection
     dateRange = { start, end };
   }
 
-  return { category, dateRange };
+  const filterParams: TranscriptFilterSelection = { category, dateRange };
+
+  const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
+    const parameters: string[] = [
+      newFilters.category && `category=${newFilters.category}`,
+      newFilters.dateRange.start && `start=${formatDateForPath(newFilters.dateRange.start)}`,
+      newFilters.dateRange.end && `end=${formatDateForPath(newFilters.dateRange.end)}`
+    ].filter(param => param !== null) as string[];
+
+    let urlString = pathName;
+
+    const paramString = parameters.join('&');
+    if (paramString != '') {
+      urlString += `?${paramString}`;
+    }
+
+    push(urlString, { scroll: false });
+  }
+
+  return {
+    filterParams,
+    updateFilterParams
+  };
 }
 
 export default function Transcripts({ allCategories }: { allCategories: string[] }) {
-  const initialFilters = useFilterParameters(allCategories);
-  const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(initialFilters);
+  const { filterParams, updateFilterParams } = useFilterParams(allCategories);
+  const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
 
   const [isLoading, setLoading] = useState(true);
   const [videos, setVideos]: [VideoData[], any] = useState([]);
@@ -90,6 +117,7 @@ export default function Transcripts({ allCategories }: { allCategories: string[]
 
   function handleFilterChange(filters: TranscriptFilterSelection) {
     updateFilters(filters);
+    updateFilterParams(filters);
   }
 
   const videoLinks: React.ReactNode[] = videos.map(

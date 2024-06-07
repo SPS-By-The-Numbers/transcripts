@@ -19,8 +19,8 @@ export type TranscriptFilterProps = {
 }
 
 export default function TranscriptFilter({selection, onFilterChange}: TranscriptFilterProps) {
-  function handleCategoryChange(event, value) {
-    onFilterChange({...selection, category: value});
+  function handleCategoryChange(event) {
+    onFilterChange({...selection, category: event.target.value});
   }
 
   function handleStartChange(start: Date | null): void {
