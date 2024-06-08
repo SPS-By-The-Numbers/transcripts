@@ -11,79 +11,6 @@ import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/pa
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
 import { isValid } from 'date-fns';
 
-function useFilterParams(allCategories: string[]): {
-   filterParams: TranscriptFilterSelection,
-   updateFilterParams: (newFilters: TranscriptFilterSelection) => void
-} {
-  const searchParams: URLSearchParams = useSearchParams();
-  const pathName: string = usePathname();
-  const { push } = useRouter();
-
-  const categoryParam: string | null = searchParams.get('category');
-
-  let category: string;
-
-  if (categoryParam !== null && allCategories.includes(categoryParam)) {
-    category = categoryParam;
-  }
-  else {
-    category = 'sps-board';
-  }
-
-  let start: Date | null = null;
-  const startParam: string | null = searchParams.get('start');
-
-  if (startParam !== null) {
-    const parsedStart: Date = parseDateFromPath(startParam);
-    if (isValid(parsedStart)) {
-      start = parsedStart;
-    }
-  }
-
-  let end: Date | null = null;
-  const endParam: string | null = searchParams.get('end');
-
-  if (endParam !== null) {
-    const parsedEnd: Date = parseDateFromPath(endParam);
-    if (isValid(parsedEnd)) {
-      end = parsedEnd;
-    }
-  }
-
-  let dateRange: DateRange;
-
-  if (start === null && end === null) {
-    dateRange = { start: parseDateFromPath('2024-03-01'), end: null };
-  }
-  else {
-    dateRange = { start, end };
-  }
-
-  const filterParams: TranscriptFilterSelection = { category, dateRange };
-
-  const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
-    const parameters: string[] = [
-      newFilters.category && `category=${newFilters.category}`,
-      newFilters.dateRange.start && `start=${formatDateForPath(newFilters.dateRange.start)}`,
-      newFilters.dateRange.end && `end=${formatDateForPath(newFilters.dateRange.end)}`
-    ].filter(param => param !== null) as string[];
-
-    let urlString = pathName;
-
-    const paramString = parameters.join('&');
-    if (paramString != '') {
-      urlString += `?${paramString}`;
-    }
-
-    push(urlString, { scroll: false });
-  }
-
-  return {
-    filterParams,
-    updateFilterParams
-  };
-}
-
 export default function Transcripts({ allCategories }: { allCategories: string[] }) {
   const { filterParams, updateFilterParams } = useFilterParams(allCategories);
   const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
@@ -152,4 +79,83 @@ export default function Transcripts({ allCategories }: { allCategories: string[]
       {isLoading ? loadingSection : resultsSection}
     </>
   );
+}
+
+function useFilterParams(allCategories: string[]): {
+   filterParams: TranscriptFilterSelection,
+   updateFilterParams: (newFilters: TranscriptFilterSelection) => void
+} {
+  const searchParams: URLSearchParams = useSearchParams();
+  const pathName: string = usePathname();
+  const { push } = useRouter();
+
+  const filterParams: TranscriptFilterSelection = {
+    category: getCategoryFromParams(searchParams, allCategories),
+    dateRange: getDateRangeFromParams(searchParams),
+  };
+
+  const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
+    push(buildUrl(pathName, newFilters), { scroll: false });
+  }
+
+  return {
+    filterParams,
+    updateFilterParams
+  };
+}
+
+function getCategoryFromParams(params: URLSearchParams, allCategories: string[]): string {
+  const categoryParam: string | null = params.get('category');
+
+  if (categoryParam !== null && allCategories.includes(categoryParam)) {
+    return categoryParam;
+  }
+  else {
+    return 'sps-board';
+  }
+}
+
+function getDateRangeFromParams(params: URLSearchParams): DateRange {
+  const start: Date | null = getDateFromParams(params, 'start');
+  const end: Date | null = getDateFromParams(params, 'end');
+
+  if (start === null && end === null) {
+    return { start: parseDateFromPath('2024-03-01'), end: null };
+  }
+  else {
+    return { start, end };
+  }
+}
+
+function getDateFromParams(params: URLSearchParams, key: string): Date | null {
+  const param: string | null = params.get(key);
+  if (param === null) {
+    return null;
+  }
+
+  const date: Date = parseDateFromPath(param);
+
+  if (isValid(date)) {
+    return date;
+  }
+  else {
+    return null;
+  }
+}
+
+function buildUrl(basePath: string, filterParams: TranscriptFilterSelection): string {
+  const parameters: string[] = [
+    filterParams.category && `category=${filterParams.category}`,
+    filterParams.dateRange.start && `start=${formatDateForPath(filterParams.dateRange.start)}`,
+    filterParams.dateRange.end && `end=${formatDateForPath(filterParams.dateRange.end)}`
+  ].filter(param => param !== null) as string[];
+
+  let urlString = basePath;
+
+  const paramString = parameters.join('&');
+  if (paramString !== null && paramString !== '') {
+    urlString += `?${paramString}`;
+  }
+
+  return urlString;
 }
