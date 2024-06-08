@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { TailSpin } from 'react-loader-spinner';
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { content, theme } from '../tailwind.config.js';
+import { content, theme } from '../tailwind.config.cjs';
 import { VideoData, getAllVideosForDateRange } from '../utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
