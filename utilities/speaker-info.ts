@@ -26,7 +26,7 @@ export function toSpeakerKey(speakerNum: number) {
 }
 
 export function toColorClass(speakerNum: number) {
-  return `c-${speakerNum % 8}`;
+  return `c-${speakerNum % 7}`;
 }
 
 export function getSpeakerAttributes(speakerNum : number, speakerInfo : SpeakerInfoData ) {
