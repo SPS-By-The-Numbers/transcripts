@@ -32,28 +32,55 @@ export default function BoardMeeting({
     metadata,
     category,
     diarizedTranscript,
+    subtextTranscript,
     initialExistingNames,
     initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
 
   const speakerNums = new Set<number>();
+  const subtextSegments = {};
+  if (subtextTranscript) {
+    for (const segment of subtextTranscript.diarized.flatMap(bubble => bubble.segments)) {
+      subtextSegments[segment[0]] = segment;
+    }
+  }
 
   // Merge all segments from the same speaker to produce speaking divs.
   const speakerBubbles = diarizedTranscript.diarized.map((bubble, i) => {
       speakerNums.add(bubble.speaker);
 
-      return (
-        <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
-          {
-            bubble.segments.map(segment => (
-                <span key={ `${i}-${segment[0]}` }
-                  className={ `ts-${toTimeAnchor(segment[2])}` }>
-                  { segment[1] }
-                </span>
-            ))
-          }
-        </SpeakerBubble>
-      );
+      if (Object.keys(subtextSegments).length) {
+        return (
+          <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
+            {
+              bubble.segments.map(segment => (
+                  <span key={ `${i}-${segment[0]}` }
+                    className={ `ts-${toTimeAnchor(segment[2])}` }>
+                    <div>
+                      { segment[1] }
+                    </div>
+                    <div className="s">
+                      { subtextSegments[segment[0]][1] }
+                    </div>
+                  </span>
+              ))
+            }
+          </SpeakerBubble>
+        );
+      } else {
+        return (
+          <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
+            {
+              bubble.segments.map(segment => (
+                  <span key={ `${i}-${segment[0]}` }
+                    className={ `ts-${toTimeAnchor(segment[2])}` }>
+                    { segment[1] }
+                  </span>
+              ))
+            }
+          </SpeakerBubble>
+        );
+      }
   });
 
   const transcriptHeader = <TranscriptHeader
