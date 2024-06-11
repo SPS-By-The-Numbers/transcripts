@@ -62,6 +62,7 @@ export default async function Index({params}: {params: VideoParams}) {
   const metadata = await getMetadata(params.category, params.videoId);
   const diarizedTranscript = await getDiarizedTranscript(params.category, params.videoId, transcriptLangCode);
   const speakerControlInfo = await loadSpeakerControlInfo(params.category, params.videoId);
+  const subtextTranscript = transcriptLangCode === 'en' ? undefined : await getDiarizedTranscript(params.category, params.videoId, 'en');
 
   return (
     <TranscriptControlProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
@@ -69,6 +70,7 @@ export default async function Index({params}: {params: VideoParams}) {
           metadata={ metadata }
           category={ params.category }
           diarizedTranscript={ diarizedTranscript }
+          subtextTranscript={ subtextTranscript }
           initialExistingNames={ speakerControlInfo.existingNames }
           initialExistingTags={ speakerControlInfo.existingTags } />
     </TranscriptControlProvider>
