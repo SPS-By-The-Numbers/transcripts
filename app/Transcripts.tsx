@@ -4,13 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { isValid } from 'date-fns';
-import resolveConfig from 'tailwindcss/resolveConfig';
-import { TailSpin } from 'react-loader-spinner';
 
-import { content, theme } from '../tailwind.config.cjs';
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
 import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
+import LoadingSpinner from 'components/LoadingSpinner';
 
 const defaultCategory = 'sps-board';
 const defaultDate = parseDateFromPath('2024-03-01');
@@ -18,33 +16,7 @@ const defaultDate = parseDateFromPath('2024-03-01');
 export default function Transcripts({ allCategories }: { allCategories: string[] }) {
   const { filterParams, updateFilterParams } = useFilterParams(allCategories);
   const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
-
-  const [isLoading, setLoading] = useState(true);
-  const [videos, setVideos]: [VideoData[], any] = useState([]);
-
-  useEffect(() => {
-    if (filters.category === null || (filters.dateRange.start === null && filters.dateRange.end === null)) {
-      setVideos([]);
-      return () => {};
-    }
-
-    let ignore = false;
-
-    const startDateString = filters.dateRange.start !== null ? formatDateForPath(filters.dateRange.start) : null;
-    const endDateString = filters.dateRange.end !== null ? formatDateForPath(filters.dateRange.end) : null;
-
-    getAllVideosForDateRange(filters.category, startDateString, endDateString)
-      .then(videoData => {
-        if (!ignore) {
-          setLoading(false);
-          setVideos(videoData);
-        }
-      });
-
-      return () => {
-        ignore = true;
-      }
-  }, [filters])
+  const { videos, isLoading } = useFilteredVideos(filters);
 
   function handleFilterChange(filters: TranscriptFilterSelection) {
     updateFilters(filters);
@@ -60,13 +32,9 @@ export default function Transcripts({ allCategories }: { allCategories: string[]
       </li>
     ));
 
-  // Get access to the tailwind theme colors to pass to the loading spinner
-  // Specifying only content and theme keys is a workaround for a type error pertaining
-  // to the "future" key
-  const fullConfig = resolveConfig({ content, theme });
-  const loadingSection = <section className="my-4 flex flex-row">
-    <TailSpin wrapperClass="justify-center" color={fullConfig.theme.colors.blue['500']} />
-  </section>;
+  const loadingSection =  <section className="my-4 flex flex-row">
+    <LoadingSpinner />
+  </section>
 
   const resultsSection: React.ReactNode = <section>
     <h2 className="my-4 text-lg">
@@ -106,6 +74,44 @@ function useFilterParams(allCategories: string[]): {
     filterParams,
     updateFilterParams
   };
+}
+
+function useFilteredVideos(filters: TranscriptFilterSelection): {
+  videos: VideoData[], isLoading: boolean
+} {
+  const [isLoading, setLoading] = useState(true);
+  const [videos, setVideos]: [VideoData[], any] = useState([]);
+
+  useEffect(() => {
+    if (filters.dateRange.start === null && filters.dateRange.end === null) {
+      setVideos([]);
+      return () => {};
+    }
+
+    const startDateString = filters.dateRange.start !== null ? formatDateForPath(filters.dateRange.start) : null;
+    const endDateString = filters.dateRange.end !== null ? formatDateForPath(filters.dateRange.end) : null;
+
+    let ignore = false;
+
+    async function fetchVideos() {
+      const videoData = await getAllVideosForDateRange(filters.category, startDateString, endDateString);
+
+      if (ignore) {
+        return;
+      }
+
+      setLoading(false);
+      setVideos(videoData);
+    }
+
+    fetchVideos();
+
+    return () => {
+      ignore = true;
+    }
+  }, [filters])
+
+  return { videos, isLoading };
 }
 
 function getCategoryFromParams(params: URLSearchParams, allCategories: string[]): string {
