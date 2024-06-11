@@ -1,15 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { TailSpin } from 'react-loader-spinner';
-import resolveConfig from 'tailwindcss/resolveConfig';
-import { content, theme } from '../tailwind.config.cjs';
-import { VideoData, getAllVideosForDateRange } from '../utilities/metadata-utils';
-import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
-import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { isValid } from 'date-fns';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import { TailSpin } from 'react-loader-spinner';
+
+import { content, theme } from '../tailwind.config.cjs';
+import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
+import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
+import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
+
+const defaultCategory = 'sps-board';
+const defaultDate = parseDateFromPath('2024-03-01');
 
 export default function Transcripts({ allCategories }: { allCategories: string[] }) {
   const { filterParams, updateFilterParams } = useFilterParams(allCategories);
@@ -110,9 +114,8 @@ function getCategoryFromParams(params: URLSearchParams, allCategories: string[])
   if (categoryParam !== null && allCategories.includes(categoryParam)) {
     return categoryParam;
   }
-  else {
-    return 'sps-board';
-  }
+
+  return defaultCategory;
 }
 
 function getDateRangeFromParams(params: URLSearchParams): DateRange {
@@ -120,11 +123,10 @@ function getDateRangeFromParams(params: URLSearchParams): DateRange {
   const end: Date | null = getDateFromParams(params, 'end');
 
   if (start === null && end === null) {
-    return { start: parseDateFromPath('2024-03-01'), end: null };
+    return { start: defaultDate, end: null };
   }
-  else {
-    return { start, end };
-  }
+
+  return { start, end };
 }
 
 function getDateFromParams(params: URLSearchParams, key: string): Date | null {
@@ -135,12 +137,11 @@ function getDateFromParams(params: URLSearchParams, key: string): Date | null {
 
   const date: Date = parseDateFromPath(param);
 
-  if (isValid(date)) {
-    return date;
-  }
-  else {
+  if (!isValid(date)) {
     return null;
   }
+
+  return date;
 }
 
 function buildUrl(basePath: string, filterParams: TranscriptFilterSelection): string {
