@@ -11,6 +11,7 @@ type BoardMeetingParams = {
   initialExistingNames: object,
   initialExistingTags: Set<string>,
   diarizedTranscript: DiarizedTranscript,
+  subtextTranscript: DiarizedTranscript | undefined,
 };
 
 function toTimeAnchor(seconds) {
