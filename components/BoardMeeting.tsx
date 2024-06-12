@@ -24,9 +24,9 @@ function toTimeAnchor(seconds) {
 const mainStyle = {
     fontFamily: 'sans-serif',
     fontSize: '14px',
-    color: 'white',
+    color: '#111',
     padding: '1em 1em 1em 1em',
-    backgroundColor: '#efe7dd',
+    backgroundColor: 'white',
 };
 
 export default function BoardMeeting({
