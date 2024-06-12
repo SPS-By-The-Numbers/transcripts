@@ -1,11 +1,6 @@
-import path from 'path';
-import { get, child } from "firebase/database"
+import { get, child, QueryConstraint, startAt, endAt, query, DataSnapshot, orderByKey } from "firebase/database"
 import { dbPublicRoot } from 'utilities/firebase';
-import { readdir, readFile } from 'fs/promises';
-import { Dirent, existsSync } from 'fs';
-import { compareAsc, isEqual, parseISO, startOfDay } from 'date-fns';
-
-const pathDateFormat = 'yyyy-MM-dd';
+import { parseISO } from 'date-fns';
 
 export type VideoData = {
     videoId: string,
@@ -60,6 +55,33 @@ export async function getAllVideosForPublishDate(category: string, datePath: str
     const result = (await getCategoryPublicRoot(category)).child(`index/date/${datePath}`).val();
 
     return Object.entries(result).map(([videoId, metadata]) => metadataToVideoData(metadata));
+}
+
+export async function getAllVideosForDateRange(
+    category: string, startDate: string | null, endDate: string | null
+): Promise<VideoData[]> {
+    const constraints: QueryConstraint[] = [orderByKey()];
+
+    if (startDate !== null) {
+        constraints.push(startAt(startDate));
+    }
+
+    if (endDate !== null) {
+        constraints.push(endAt(endDate));
+    }
+
+    const data: DataSnapshot = await get(query(child(dbPublicRoot, `${category}/index/date`), ...constraints));
+    const videosByDate: {
+        [dateString: string]: {
+            [videoId: string]: VideoData
+        }
+    } = data.val();
+
+    const videos: VideoData[] = Object.entries(videosByDate).flatMap(([dateString, videosById]) =>
+        Object.entries(videosById).map(([videoId, videoData]) => metadataToVideoData(videoData))
+    );
+
+    return videos;
 }
 
 export async function getMetadata(category: string, id: string): Promise<any> {
