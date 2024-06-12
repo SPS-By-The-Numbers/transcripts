@@ -11,7 +11,8 @@
     "syncData": "bash syncdata.sh",
     "setupFirebase": "firebase target:apply hosting transcripts transcripts-sps-by-the-numbers",
     "start": "next start",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.24.5",
@@ -70,6 +71,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "meilisearch": "^0.40.0",
     "react-query": "^3.39.3",
+    "ts-node": "^10.9.2",
     "type-fest": "^4.18.2"
   }
 }
