@@ -24,7 +24,7 @@ function toTimeAnchor(seconds) {
 const mainStyle = {
     fontFamily: 'sans-serif',
     fontSize: '14px',
-    color: '#111',
+    color: 'white',
     padding: '1em 1em 1em 1em',
     backgroundColor: '#efe7dd',
 };
