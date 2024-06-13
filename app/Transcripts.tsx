@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { isValid } from 'date-fns';
+import { compareDesc, isValid } from 'date-fns';
 
 import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
 import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
@@ -23,8 +23,9 @@ export default function Transcripts({ allCategories }: { allCategories: string[]
     updateFilterParams(filters);
   }
 
-  const videoLinks: React.ReactNode[] = videos.map(
-    video => (
+  const videoLinks: React.ReactNode[] = videos
+    .sort((a, b) => compareDesc(a.publishDate, b.publishDate))
+    .map(video => (
       <li key={video.videoId} className="mx-3 list-disc">
         <Link href={getVideoPath(filters.category, video.videoId)}>
           {video.title}
