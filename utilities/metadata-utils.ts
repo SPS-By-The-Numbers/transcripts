@@ -1,6 +1,7 @@
-import { get, child, QueryConstraint, startAt, endAt, query, DataSnapshot, orderByKey } from "firebase/database"
+import { get, child, QueryConstraint, startAt, endAt, query, DataSnapshot, orderByKey, limitToLast } from "firebase/database"
 import { dbPublicRoot } from 'utilities/firebase';
 import { parseISO } from 'date-fns';
+import { parseDateFromPath } from "./path-utils";
 
 export type VideoData = {
     videoId: string,
@@ -49,6 +50,25 @@ export async function getDatesForCategory(category: string): Promise<string[]> {
       return [];
     }
     return Object.keys(result);
+}
+
+export async function getLastDateForCategory(category: string): Promise<Date | null> {
+  const data: DataSnapshot = await get(query(
+    child(dbPublicRoot, `${category}/index/date`),
+    orderByKey(),
+    limitToLast(1)));
+
+  const dataVal: {
+    [dateString: string]: any
+  } = data.val();
+
+  const datePaths: string[] = Object.keys(dataVal);
+
+  if (datePaths.length === 0) {
+    return null;
+  }
+
+  return parseDateFromPath(datePaths[0]);
 }
 
 export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoData[]> {
