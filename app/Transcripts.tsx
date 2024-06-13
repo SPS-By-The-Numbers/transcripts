@@ -10,11 +10,13 @@ import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import LoadingSpinner from 'components/LoadingSpinner';
 
-const defaultCategory = 'sps-board';
-const defaultDate = parseDateFromPath('2024-03-01');
+type Props = {
+  allCategories: string[],
+  defaultFilters: TranscriptFilterSelection
+};
 
-export default function Transcripts({ allCategories }: { allCategories: string[] }) {
-  const { filterParams, updateFilterParams } = useFilterParams(allCategories);
+export default function Transcripts({ allCategories, defaultFilters}: Props) {
+  const { filterParams, updateFilterParams } = useFilterParams(allCategories, defaultFilters);
   const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
   const { videos, isLoading } = useFilteredVideos(filters);
 
@@ -54,7 +56,7 @@ export default function Transcripts({ allCategories }: { allCategories: string[]
   );
 }
 
-function useFilterParams(allCategories: string[]): {
+function useFilterParams(allCategories: string[], defaultFilter: TranscriptFilterSelection): {
    filterParams: TranscriptFilterSelection,
    updateFilterParams: (newFilters: TranscriptFilterSelection) => void
 } {
@@ -63,8 +65,8 @@ function useFilterParams(allCategories: string[]): {
   const { push } = useRouter();
 
   const filterParams: TranscriptFilterSelection = {
-    category: getCategoryFromParams(searchParams, allCategories),
-    dateRange: getDateRangeFromParams(searchParams),
+    category: getCategoryFromParams(searchParams, allCategories, defaultFilter.category),
+    dateRange: getDateRangeFromParams(searchParams, defaultFilter.dateRange),
   };
 
   const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
@@ -115,7 +117,7 @@ function useFilteredVideos(filters: TranscriptFilterSelection): {
   return { videos, isLoading };
 }
 
-function getCategoryFromParams(params: URLSearchParams, allCategories: string[]): string {
+function getCategoryFromParams(params: URLSearchParams, allCategories: string[], defaultCategory: string): string {
   const categoryParam: string | null = params.get('category');
 
   if (categoryParam !== null && allCategories.includes(categoryParam)) {
@@ -125,12 +127,12 @@ function getCategoryFromParams(params: URLSearchParams, allCategories: string[])
   return defaultCategory;
 }
 
-function getDateRangeFromParams(params: URLSearchParams): DateRange {
+function getDateRangeFromParams(params: URLSearchParams, defaultRange: DateRange): DateRange {
   const start: Date | null = getDateFromParams(params, 'start');
   const end: Date | null = getDateFromParams(params, 'end');
 
   if (start === null && end === null) {
-    return { start: defaultDate, end: null };
+    return defaultRange;
   }
 
   return { start, end };
