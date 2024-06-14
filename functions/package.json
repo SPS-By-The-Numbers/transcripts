@@ -24,6 +24,7 @@
     "firebase-functions": "^5.0.0",
     "lodash.isequal": "^4.5.0",
     "lzma-native": "^8.0.6",
+    "sentence-splitter": "^5.0.0",
     "youtubei.js": "^9.4.0"
   },
   "devDependencies": {

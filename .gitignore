@@ -1,5 +1,5 @@
 *~
-*.sw[op]
+*.sw[nop]
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -36,3 +36,11 @@ yarn-error.log*
 .firebase
 
 data/transcripts
+
+venv
+
+*.log
+
+__pycache__
+
+coverage
