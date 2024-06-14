@@ -1,5 +1,6 @@
 import * as Storage from "firebase/storage";
-import type { DiarizedTranscript, SpeakerSegments, SegmentData } from "../../../utilities/transcript";
+import type { DiarizedTranscript, SpeakerMonologue, SegmentData } from "../../../utilities/transcript";
+import { SegmentTypeValues } from "../../../utilities/transcript";
 import { split, SentenceSplitterSyntax } from "sentence-splitter";
 import { makeWhisperXTranscriptsPath } from "./path.js";
 import { toSpeakerNum } from "../../../utilities/speaker-info";
@@ -37,9 +38,7 @@ export type WhisperXTranscript = {
   language : string;
 };
 
-type StartEnds = [number, number];
-
-function toSentences(words : string[], wordStartEnds : StartEnds[]) : SegmentData[] {
+function toSentences(words : string[], wordStarts : number[], wordEnds : number[]) : SegmentData[] {
   const paragraph = words.join(' ');
   const sentences = split(paragraph);
   const sentenceTexts = sentences
@@ -52,8 +51,8 @@ function toSentences(words : string[], wordStartEnds : StartEnds[]) : SegmentDat
   let totalWords = 0;
   return sentenceTexts.map((text, id) => {
       const numWords = (text.match(/ /g)||[]).length + 1;
-      const start = wordStartEnds[totalWords][0];
-      const end = wordStartEnds[totalWords + numWords - 1][1];
+      const start = wordStarts[totalWords];
+      const end = wordEnds[totalWords + numWords - 1];
       totalWords += numWords;
       return [id.toString(), text, start, end];
     });
@@ -75,25 +74,27 @@ export function toSearchDocuments(vid: string, transcript: DiarizedTranscript) {
   }));
 }
 
+export function toMonologuesAndSegments(whisperXTranscript: WhisperXTranscript) {
+}
+
 export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript): DiarizedTranscript {
-  // Group all segments for a sepaker into one long pagraph.
-  // Split the paragraph by sentence.
-  // Match start/end of words.
-  const speakerSegments = new Array<SpeakerSegments>();
+  const speakerMonologues = new Array<SpeakerMonologue>();
 
   let curSpeakerNum = -1;
   const words = [];
-  const wordStartEnds = [];
+  const wordStarts = [];
+  const wordEnds = [];
   for (const rawSegment of whisperXTranscript.segments) {
     const newSpeaker = toSpeakerNum(rawSegment.speaker);
     if (newSpeaker !== curSpeakerNum) {
       if (words.length > 0) {
-        speakerSegments.push({speaker: curSpeakerNum, segments: toSentences(words, wordStartEnds)});
+        speakerMonologues.push({speaker: curSpeakerNum, segments: toSentences(words, wordStarts, wordEnds)});
       }
 
       curSpeakerNum = newSpeaker;
       words.length = 0;
-      wordStartEnds.length = 0;
+      wordStarts.length = 0;
+      wordEnds.length = 0;
     }
 
     let lastStart = rawSegment.words[0].start || rawSegment.start;
@@ -103,15 +104,21 @@ export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript): Di
       let end = wordInfo.end || start + SMALL_TS_INCREMENT_S;
       lastStart = end;
       words.push(wordInfo.word.trim());
-      wordStartEnds.push([start, end]);
+      wordStarts.push(start);
+      wordEnds.push(end);
     }
   }
 
   if (words.length > 0) {
-    speakerSegments.push({speaker: curSpeakerNum, segments: toSentences(words, wordStartEnds)});
+    speakerMonologues.push({speaker: curSpeakerNum, segments: toSentences(words, wordStarts, wordEnds)});
   }
 
-  return {language: whisperXTranscript.language, diarized: speakerSegments};
+  return {
+    version: 1,
+    segmentType: SegmentTypeValues.Sentence,
+    language: whisperXTranscript.language,
+    diarized: speakerMonologues
+    };
 }
 
 export async function getCompressedWhisperXTranscript(category: string, id: string, language: string): Promise<object> {
