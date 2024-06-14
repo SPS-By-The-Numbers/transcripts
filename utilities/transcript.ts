@@ -8,13 +8,24 @@ export type SegmentData = [
   number   // End time.
   ];
 
-export type SpeakerSegments = {
+export type SpeakerMonologue = {
   speaker: number;
   segments : SegmentData[];
 };
 
+export const SegmentTypeValues = {
+  Default: 0,   // Whatever WhisperX provides
+  Sentence: 1,  // Rebroken based on english sentence splitter.
+} as const;
+
+type SegmentType = typeof SegmentTypeValues[keyof typeof SegmentTypeValues];
+
+type DiarizedTranscriptVersion = 1;
+
 export type DiarizedTranscript = {
-  diarized : SpeakerSegments[];
+  version : DiarizedTranscriptVersion;
+  segmentType : SegmentType;
+  diarized : SpeakerMonologue[];
   language : string;
 };
 
@@ -36,7 +47,7 @@ export async function getDiarizedTranscript(category: string, id: string, langua
     console.error(e);
   }
 
-  return { diarized: [], language };
+  return { diarized: [], language, version: 1, segmentType: SegmentTypeValues.Sentence };
 }
 
 export function toHhmmss(seconds: number) {
