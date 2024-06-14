@@ -1,11 +1,15 @@
 import * as Storage from "firebase/storage";
-import type {DiarizedTranscript, SpeakerSegments, SegmentData} from "../../../utilities/transcript";
-import {toSpeakerNum} from "../../../utilities/speaker-info";
-import {makeWhisperXTranscriptsPath} from "./path.js";
+import type { DiarizedTranscript, SpeakerSegments, SegmentData } from "../../../utilities/transcript";
+import { split, SentenceSplitterSyntax } from "sentence-splitter";
+import { makeWhisperXTranscriptsPath } from "./path.js";
+import { toSpeakerNum } from "../../../utilities/speaker-info";
 
-// SMALL_TS_INCREMENT is a very small increment in the timestamp used to synthetically
+
+const WHISPERX_GRANULARITY_S = 0.001;
+
+// SMALL_TS_INCREMENT_S is a very small increment in the timestamp used to synthetically
 // advance time if time timestamps are missing.
-const SMALL_TS_INCREMENT = 0.0001;
+const SMALL_TS_INCREMENT_S = WHISPERX_GRANULARITY_S / 100;
 
 // The WhisperX json data is very verbose and contains redundant information
 // which bloats the size of the transcript compared to raw words by over 10x.
@@ -33,6 +37,28 @@ export type WhisperXTranscript = {
   language : string;
 };
 
+type StartEnds = [number, number];
+
+function toSentences(words : string[], wordStartEnds : StartEnds[]) : SegmentData[] {
+  const paragraph = words.join(' ');
+  const sentences = split(paragraph);
+  const sentenceTexts = sentences
+    .filter((node) => {
+        return node.type === SentenceSplitterSyntax.Sentence;
+     })
+    .map((node) => {
+        return node.raw;
+     });
+  let totalWords = 0;
+  return sentenceTexts.map((text, id) => {
+      const numWords = (text.match(/ /g)||[]).length + 1;
+      const start = wordStartEnds[totalWords][0];
+      const end = wordStartEnds[totalWords + numWords - 1][1];
+      totalWords += numWords;
+      return [id.toString(), text, start, end];
+    });
+}
+
 // Takes a `transcript` and produces an array of documents suitable for sending to
 // Meilisearch.
 //
@@ -49,54 +75,40 @@ export function toSearchDocuments(vid: string, transcript: DiarizedTranscript) {
   }));
 }
 
-export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript,
-  wordsAreSegments: boolean): DiarizedTranscript {
+export function toDiarizedTranscript(whisperXTranscript: WhisperXTranscript): DiarizedTranscript {
+  // Group all segments for a sepaker into one long pagraph.
+  // Split the paragraph by sentence.
+  // Match start/end of words.
   const speakerSegments = new Array<SpeakerSegments>();
 
   let curSpeakerNum = -1;
-  let segments;
-  let segmentIndex = 0;
+  const words = [];
+  const wordStartEnds = [];
   for (const rawSegment of whisperXTranscript.segments) {
-    segmentIndex++;
     const newSpeaker = toSpeakerNum(rawSegment.speaker);
     if (newSpeaker !== curSpeakerNum) {
-      if (segments) {
-        speakerSegments.push({speaker: curSpeakerNum, segments});
+      if (words.length > 0) {
+        speakerSegments.push({speaker: curSpeakerNum, segments: toSentences(words, wordStartEnds)});
       }
 
       curSpeakerNum = newSpeaker;
-      segments = new Array<SegmentData>();
+      words.length = 0;
+      wordStartEnds.length = 0;
     }
 
-    if (wordsAreSegments) {
-      let lastStart : number = rawSegment.words[0].start || 1;
-      let wordIndex = 0;
-      for (const word of rawSegment.words) {
-        wordIndex++;
-        const start = word.start || lastStart + SMALL_TS_INCREMENT;
-
-        let end = word.end;
-        if (!end) {
-          // Hack for missing start time. Move forward by 0.1 milliseconds.
-          end = start + SMALL_TS_INCREMENT;
-        }
-        lastStart = end;
-        segments.push([wordIndex, word.word.trim(), start, end]);
-      }
-    } else {
-      if (rawSegment.text) {
-        segments.push([
-          segmentIndex,
-          rawSegment.text.trim(),
-          rawSegment.start,
-          rawSegment.end,
-        ]);
-      }
+    let lastStart = rawSegment.words[0].start || rawSegment.start;
+    for (const wordInfo of rawSegment.words) {
+      // Hack for missing start time or end time. Move forward by a small amount.
+      const start = wordInfo.start || lastStart + SMALL_TS_INCREMENT_S;
+      let end = wordInfo.end || start + SMALL_TS_INCREMENT_S;
+      lastStart = end;
+      words.push(wordInfo.word.trim());
+      wordStartEnds.push([start, end]);
     }
   }
 
-  if (segments) {
-    speakerSegments.push({speaker: curSpeakerNum, segments});
+  if (words.length > 0) {
+    speakerSegments.push({speaker: curSpeakerNum, segments: toSentences(words, wordStartEnds)});
   }
 
   return {language: whisperXTranscript.language, diarized: speakerSegments};
