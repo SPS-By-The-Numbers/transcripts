@@ -10,13 +10,17 @@ import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import LoadingSpinner from 'components/LoadingSpinner';
 
+export type DefaultFiltersByCategory = {
+    [category: string]: { defaultStart: Date | null }
+}
+
 type Props = {
-  allCategories: string[],
-  defaultFilters: TranscriptFilterSelection
+  defaultCategory: string,
+  defaultsByCategory: DefaultFiltersByCategory,
 };
 
-export default function Transcripts({ allCategories, defaultFilters}: Props) {
-  const { filterParams, updateFilterParams } = useFilterParams(allCategories, defaultFilters);
+export default function Transcripts({ defaultCategory, defaultsByCategory }: Props) {
+  const { filterParams, updateFilterParams } = useFilterParams(defaultCategory, defaultsByCategory);
   const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
   const { videos, isLoading } = useFilteredVideos(filters);
 
@@ -56,7 +60,7 @@ export default function Transcripts({ allCategories, defaultFilters}: Props) {
   );
 }
 
-function useFilterParams(allCategories: string[], defaultFilter: TranscriptFilterSelection): {
+function useFilterParams(defaultCategory: string, defaultsByCategory: DefaultFiltersByCategory): {
    filterParams: TranscriptFilterSelection,
    updateFilterParams: (newFilters: TranscriptFilterSelection) => void
 } {
@@ -64,9 +68,11 @@ function useFilterParams(allCategories: string[], defaultFilter: TranscriptFilte
   const pathName: string = usePathname();
   const { push } = useRouter();
 
+  const category: string = getCategoryFromParams(searchParams, defaultCategory, defaultsByCategory);
+
   const filterParams: TranscriptFilterSelection = {
-    category: getCategoryFromParams(searchParams, allCategories, defaultFilter.category),
-    dateRange: getDateRangeFromParams(searchParams, defaultFilter.dateRange),
+    category,
+    dateRange: getDateRangeFromParams(searchParams, defaultsByCategory[category].defaultStart),
   };
 
   const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
@@ -117,22 +123,22 @@ function useFilteredVideos(filters: TranscriptFilterSelection): {
   return { videos, isLoading };
 }
 
-function getCategoryFromParams(params: URLSearchParams, allCategories: string[], defaultCategory: string): string {
+function getCategoryFromParams(params: URLSearchParams, defaultCategory: string, defaultsByCategory: DefaultFiltersByCategory): string {
   const categoryParam: string | null = params.get('category');
 
-  if (categoryParam !== null && allCategories.includes(categoryParam)) {
+  if (categoryParam !== null && defaultsByCategory.hasOwnProperty(categoryParam)) {
     return categoryParam;
   }
 
   return defaultCategory;
 }
 
-function getDateRangeFromParams(params: URLSearchParams, defaultRange: DateRange): DateRange {
+function getDateRangeFromParams(params: URLSearchParams, defaultStart: Date | null): DateRange {
   const start: Date | null = getDateFromParams(params, 'start');
   const end: Date | null = getDateFromParams(params, 'end');
 
   if (start === null && end === null) {
-    return defaultRange;
+    return { start: defaultStart, end: null };
   }
 
   return { start, end };
