@@ -6,9 +6,9 @@ import {getAuth} from "firebase-admin/auth";
 import {onRequest} from "firebase-functions/v2/https";
 
 import {makeResponseJson} from "./response";
-import {makePublicPath, makePrivatePath} from "./path";
+import {makePublicPath, makePrivatePath} from "common/transcript";
 
-const STORAGE_BUCKET = "sps-by-the-numbers.appspot.com";
+import * as ConfigConstants from "../../../config/constants";
 
 function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
@@ -35,12 +35,12 @@ function getPubSubClient() {
 }
 
 function getDefaultBucket() {
-  return getStorage().bucket(STORAGE_BUCKET);
+  return getStorage().bucket(ConfigConstants.STORAGE_BUCKET);
 }
 
 // Global intialization for process.
-function initializeFirebase() {
-  initializeApp();
+function initializeFirebase(opts) {
+  initializeApp(opts);
 }
 
 async function getUser(token) {
