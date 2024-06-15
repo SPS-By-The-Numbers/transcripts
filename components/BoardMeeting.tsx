@@ -75,9 +75,9 @@ export default function BoardMeeting({
               bubble.segments.map(segment => (
                   <span key={ `${i}-${segment[0]}` }
                     className={ `ts-${toTimeAnchor(segment[2])}` }>
-                    <div>
+                    <p>
                       { segment[1] }
-                    </div>
+                    </p>
                   </span>
               ))
             }

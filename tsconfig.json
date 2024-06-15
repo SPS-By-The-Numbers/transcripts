@@ -8,6 +8,8 @@
     "paths": {
       "styles/*": ["./styles/*"],
       "components/*": ["./components/*"],
+      "common/*": ["./common/*"],
+      "config/*": ["./config/*"],
       "utilities/*": ["./utilities/*"]
     },
     "allowJs": true,

@@ -8,25 +8,9 @@ export type SegmentData = [
   number   // End time.
   ];
 
-export type SpeakerMonologue = {
+export type DiarizedSegments = {
   speaker: number;
   segments : SegmentData[];
-};
-
-export const SegmentTypeValues = {
-  Default: 0,   // Whatever WhisperX provides
-  Sentence: 1,  // Rebroken based on english sentence splitter.
-} as const;
-
-type SegmentType = typeof SegmentTypeValues[keyof typeof SegmentTypeValues];
-
-type DiarizedTranscriptVersion = 1;
-
-export type DiarizedTranscript = {
-  version : DiarizedTranscriptVersion;
-  segmentType : SegmentType;
-  diarized : SpeakerMonologue[];
-  language : string;
 };
 
 // Returns the path to the transcript data for the identified file. Data is 
