@@ -131,6 +131,15 @@ export function toTranscript(whisperXTranscript: WhisperXTranscript) : [Transcri
   const wordStarts = [];
   const wordEnds = [];
   for (const rawSegment of whisperXTranscript.segments) {
+    // There are some degenerate segments. Push them into the previous entry if it exists.
+    if (rawSegment.words.length === 0 && rawSegment.text.trimEnd().length !== 0) {
+      // Only attempt to add to the previous. If there was no previous, give up.
+      if (words.length > 0) {
+        words.at[words.length-1] += rawSegment.text.trimEnd();
+      }
+      continue;
+    }
+
     const newSpeaker = toSpeakerNum(rawSegment.speaker);
     if (newSpeaker !== curSpeakerNum) {
       if (words.length > 0) {
@@ -143,12 +152,6 @@ export function toTranscript(whisperXTranscript: WhisperXTranscript) : [Transcri
       words.length = 0;
       wordStarts.length = 0;
       wordEnds.length = 0;
-    }
-
-    if (rawSegment.words.length === 0 && rawSegment.text.trim().length !== 0) {
-      // TODO: This is a bad state. If there is just punction or stuff, fake the word?
-      console.log("fffuuu: ", rawSegment.text);
-      continue;
     }
 
     let lastStart = rawSegment.words[0].start || rawSegment.start;
