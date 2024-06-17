@@ -40,38 +40,46 @@ for (const category of Constants.ALL_CATEGORIES) {
         });
 
   for (const file of allFiles) {
-    const buffer = new streamBuffers.WritableStreamBuffer({ initialSize: 150 * 1024 });
-    await pipeline(file.createReadStream(), lzma.createDecompressor(), buffer);
-    const str = buffer.getContentsAsString('utf8');
-    const [transcript, sentences] = toTranscript(JSON.parse(str));
+    try {
+      const buffer = new streamBuffers.WritableStreamBuffer({ initialSize: 150 * 1024 });
+      await pipeline(file.createReadStream(), lzma.createDecompressor(), buffer);
+      const str = buffer.getContentsAsString('utf8');
+      const [transcript, sentences] = toTranscript(JSON.parse(str));
 
-    // Generate the filenames.
-    const vid = basename(file.name).split('.')[0];
-    const language = transcript.language;
-    const diarizedPath = makePublicPath(category, Constants.DIARIZED_SUBDIR, `${vid}.${language}.json`);
-    const sentencesPath = makePublicPath(category, Constants.SENTENCE_TABLE_SUBDIR, `${vid}.${language}.tsv`);
+      // Generate the filenames.
+      const vid = basename(file.name).split('.')[0];
+      const language = transcript.language;
+      const diarizedPath = makePublicPath(category, Constants.DIARIZED_SUBDIR, `${vid}.${language}.json`);
+      const sentencesPath = makePublicPath(category, Constants.SENTENCE_TABLE_SUBDIR, `${vid}.${language}.tsv`);
 
-    // Write the sentence data.
-    const tsvWriter = stringify({
-        header: false,
-        delimiter: '\t',
-      });
+      // Write the sentence data.
+      if (!(await getDefaultBucket().file(sentencesPath).exists())[0]) {
+        const tsvWriter = stringify({
+            header: false,
+            delimiter: '\t',
+          });
 
-    // Write the sentence tsv.
-    for (const [id, text] of sentences.entries()) {
-      tsvWriter.write([id, text]);
+        // Write the sentence tsv.
+        for (const [id, text] of sentences.entries()) {
+          tsvWriter.write([id, text]);
+        }
+        tsvWriter.end();
+
+        await pipeline(
+            tsvWriter,
+            createGzip({level: 9}),
+            getDefaultBucket().file(sentencesPath).createWriteStream(
+              {metadata: {contentEncoding: "gzip", contentType: "text/plain"}}
+              ));
+      }
+
+      // Write the diarized json.
+      if (!(await getDefaultBucket().file(diarizedPath).exists())[0]) {
+        const diarizedJson = JSON.stringify(transcript);
+        await writeToStorage(diarizedPath, createGzip({level: 9}), diarizedJson, {metadata: {contentEncoding: "gzip"}});
+      }
+    } catch (e) {
+      console.error("Failed ", file.name, " with error ", e);
     }
-    tsvWriter.end();
-
-    await pipeline(
-        tsvWriter, 
-        createGzip({level: 9}),
-        getDefaultBucket().file(sentencesPath).createWriteStream(
-          {metadata: {contentEncoding: "gzip", contentType: "text/plain"}}
-          ));
-
-    // Write the diarized json.
-    const diarizedJson = JSON.stringify(transcript);
-    await writeToStorage(diarizedPath, createGzip({level: 9}), diarizedJson, {metadata: {contentEncoding: "gzip"}});
   }
 }
