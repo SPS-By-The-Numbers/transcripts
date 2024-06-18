@@ -1,9 +1,12 @@
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { Metadata, ResolvingMetadata } from "next"
-import { loadSpeakerControlInfo } from 'utilities/client/speaker'
+import { firebaseStorageAccessor } from "utilities/firebase"
+import { getTranscript, getSentenceTable } from "common/transcript"
 import { getMetadata } from "utilities/metadata-utils"
-import { getDiarizedTranscript } from "utilities/transcript"
+import { loadSpeakerControlInfo } from 'utilities/client/speaker'
+
+import { DiarizedTranscript } from "common/transcript"
 
 export type VideoParams = {
     category: string,
@@ -55,14 +58,22 @@ export default async function Index({params}: {params: VideoParams}) {
     );
   }
 
-  const transcriptLangCode = params.lang === 'eng' ? 'en' : params.lang;
+  const transcriptLangCode = params.lang;
 
   // Handle the fact that transcript files for english still use the 2-letter ISO-639 code.
+  const loadData = new Array<Promise<any>>;
+  loadData.push(getMetadata(params.category, params.videoId));
+  loadData.push(DiarizedTranscript.makeFromStorage(
+      firebaseStorageAccessor, params.category, params.videoId, [lang]));
+  loadData.push(loadSpeakerControlInfo(params.category, params.videoId));
 
-  const metadata = await getMetadata(params.category, params.videoId);
-  const diarizedTranscript = await getDiarizedTranscript(params.category, params.videoId, transcriptLangCode);
-  const speakerControlInfo = await loadSpeakerControlInfo(params.category, params.videoId);
-  const subtextTranscript = transcriptLangCode === 'en' ? undefined : await getDiarizedTranscript(params.category, params.videoId, 'en');
+  const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all(loadData);
+
+  const languageOrder = ['eng'];
+  const translatedSentences = {};
+  if (transcriptLangCode !== 'eng') {
+    languageOrder.push(transcriptLangCode);
+  }
 
   return (
     <TranscriptControlProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
@@ -70,7 +81,8 @@ export default async function Index({params}: {params: VideoParams}) {
           metadata={ metadata }
           category={ params.category }
           diarizedTranscript={ diarizedTranscript }
-          subtextTranscript={ subtextTranscript }
+          languageOrder={ languageOrder }
+          speakerInfo={ speakerControlInfo.speakerInfo }
           initialExistingNames={ speakerControlInfo.existingNames }
           initialExistingTags={ speakerControlInfo.existingTags } />
     </TranscriptControlProvider>

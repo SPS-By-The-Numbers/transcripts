@@ -1,9 +1,9 @@
 'use client'
 
-import { forwardRef, MutableRefObject, useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube'
-import { fromHhmmss, toHhmmss } from 'utilities/transcript'
 import { Options } from 'youtube-player/dist/types';
+import { forwardRef, MutableRefObject, useRef, useEffect, useState } from 'react';
+import { fromHhmmss, toHhmmss } from 'utilities/client/css'
 
 type VideoPlayerParams = {
   videoId: string;

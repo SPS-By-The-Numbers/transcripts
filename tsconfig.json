@@ -28,7 +28,8 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "target": "esnext"
   },
   "include": [
     "next-env.d.ts",

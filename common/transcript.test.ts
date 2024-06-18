@@ -1,18 +1,29 @@
 import * as Transcript from './transcript';
-import * as fs from 'node:fs/promises';
+import * as fsPromise from 'node:fs/promises';
+import * as fs from 'node:fs';
 
-class TestStorageAccessor {
-  getBytes(bucket: string, path : string) : Promise<string> {
-    return fs.readFile([global.TESTDATA_PATH, bucket, path].join('/'), {encoding: 'utf8'});
+const TEST_VIDEOID = 'a95KMDHf4vQ';
+const TEST_BUCKET = 'testbucket';
+const TEST_CATEGORY = 'testcategory';
+
+class TestStorageAccessor extends Transcript.StorageAccessor {
+  listFilesByPrefix(_: string) : Promise<string[]> {
+    // Hardcode 1 file.
+    return Promise.resolve(['transcripts/public/testcategory/sentences/a95KMDHf4vQ.eng.tsv']);
   }
-  writeBytes(bucket: string, path : string, data : Buffer) {
-    return fs.writeFile(['testdata', bucket, path].join('/'), data);
+
+  createReadStream(path: string) : Readable {
+    return fs.createReadStream([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
+  }
+
+  createWriteStream(path: string) : Writeable {
+    return fs.createWriteStream([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
   }
 }
 
 it('toDiarizedTranscript() resplits whisper into sentences with correct timings', async () => {
-  const accessor = new TestStorageAccessor();
-  const whisperX = JSON.parse(await accessor.getBytes('testbucket', 'whisperx-raw.en.json'));
+  const whisperX = JSON.parse(
+      await fsPromise.readFile([global.TESTDATA_PATH, TEST_BUCKET, 'whisperx-raw.en.json'].join('/')));
 
   const [transcript, sentences] = Transcript.toTranscript(whisperX);
 
@@ -35,4 +46,16 @@ it('toDiarizedTranscript() resplits whisper into sentences with correct timings'
     expect(sentenceId).toEqual(id.toString());
   }
   expect(transcript.sentenceMetadata.length).toEqual(sentences.length);
+});
+
+it('DiarizedTranscript.makeFromStorage() loads files', async () => {
+  const accessor = new TestStorageAccessor();
+  const transcript = await Transcript.DiarizedTranscript.makeFromStorage(accessor, TEST_CATEGORY, TEST_VIDEOID);
+  expect(transcript.defaultLanguage()).toStrictEqual('eng');
+  expect(transcript.languages()).toStrictEqual(['eng']);
+
+  // Check golden file value. There are 101 sentences in the file.
+  expect(transcript.version()).toStrictEqual(1);
+  expect(transcript.sentenceMetadata().length).toStrictEqual(101);
+  expect(Object.keys(transcript.sentenceTable('eng')).length).toStrictEqual(101);
 });
