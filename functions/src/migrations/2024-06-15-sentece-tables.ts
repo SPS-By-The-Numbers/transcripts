@@ -12,7 +12,7 @@ import { Stream } from "stream";
 import { basename } from 'node:path';
 import { createGzip } from "zlib";
 import { initializeFirebase, getDefaultBucket } from 'utils/firebase';
-import { makePublicPath, toTranscript } from 'common/transcript';
+import { makePublicPath, toTranscript, makeSentenceTablePath, makeTranscriptPath } from 'common/transcript';
 import { pipeline } from 'node:stream/promises';
 import { stringify } from 'csv-stringify';
 import * as Constants from 'config/constants';
@@ -49,8 +49,8 @@ for (const category of Constants.ALL_CATEGORIES) {
       // Generate the filenames.
       const vid = basename(file.name).split('.')[0];
       const language = transcript.language;
-      const diarizedPath = makePublicPath(category, Constants.DIARIZED_SUBDIR, `${vid}.${language}.json`);
-      const sentencesPath = makePublicPath(category, Constants.SENTENCE_TABLE_SUBDIR, `${vid}.${language}.tsv`);
+      const diarizedPath = makeTranscriptPath(category, vid);
+      const sentencesPath = makeSentenceTablePath(category, vid, language);
 
       // Write the sentence data.
       if (!(await getDefaultBucket().file(sentencesPath).exists())[0]) {

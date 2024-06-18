@@ -15,7 +15,7 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": false,
-    "target": "es2017"
+    "target": "esnext"
   },
   "compileOnSave": true,
   "include": [

@@ -1,9 +1,12 @@
-import TranscriptHeader from 'components/TranscriptHeader'
-import SpeakerBubble from 'components/SpeakerBubble'
 import BoardMeetingControl from 'components/BoardMeetingControl';
-import type { DiarizedTranscript } from 'utilities/transcript'
-import { toHhmmss } from 'utilities/transcript'
+import SpeakerBubble from 'components/SpeakerBubble'
+import TranscriptHeader from 'components/TranscriptHeader'
 import { UnknownSpeakerNum } from 'utilities/speaker-info'
+import { toTimeClassName } from 'utilities/client/css'
+
+import type { DiarizedTranscript } from 'common/transcript'
+import type { ReactNode } from 'react';
+import type { SpeakerInfoData } from 'utilities/speaker-info'
 
 type BoardMeetingParams = {
   metadata: any,
@@ -11,15 +14,9 @@ type BoardMeetingParams = {
   initialExistingNames: object,
   initialExistingTags: Set<string>,
   diarizedTranscript: DiarizedTranscript,
-  subtextTranscript: DiarizedTranscript | undefined,
+  speakerInfo: SpeakerInfoData,
+  languageOrder: string[],
 };
-
-function toTimeAnchor(seconds) {
-    if (seconds) {
-        return `${toHhmmss(seconds)}`;
-    }
-    return '';
-}
 
 const mainStyle = {
     fontFamily: 'sans-serif',
@@ -29,61 +26,52 @@ const mainStyle = {
     backgroundColor: 'white',
 };
 
+function textDivs(segmentId, languageOrder, diarizedTranscript) {
+  const lines = new Array<ReactNode>;
+  for (const [langNum, language] of languageOrder.entries()) {
+    lines.push(
+      <span key={`${language}-segmentId`} className={`l-${langNum}`} >
+        { diarizedTranscript.sentence(language, segmentId) }
+      </span>
+    );
+    lines.push(
+      <br />
+    );
+  }
+
+  lines.pop();  // Drop last <br />.
+
+  return lines;
+}
+
 export default function BoardMeeting({
     metadata,
     category,
     diarizedTranscript,
-    subtextTranscript,
+    languageOrder,
+    speakerInfo,
     initialExistingNames,
     initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
 
   const speakerNums = new Set<number>();
-  const subtextSegments = {};
-  if (subtextTranscript) {
-    for (const segment of subtextTranscript.diarized.flatMap(bubble => bubble.segments)) {
-      subtextSegments[segment[0]] = segment;
-    }
-  }
 
   // Merge all segments from the same speaker to produce speaking divs.
-  const speakerBubbles = diarizedTranscript.diarized.map((bubble, i) => {
+  const speakerBubbles = diarizedTranscript.groupMetadataBySpeaker().map((bubble, i) => {
       speakerNums.add(bubble.speaker);
 
-      if (Object.keys(subtextSegments).length) {
-        return (
-          <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
-            {
-              bubble.segments.map(segment => (
-                  <span key={ `${i}-${segment[0]}` }
-                    className={ `ts-${toTimeAnchor(segment[2])}` }>
-                    <div>
-                      { segment[1] }
-                    </div>
-                    <div className="s">
-                      { subtextSegments[segment[0]][1] }
-                    </div>
-                  </span>
-              ))
-            }
-          </SpeakerBubble>
-        );
-      } else {
-        return (
-          <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
-            {
-              bubble.segments.map(segment => (
-                  <span key={ `${i}-${segment[0]}` }
-                    className={ `ts-${toTimeAnchor(segment[2])}` }>
-                    <p>
-                      { segment[1] }
-                    </p>
-                  </span>
-              ))
-            }
-          </SpeakerBubble>
-        );
-      }
+      return (
+        <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
+          {
+            bubble.sentenceMetadata.map(([segmentId, speakerId, start]) => (
+                <span key={ `${i}-${segmentId}` }
+                  className={ toTimeClassName(start) }>
+                  { textDivs( segmentId, languageOrder, diarizedTranscript) }
+                </span>
+            ))
+          }
+        </SpeakerBubble>
+      );
   });
 
   const transcriptHeader = <TranscriptHeader

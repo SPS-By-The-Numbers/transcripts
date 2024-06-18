@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref } from "firebase/database"
+import { getDatabase, getStorage, listAll, ref } from "firebase/database";
+import * as Storage from "firebase/storage";
+import * as Transcript from 'common/transcript';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
@@ -16,3 +18,25 @@ export const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const dbPublicRoot = ref(database, '/transcripts/public');
 export const dbPrivateRoot = ref(database, '/transcripts/private');
+
+class FirebaseStorageAccessor extends Transcript.StorageAccessor {
+  listFilesByPrefix(prefix: string) : Promise<string[]> {
+    const storage = Storage.getStorage(app);
+    return (async () => {
+      const result = await Storage.listAll(Storage.ref(storage, prefix));
+      return result.items.map(r => r.fullPath);
+    })();
+  }
+
+  getBytes(path: string) : Promise<Buffer> {
+    const storage = Storage.getStorage(app);
+    return Storage.getBytes(Storage.ref(storage, path));
+  }
+
+  createWriteStream(path: string) : Writeable {
+//    return getStream(ref(storage, path));
+  }
+}
+
+export const firebaseStorageAccessor = new FirebaseStorageAccessor();
+
