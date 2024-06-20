@@ -1,13 +1,14 @@
 'use client'
 
-import { ReactNode, useRef } from 'react';
-import VideoPlayer, { VideoPlayerControl } from './VideoPlayer';
 import SpeakerInfoControl from './SpeakerInfoControl';
 import TranscriptControl from './TranscriptControl';
+import VideoPlayer, { VideoPlayerControl } from './VideoPlayer';
+import { ReactNode, useRef } from 'react';
 
 type BoardMeetingLayoutParams = {
   header: ReactNode,
   transcriptNode: ReactNode,
+  errors: string[],
   category: string,
   videoId: string,
   initialExistingNames: object,
@@ -23,6 +24,7 @@ type BoardMeetingLayoutParams = {
 export default function BoardMeetingControl({
   header,
   transcriptNode,
+  errors,
   category,
   videoId,
   initialExistingNames,
@@ -35,6 +37,9 @@ export default function BoardMeetingControl({
     history.pushState(null, '', `#${timeStamp}`);
     videoPlayer.current?.jumpToTime(timeStamp);
   }
+
+  const errorPanel = errors.length === 0 ? undefined : (<div key="errors">{errors.map((e,i) => (<div key={i}>{e}</div>))}</div>)
+  console.log(errors);
 
   return (
     <>
@@ -51,6 +56,7 @@ export default function BoardMeetingControl({
               speakerNums={speakerNums}
               videoId={videoId} />
         </section>
+        {errorPanel}
         <TranscriptControl onTimeStampSelected={handleTimeStampSelected}>
           { transcriptNode }
         </TranscriptControl>

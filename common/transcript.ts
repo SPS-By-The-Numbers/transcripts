@@ -62,15 +62,17 @@ const SMALL_TS_INCREMENT_S = WHISPERX_GRANULARITY_S / 100;
 
 export const UnknownSpeakerNum : number = 99;
 
-const TSV_ISO6393_REGEX = /\.([a-z]{3})\.tsv$/;
+const EMPTY_TRANSIT_DATA : TranscriptData = {
+  version: 1,
+  language: 'eng',
+  sentenceMetadata: [],
+};
 
 ///////////////////
 /// Classes
 ///////////////////
-export abstract class StorageAccessor {
-  listFilesByPrefix(prefix: string) : Promise<string[]>;
-  getBytes(path: string) : Promise<Buffer>;
-  writeBytes(path: string, data: string) : Promise<void>;
+export interface StorageAccessor {
+  getBytes(path: string) : Promise<ArrayBuffer>;
 }
 
 export class DiarizedTranscript {
@@ -78,27 +80,29 @@ export class DiarizedTranscript {
   readonly videoId: VideoId;
   readonly transcriptData: TranscriptData;
   readonly originalLanguage: Iso6393Code;
-  readonly sentenceMetadata: SentenceMetadata;
+  readonly sentenceMetadata: SentenceMetadata[];
   readonly languageToSentenceTable: LanguageToSentenceTable;
+  readonly loadErrors: string[];
 
   constructor(
       category: CategoryId,
       videoId: VideoId,
       transcriptData: TranscriptData,
-      languageToSentenceTable: LanguageToSentenceTable) {
+      languageToSentenceTable: LanguageToSentenceTable,
+      loadErrors: string[]) {
     this.category = category;
     this.videoId = videoId;
-    this.transcriptData = transcriptData;
-    this.originalLanguage = this.transcriptData.language;
-    this.sentenceMetadata = this.transcriptData.sentenceMetadata;
+    this.originalLanguage = transcriptData.language;
+    this.sentenceMetadata = transcriptData.sentenceMetadata;
     this.languageToSentenceTable = languageToSentenceTable;
+    this.loadErrors = loadErrors;
   }
 
   static async makeFromStorage(
       storageAccessor: StorageAccessor,
       category: CategoryId,
       videoId: VideoId,
-      languages: Iso6393Code[]) : Transcript {
+      languages: Iso6393Code[]) : Promise<DiarizedTranscript> {
     // Load the large data files.
     const loadPromises = new Array<Promise<any>>;
     loadPromises.push(storageAccessor.getBytes(makeTranscriptPath(category, videoId)));
@@ -106,34 +110,48 @@ export class DiarizedTranscript {
           l => storageAccessor.getBytes(makeSentenceTablePath(category, videoId, l))));
 
     // Wait for everything.
-    const results = await Promise.all(loadPromises);
+    const allResults = await Promise.allSettled(loadPromises);
 
     // Decode results. Make sure the order is exactly the same as above!
     const decoder = new TextDecoder('utf-8');
-    const transcriptData : TranscriptData = JSON.parse(decoder.decode(results.shift()));
+    // TODO: Error handling.
+    if (allResults[0].status === 'rejected') {
+      return new DiarizedTranscript(category, videoId, EMPTY_TRANSIT_DATA, {},
+          ["Cannout load transcript Data"]);
+    }
+
+    const errors : string[] = [];
+    const transcriptData : TranscriptData = JSON.parse(decoder.decode(allResults[0].value));
+    allResults.shift();
     const languageToSentenceTable : LanguageToSentenceTable = {};
     for (const language of languages) {
+      const result = allResults.shift();
+      if (result?.status === 'rejected') {
+        errors.push(`Unable to load sentences for ${language}`);
+        continue;
+      }
+
       const sentenceTableRows : [string, string][] =
-          parse(decoder.decode(results.shift()), { delimiter: '\t', trim: true });
+          parse(decoder.decode(result?.value), { delimiter: '\t', trim: true });
       const sentenceTable : SentenceTable = {};
       sentenceTableRows.forEach(row => sentenceTable[row[0]] = row[1]);
       languageToSentenceTable[language] = sentenceTable;
     }
 
-    return new DiarizedTranscript(category, videoId, transcriptData, languageToSentenceTable);
+    return new DiarizedTranscript(category, videoId, transcriptData, languageToSentenceTable, errors);
   }
 
   sentence(language: Iso6393Code, segmentId: SegmentId) : string {
     return this.languageToSentenceTable[language]?.[segmentId] || `<missing ${segmentId}>`;
   }
 
-  groupMetadataBySpeaker(speakerNames : SpeakerNameMap) : MetadataBySpeaker[] {
-    const result : MetadataBySpeaker = []
-    for (const metadata of this.transcriptData.sentenceMetadata) {
+  groupMetadataBySpeaker(speakerNames : SpeakerNameMap = {}) : MetadataBySpeaker[] {
+    const result = new Array<MetadataBySpeaker>;
+    for (const metadata of this.sentenceMetadata) {
       if (result.at(-1)?.speaker !== metadata[1]) {
         result.push({speaker: metadata[1], sentenceMetadata: new Array<SentenceMetadata>});
       }
-      result.at(-1).sentenceMetadata.push(metadata);
+      result.at(-1)?.sentenceMetadata.push(metadata);
     }
     return result;
   }
@@ -273,14 +291,4 @@ export function toTranscript(whisperXTranscript: WhisperXTranscript) : [Transcri
         sentenceMetadata,
       },
       sentences ];
-}
-
-// Taken from https://stackoverflow.com/a/49428486
-function streamToString (stream) {
-  const chunks = [];
-  return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('error', (err) => reject(err));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  })
 }

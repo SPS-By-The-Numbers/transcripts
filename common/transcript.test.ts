@@ -1,23 +1,18 @@
 import * as Transcript from './transcript';
 import * as fsPromise from 'node:fs/promises';
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
+
+// Work around JSDOM missing TextDecoder.
+import { TextEncoder, TextDecoder } from 'util';
+Object.assign(global, { TextDecoder, TextEncoder });
 
 const TEST_VIDEOID = 'a95KMDHf4vQ';
 const TEST_BUCKET = 'testbucket';
 const TEST_CATEGORY = 'testcategory';
 
-class TestStorageAccessor extends Transcript.StorageAccessor {
-  listFilesByPrefix(_: string) : Promise<string[]> {
-    // Hardcode 1 file.
-    return Promise.resolve(['transcripts/public/testcategory/sentences/a95KMDHf4vQ.eng.tsv']);
-  }
-
-  createReadStream(path: string) : Readable {
-    return fs.createReadStream([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
-  }
-
-  createWriteStream(path: string) : Writeable {
-    return fs.createWriteStream([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
+class TestStorageAccessor implements Transcript.StorageAccessor {
+  getBytes(path: string) : Promise<ArrayBuffer> {
+    return fs.readFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
   }
 }
 
@@ -50,12 +45,12 @@ it('toDiarizedTranscript() resplits whisper into sentences with correct timings'
 
 it('DiarizedTranscript.makeFromStorage() loads files', async () => {
   const accessor = new TestStorageAccessor();
-  const transcript = await Transcript.DiarizedTranscript.makeFromStorage(accessor, TEST_CATEGORY, TEST_VIDEOID);
-  expect(transcript.defaultLanguage()).toStrictEqual('eng');
-  expect(transcript.languages()).toStrictEqual(['eng']);
+  const transcript = await Transcript.DiarizedTranscript.makeFromStorage(accessor, TEST_CATEGORY, TEST_VIDEOID, ["eng"]);
+  expect(transcript.originalLanguage).toBe('eng');
+  expect(Object.keys(transcript.languageToSentenceTable)).toStrictEqual(['eng']);
 
   // Check golden file value. There are 101 sentences in the file.
-  expect(transcript.version()).toStrictEqual(1);
-  expect(transcript.sentenceMetadata().length).toStrictEqual(101);
-  expect(Object.keys(transcript.sentenceTable('eng')).length).toStrictEqual(101);
+  expect(transcript.sentenceMetadata.length).toBe(101);
+  expect(Object.keys(transcript.languageToSentenceTable['eng']).length).toBe(101);
+  expect(transcript.loadErrors.length).toBe(0);
 });
