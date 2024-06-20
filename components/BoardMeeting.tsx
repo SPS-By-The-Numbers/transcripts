@@ -57,7 +57,7 @@ export default function BoardMeeting({
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  const speakerBubbles = diarizedTranscript.groupMetadataBySpeaker().map((bubble, i) => {
+  const speakerBubbles = diarizedTranscript.groupMetadataBySpeaker({}).map((bubble, i) => {
       speakerNums.add(bubble.speaker);
 
       return (
@@ -90,6 +90,7 @@ export default function BoardMeeting({
         <BoardMeetingControl
           header={transcriptHeader}
           transcriptNode={transcriptSection}
+          errors={diarizedTranscript.loadErrors}
           category={category}
           videoId={videoId}
           initialExistingNames={initialExistingNames}

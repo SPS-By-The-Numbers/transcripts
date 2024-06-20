@@ -1,12 +1,11 @@
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
+import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { firebaseStorageAccessor } from "utilities/firebase"
-import { getTranscript, getSentenceTable } from "common/transcript"
 import { getMetadata } from "utilities/metadata-utils"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
 
-import { DiarizedTranscript } from "common/transcript"
 
 export type VideoParams = {
     category: string,
@@ -58,22 +57,20 @@ export default async function Index({params}: {params: VideoParams}) {
     );
   }
 
-  const transcriptLangCode = params.lang;
+  const languageOrder = ['eng'];
+  const translatedSentences = {};
+  if (params.lang !== 'eng') {
+    languageOrder.push(params.lang);
+  }
 
   // Handle the fact that transcript files for english still use the 2-letter ISO-639 code.
   const loadData = new Array<Promise<any>>;
   loadData.push(getMetadata(params.category, params.videoId));
   loadData.push(DiarizedTranscript.makeFromStorage(
-      firebaseStorageAccessor, params.category, params.videoId, [lang]));
+      firebaseStorageAccessor, params.category, params.videoId, languageOrder));
   loadData.push(loadSpeakerControlInfo(params.category, params.videoId));
 
   const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all(loadData);
-
-  const languageOrder = ['eng'];
-  const translatedSentences = {};
-  if (transcriptLangCode !== 'eng') {
-    languageOrder.push(transcriptLangCode);
-  }
 
   return (
     <TranscriptControlProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
