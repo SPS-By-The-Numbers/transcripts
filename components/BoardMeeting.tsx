@@ -26,7 +26,7 @@ const mainStyle = {
     backgroundColor: 'white',
 };
 
-function textDivs(segmentId, languageOrder, diarizedTranscript) {
+function textLines(segmentId, languageOrder, diarizedTranscript) {
   const lines = new Array<ReactNode>;
   for (const [langNum, language] of languageOrder.entries()) {
     lines.push(
@@ -35,11 +35,9 @@ function textDivs(segmentId, languageOrder, diarizedTranscript) {
       </span>
     );
     lines.push(
-      <br />
+      <br key={`br-${language}-segmentId`} />
     );
   }
-
-  lines.pop();  // Drop last <br />.
 
   return lines;
 }
@@ -57,7 +55,7 @@ export default function BoardMeeting({
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
-  const speakerBubbles = diarizedTranscript.groupMetadataBySpeaker({}).map((bubble, i) => {
+  const speakerBubbles = diarizedTranscript.groupMetadataBySpeaker().map((bubble, i) => {
       speakerNums.add(bubble.speaker);
 
       return (
@@ -66,7 +64,7 @@ export default function BoardMeeting({
             bubble.sentenceMetadata.map(([segmentId, speakerId, start]) => (
                 <span key={ `${i}-${segmentId}` }
                   className={ toTimeClassName(start) }>
-                  { textDivs( segmentId, languageOrder, diarizedTranscript) }
+                  { textLines( segmentId, languageOrder, diarizedTranscript) }
                 </span>
             ))
           }

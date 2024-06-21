@@ -1,11 +1,10 @@
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { DiarizedTranscript } from "common/transcript"
+import { CloudStorageAccessor } from "common/storage"
 import { Metadata, ResolvingMetadata } from "next"
-import { firebaseStorageAccessor } from "utilities/firebase"
 import { getMetadata } from "utilities/metadata-utils"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
-
 
 export type VideoParams = {
     category: string,
@@ -18,6 +17,8 @@ type Props = {
   params: VideoParams
   searchParams: { [key: string]: string | string[] | undefined }
 };
+
+const cloudStorageAccessor = new CloudStorageAccessor();
 
 export async function generateMetadata(
     { params, searchParams }: Props,
@@ -66,8 +67,8 @@ export default async function Index({params}: {params: VideoParams}) {
   // Handle the fact that transcript files for english still use the 2-letter ISO-639 code.
   const loadData = new Array<Promise<any>>;
   loadData.push(getMetadata(params.category, params.videoId));
-  loadData.push(DiarizedTranscript.makeFromStorage(
-      firebaseStorageAccessor, params.category, params.videoId, languageOrder));
+  loadData.push(DiarizedTranscript.fromStorage(
+      cloudStorageAccessor, params.category, params.videoId, languageOrder));
   loadData.push(loadSpeakerControlInfo(params.category, params.videoId));
 
   const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all(loadData);

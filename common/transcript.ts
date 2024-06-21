@@ -1,21 +1,18 @@
-import * as Constants from "config/constants";
+import * as Constants from 'config/constants';
 import langs from 'langs';
+import { getArchivedWhisperXTranscript } from 'common/whisperx';
 import { parse } from 'csv-parse/sync';
-import { pipeline } from 'node:stream/promises';
-import { split, SentenceSplitterSyntax } from "sentence-splitter";
+import { stringify } from 'csv-stringify/sync';
+import { makePublicPath } from 'common/paths';
+import { split, SentenceSplitterSyntax } from 'sentence-splitter';
 
-import type { Readable } from 'node:stream';
-import type { WhisperXTranscript } from "common/whisperx";
+import type { CategoryId, Iso6393Code, SegmentId, SpeakerId, VideoId } from 'common/params';
+import type { StorageAccessor } from 'common/storage';
+import type { WhisperXTranscript } from 'common/whisperx';
 
 ///////////////////
 /// Types
 ///////////////////
-
-export type CategoryId = string;
-export type SegmentId = string;
-export type SpeakerId = number;
-export type Iso6393Code = string;
-export type VideoId = string;
 
 // Use array to compress size of keys in json serialization.
 export type SentenceMetadata = [
@@ -71,10 +68,6 @@ const EMPTY_TRANSIT_DATA : TranscriptData = {
 ///////////////////
 /// Classes
 ///////////////////
-export interface StorageAccessor {
-  getBytes(path: string) : Promise<ArrayBuffer>;
-}
-
 export class DiarizedTranscript {
   readonly category: CategoryId;
   readonly videoId: VideoId;
@@ -98,29 +91,28 @@ export class DiarizedTranscript {
     this.loadErrors = loadErrors;
   }
 
-  static async makeFromStorage(
+  static async fromStorage(
       storageAccessor: StorageAccessor,
       category: CategoryId,
       videoId: VideoId,
       languages: Iso6393Code[]) : Promise<DiarizedTranscript> {
     // Load the large data files.
     const loadPromises = new Array<Promise<any>>;
-    loadPromises.push(storageAccessor.getBytes(makeTranscriptPath(category, videoId)));
+    loadPromises.push(storageAccessor.readBytes(makeTranscriptDataPath(category, videoId)));
     loadPromises.push(...languages.map(
-          l => storageAccessor.getBytes(makeSentenceTablePath(category, videoId, l))));
+          l => storageAccessor.readBytes(makeSentenceTablePath(category, videoId, l))));
 
     // Wait for everything.
     const allResults = await Promise.allSettled(loadPromises);
 
     // Decode results. Make sure the order is exactly the same as above!
-    const decoder = new TextDecoder('utf-8');
-    // TODO: Error handling.
     if (allResults[0].status === 'rejected') {
       return new DiarizedTranscript(category, videoId, EMPTY_TRANSIT_DATA, {},
           ["Cannout load transcript Data"]);
     }
 
     const errors : string[] = [];
+    const decoder = new TextDecoder('utf-8');
     const transcriptData : TranscriptData = JSON.parse(decoder.decode(allResults[0].value));
     allResults.shift();
     const languageToSentenceTable : LanguageToSentenceTable = {};
@@ -141,8 +133,89 @@ export class DiarizedTranscript {
     return new DiarizedTranscript(category, videoId, transcriptData, languageToSentenceTable, errors);
   }
 
+  static async fromWhisperXArchive(
+      storageAccessor: StorageAccessor,
+      category: CategoryId,
+      videoId: VideoId,
+      language: Iso6393Code) : Promise<DiarizedTranscript> {
+    const whisperXTranscript = await getArchivedWhisperXTranscript(storageAccessor, category, videoId, language);
+      return DiarizedTranscript.fromWhisperX(category, videoId, whisperXTranscript);
+    }
+
+  static fromWhisperX(category: CategoryId, videoId: VideoId,
+      whisperXTranscript : WhisperXTranscript) : DiarizedTranscript {
+    // Accumualted output.
+    const sentenceMetadata = new Array<SentenceMetadata>;
+    const sentences = new Array<string>;
+
+    // Grouping variables.
+    let curSpeakerNum = -1;
+    const words = new Array<string>;
+    const wordStarts = new Array<number>;
+    const wordEnds = new Array<number>;
+    for (const rawSegment of whisperXTranscript.segments) {
+      // There are some degenerate segments. Push them into the previous entry if it exists.
+      if (rawSegment.words.length === 0 && rawSegment.text.trimEnd().length !== 0) {
+        // Only attempt to add to the previous. If there was no previous, give up.
+        if (words.length > 0) {
+          words.at[words.length-1] += rawSegment.text.trimEnd();
+        }
+        continue;
+      }
+
+      const newSpeaker = toSpeakerNum(rawSegment.speaker);
+      if (newSpeaker !== curSpeakerNum) {
+        if (words.length > 0) {
+          const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
+          sentenceMetadata.push(...result.sentenceMetadata);
+          sentences.push(...result.sentences);
+        }
+
+        curSpeakerNum = newSpeaker;
+        words.length = 0;
+        wordStarts.length = 0;
+        wordEnds.length = 0;
+      }
+
+      let lastStart = rawSegment.words[0].start || rawSegment.start;
+      for (const wordInfo of rawSegment.words) {
+        // Hack for missing start time or end time. Move forward by a small amount.
+        const start = wordInfo.start || lastStart + SMALL_TS_INCREMENT_S;
+        let end = wordInfo.end || start + SMALL_TS_INCREMENT_S;
+        lastStart = end;
+        words.push(wordInfo.word.trim());
+        wordStarts.push(start);
+        wordEnds.push(end);
+      }
+    }
+
+    if (words.length > 0) {
+      const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
+      sentenceMetadata.push(...result.sentenceMetadata);
+      sentences.push(...result.sentences);
+    }
+
+    // Whipser uses iso639-1 language codes. Move to iso639-3.
+    const whisperLang = langs.where('1', whisperXTranscript.language);
+    const languageInFile = (whisperLang && whisperLang['3']) || "eng";  // Default to english.
+    const transcriptData : TranscriptData = {
+      version: 1,
+      language: languageInFile,
+      sentenceMetadata
+    };
+    const sentenceTable : SentenceTable = {};
+    for (const [id, text] of sentences.entries()) {
+      sentenceTable[id] = text;
+    }
+    const languageToSentenceTable = {
+      [transcriptData.language]: sentenceTable
+    }
+
+    return new DiarizedTranscript(category, videoId, transcriptData, languageToSentenceTable, []);
+  }
+
   sentence(language: Iso6393Code, segmentId: SegmentId) : string {
-    return this.languageToSentenceTable[language]?.[segmentId] || `<missing ${segmentId}>`;
+    return this.languageToSentenceTable[language]?.[segmentId] || `<missing ${language}-${segmentId}>`;
   }
 
   groupMetadataBySpeaker(speakerNames : SpeakerNameMap = {}) : MetadataBySpeaker[] {
@@ -154,6 +227,37 @@ export class DiarizedTranscript {
       result.at(-1)?.sentenceMetadata.push(metadata);
     }
     return result;
+  }
+
+  async writeSentenceTable(storageAccessor: StorageAccessor, language: Iso6393Code) : Promise<unknown> {
+    const sentenceTable = this.languageToSentenceTable[language];
+    if (!sentenceTable) {
+      throw `No sentenceTable for ${language}`;
+    }
+    const rows = new Array<[string, string]>;
+    for (const sentenceId of Object.keys(sentenceTable).sort()) {
+      rows.push([sentenceId, sentenceTable[sentenceId]]);
+    }
+
+    return storageAccessor.writeBytesGzip(
+        makeSentenceTablePath(this.category, this.videoId, language),
+        stringify(rows, { header: false, delimiter: '\t', }));
+  }
+
+  async writeDiarizedTranscript(storageAccessor: StorageAccessor) : Promise<unknown> {
+    if (!this.sentenceMetadata) {
+      throw "Missing sentenceMetadata";
+    }
+
+    const transcriptData : TranscriptData = {
+      version: 1,
+      language: this.originalLanguage,
+      sentenceMetadata: this.sentenceMetadata,
+    };
+
+    return storageAccessor.writeBytesGzip(
+        makeTranscriptDataPath(this.category, this.videoId),
+        JSON.stringify(transcriptData));
   }
 }
 
@@ -175,16 +279,8 @@ export function toSpeakerNum(speakerKey: string) {
 }
 
 // Makes the path string for public data. The prefix is the same in storage as it is in the database.
-export function makePublicPath(...parts) {
-  return [Constants.APP_SCOPE, "public", ...parts].join("/");
-}
-
-export function makePrivatePath(...parts) {
-  return [Constants.APP_SCOPE, "private", ...parts].join("/");
-}
-
 // Returns the path to the transcript data for given `videoId`.
-export function makeTranscriptPath(category: CategoryId, videoId: VideoId): string {
+export function makeTranscriptDataPath(category: CategoryId, videoId: VideoId): string {
   return makePublicPath(category, Constants.DIARIZED_SUBDIR, `${videoId}.json`);
 }
 
@@ -193,14 +289,7 @@ export function makeSentenceTablePath(category: CategoryId, videoId: VideoId, la
   return makePublicPath(category, Constants.SENTENCE_TABLE_SUBDIR, `${videoId}.${language}.tsv`);
 }
 
-export function makeWhisperXTranscriptsPath(
-    category: CategoryId,
-    id: VideoId,
-    language: Iso6393Code): string {
-  return makePublicPath(category, Constants.WHISPERX_ARCHIVE_SUBDIR, `${id}.${language}.json.xz`);
-}
-
-function toSentences(speaker : SpeakerId, firstId : SpeakerId, words : string[], wordStarts : number[], wordEnds : number[]) {
+function toSentences(speaker : SpeakerId, firstId : number, words : string[], wordStarts : number[], wordEnds : number[]) {
   const paragraph = words.join(' ');
   const allSplits = split(paragraph);
   const sentenceTexts = allSplits
@@ -226,69 +315,4 @@ function toSentences(speaker : SpeakerId, firstId : SpeakerId, words : string[],
   }
 
   return {sentenceMetadata, sentences};   
-}
-
-export function toTranscript(whisperXTranscript: WhisperXTranscript) : [TranscriptData, string[]] {
-  // Output data
-  const sentenceMetadata = new Array<SentenceMetadata>;
-  const sentences = new Array<string>;
-
-  // Grouping data.
-  let curSpeakerNum = -1;
-  const words = new Array<string>;
-  const wordStarts = new Array<number>;
-  const wordEnds = new Array<number>;
-  for (const rawSegment of whisperXTranscript.segments) {
-    // There are some degenerate segments. Push them into the previous entry if it exists.
-    if (rawSegment.words.length === 0 && rawSegment.text.trimEnd().length !== 0) {
-      // Only attempt to add to the previous. If there was no previous, give up.
-      if (words.length > 0) {
-        words.at[words.length-1] += rawSegment.text.trimEnd();
-      }
-      continue;
-    }
-
-    const newSpeaker = toSpeakerNum(rawSegment.speaker);
-    if (newSpeaker !== curSpeakerNum) {
-      if (words.length > 0) {
-        const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
-        sentenceMetadata.push(...result.sentenceMetadata);
-        sentences.push(...result.sentences);
-      }
-
-      curSpeakerNum = newSpeaker;
-      words.length = 0;
-      wordStarts.length = 0;
-      wordEnds.length = 0;
-    }
-
-    let lastStart = rawSegment.words[0].start || rawSegment.start;
-    for (const wordInfo of rawSegment.words) {
-      // Hack for missing start time or end time. Move forward by a small amount.
-      const start = wordInfo.start || lastStart + SMALL_TS_INCREMENT_S;
-      let end = wordInfo.end || start + SMALL_TS_INCREMENT_S;
-      lastStart = end;
-      words.push(wordInfo.word.trim());
-      wordStarts.push(start);
-      wordEnds.push(end);
-    }
-  }
-
-  if (words.length > 0) {
-    const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
-    sentenceMetadata.push(...result.sentenceMetadata);
-    sentences.push(...result.sentences);
-  }
-
-  // Whipser uses iso639-1 language codes. Move to iso-639-3.
-  const whisperLang = langs.where('1', whisperXTranscript.language);
-  const language = (whisperLang && whisperLang["3"]) || "eng";  // Default to english.
-
-  return [
-      {
-        version: 1,
-        language,
-        sentenceMetadata,
-      },
-      sentences ];
 }

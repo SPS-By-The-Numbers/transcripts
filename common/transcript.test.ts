@@ -1,6 +1,7 @@
-import * as Transcript from './transcript';
-import * as fsPromise from 'node:fs/promises';
+import { DiarizedTranscript } from 'common/transcript';
 import * as fs from 'node:fs/promises';
+
+import type { StorageAccessor } from 'common/storage';
 
 // Work around JSDOM missing TextDecoder.
 import { TextEncoder, TextDecoder } from 'util';
@@ -10,20 +11,40 @@ const TEST_VIDEOID = 'a95KMDHf4vQ';
 const TEST_BUCKET = 'testbucket';
 const TEST_CATEGORY = 'testcategory';
 
-class TestStorageAccessor implements Transcript.StorageAccessor {
-  getBytes(path: string) : Promise<ArrayBuffer> {
+class TestStorageAccessor implements StorageAccessor {
+  readBytes(path: string) : Promise<ArrayBuffer> {
     return fs.readFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
+  }
+  writeBytes(path: string, data: string) : Promise<unknown> {
+    return fs.writeFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'), data);
+  }
+
+  // Returns uncompressed bytes from an path using lzma.
+  readBytesLzma(path: string) : Promise<ArrayBuffer> {
+    return this.readBytes(path);
+  }
+
+  writeBytesLzma(path: string, data: string) : Promise<unknown> {
+    return this.writeBytes(path, data);
+  }
+
+  readBytesGzip(path: string) : Promise<ArrayBuffer> {
+    return this.readBytes(path);
+  }
+  writeBytesGzip(path: string, data: string) : Promise<unknown> {
+    return this.writeBytes(path, data);
   }
 }
 
-it('toDiarizedTranscript() resplits whisper into sentences with correct timings', async () => {
-  const whisperX = JSON.parse(
-      await fsPromise.readFile([global.TESTDATA_PATH, TEST_BUCKET, 'whisperx-raw.en.json'].join('/')));
+it('fromWhisperXArchive() loads and splits whisper into sentences with correct timings', async () => {
+  const accessor = new TestStorageAccessor();
+  const transcript = await DiarizedTranscript.fromWhisperXArchive(accessor, TEST_CATEGORY, TEST_VIDEOID, "eng");
 
-  const [transcript, sentences] = Transcript.toTranscript(whisperX);
+  expect(transcript.category).toStrictEqual(TEST_CATEGORY);
+  expect(transcript.videoId).toStrictEqual(TEST_VIDEOID);
 
   // Should generate an iso639-3 code instead of a iso639-2 code.
-  expect(transcript.language).toStrictEqual('eng');
+  expect(transcript.originalLanguage).toStrictEqual('eng');
 
   // Basic integrity check of the data.
   const expectedSentences = 88;  // Golden test number.
@@ -40,12 +61,13 @@ it('toDiarizedTranscript() resplits whisper into sentences with correct timings'
     // items, no off-by-ones, no id stringification issues, etc).
     expect(sentenceId).toEqual(id.toString());
   }
-  expect(transcript.sentenceMetadata.length).toEqual(sentences.length);
+  expect(transcript.languageToSentenceTable[transcript.originalLanguage]).not.toBeNull();
+  expect(transcript.sentenceMetadata.length).toEqual(transcript.languageToSentenceTable[transcript.originalLanguage]);
 });
 
-it('DiarizedTranscript.makeFromStorage() loads files', async () => {
+it('DiarizedTranscript.fromStorage() loads split data files', async () => {
   const accessor = new TestStorageAccessor();
-  const transcript = await Transcript.DiarizedTranscript.makeFromStorage(accessor, TEST_CATEGORY, TEST_VIDEOID, ["eng"]);
+  const transcript = await DiarizedTranscript.fromStorage(accessor, TEST_CATEGORY, TEST_VIDEOID, ["eng"]);
   expect(transcript.originalLanguage).toBe('eng');
   expect(Object.keys(transcript.languageToSentenceTable)).toStrictEqual(['eng']);
 

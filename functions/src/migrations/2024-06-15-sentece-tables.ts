@@ -8,75 +8,46 @@
 //  /transcripts/public/[category]/diarized/[vid].json
 //  /transcripts/public/[category]/sentences/[vid].eng.json
 
-import { Stream } from "stream";
-import { basename } from 'node:path';
-import { createGzip } from "zlib";
-import { initializeFirebase, getDefaultBucket } from 'utils/firebase';
-import { makePublicPath, toTranscript, makeSentenceTablePath, makeTranscriptPath } from 'common/transcript';
-import { pipeline } from 'node:stream/promises';
-import { stringify } from 'csv-stringify';
 import * as Constants from 'config/constants';
-import * as fs from 'node:fs/promises';
-import * as lzma from "lzma-native";
-import * as streamBuffers from 'stream-buffers';
-import admin from 'firebase-admin';
+import process from 'node:process';
+import { CloudStorageAccessor } from 'common/storage';
+import { DiarizedTranscript, makeSentenceTablePath, makeTranscriptDataPath } from 'common/transcript';
+import { basename } from 'node:path';
+import { makePublicPath } from 'common/paths';
 
-const serviceAccount = JSON.parse(await fs.readFile('/Users/albert/src/transcriptions/tools/gcloud-storage-key.json', {encoding: 'utf8'}));
 
-initializeFirebase({credential: admin.credential.cert(serviceAccount)});
+import type { Iso6393Code, VideoId } from "common/params";
 
-async function writeToStorage(path: string, filter: any, contents: string, fileOptions: object = {}) {
-  const file = getDefaultBucket().file(path);
-  const passthroughStream = new Stream.PassThrough();
-  passthroughStream.write(contents);
-  passthroughStream.end();
-  await pipeline(passthroughStream, filter, file.createWriteStream(fileOptions));
-}
+const accessor = new CloudStorageAccessor({keyfile:process.env.TRANSCRIPT_STORAGE_KEYFILE}); 
 
 for (const category of Constants.ALL_CATEGORIES) {
-  const [allFiles] = await getDefaultBucket().getFiles(
+  const [allFiles] = await accessor.bucket.getFiles(
       { prefix: makePublicPath(category, Constants.WHISPERX_ARCHIVE_SUBDIR),
         autoPaginate: true,
         });
 
   for (const file of allFiles) {
     try {
-      const buffer = new streamBuffers.WritableStreamBuffer({ initialSize: 150 * 1024 });
-      await pipeline(file.createReadStream(), lzma.createDecompressor(), buffer);
-      const str = buffer.getContentsAsString('utf8');
-      const [transcript, sentences] = toTranscript(JSON.parse(str));
+      const splits = basename(file.name).split('.')[0];
+      const vid : VideoId = splits[0];
+      const language : Iso6393Code = splits[1];
 
       // Generate the filenames.
-      const vid = basename(file.name).split('.')[0];
-      const language = transcript.language;
-      const diarizedPath = makeTranscriptPath(category, vid);
+      const diarizedPath = makeTranscriptDataPath(category, vid);
       const sentencesPath = makeSentenceTablePath(category, vid, language);
+      const diarizedTranscriptExists = (await accessor.bucket.file(diarizedPath).exists())[0];
+      const sentenceTableExists = (await accessor.bucket.file(sentencesPath).exists())[0];
+      
+      if (!diarizedTranscriptExists || !sentenceTableExists) {
+        const diarizedTranscript = await DiarizedTranscript.fromWhisperXArchive(accessor, category, vid, language);
 
-      // Write the sentence data.
-      if (!(await getDefaultBucket().file(sentencesPath).exists())[0]) {
-        const tsvWriter = stringify({
-            header: false,
-            delimiter: '\t',
-          });
-
-        // Write the sentence tsv.
-        for (const [id, text] of sentences.entries()) {
-          tsvWriter.write([id, text]);
+        if (!sentenceTableExists) {
+          diarizedTranscript.writeSentenceTable(accessor, diarizedTranscript.originalLanguage);
         }
-        tsvWriter.end();
 
-        await pipeline(
-            tsvWriter,
-            createGzip({level: 9}),
-            getDefaultBucket().file(sentencesPath).createWriteStream(
-              {metadata: {contentEncoding: "gzip", contentType: "text/plain"}}
-              ));
-      }
-
-      // Write the diarized json.
-      if (!(await getDefaultBucket().file(diarizedPath).exists())[0]) {
-        const diarizedJson = JSON.stringify(transcript);
-        await writeToStorage(diarizedPath, createGzip({level: 9}), diarizedJson, {metadata: {contentEncoding: "gzip"}});
+        if (!diarizedTranscriptExists) {
+          await diarizedTranscript.writeDiarizedTranscript(accessor);
+        }
       }
     } catch (e) {
       console.error("Failed ", file.name, " with error ", e);
