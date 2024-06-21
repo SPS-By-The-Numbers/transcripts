@@ -23,7 +23,7 @@ const speakerinfo = onRequest(
       return;
     }
 
-    let user = null;
+    let user;
     try {
       user = getUser(req.body?.auth);
     } catch (error) {

@@ -1,9 +1,11 @@
-import {speakerinfo} from "./speakerinfo";
-import {metadata, transcript} from "./transcript";
-import {video_queue, vast} from "./video_queue";
+import "source-map-support/register";
 
-import {initializeFirebase} from "./utils/firebase";
+import { speakerinfo } from "./speakerinfo";
+import { metadata, transcript } from "./transcript";
+import { video_queue, vast } from "./video_queue";
 
-initializeFirebase();
+import { initializeFirebase } from "./utils/firebase";
+
+initializeFirebase({});
 
 export {speakerinfo, metadata, transcript, video_queue, vast};

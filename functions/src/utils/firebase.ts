@@ -1,16 +1,19 @@
-import {PubSub} from "@google-cloud/pubsub";
-import {initializeApp} from "firebase-admin/app";
-import {getDatabase} from "firebase-admin/database";
-import {getStorage} from "firebase-admin/storage";
-import {getAuth} from "firebase-admin/auth";
-import {onRequest} from "firebase-functions/v2/https";
+// Utilities for talking to firebase services. It does NOT use
+// firebase storage API which are more limited than the Cloud Storage
+// APIs and just not useful. Look at utils/storage.ts instead.
 
-import {makeResponseJson} from "./response";
-import {makePublicPath, makePrivatePath} from "common/transcript";
+import { PubSub } from "@google-cloud/pubsub";
+import { initializeApp } from "firebase-admin/app";
+import { getDatabase } from "firebase-admin/database";
+import { getAuth } from "firebase-admin/auth";
+import { onRequest } from "firebase-functions/v2/https";
 
-import * as ConfigConstants from "../../../config/constants";
+import { makeResponseJson } from "./response";
+import { makePublicPath, makePrivatePath } from "common/paths";
 
-function jsonOnRequest(options : object, func) {
+export { UserRecord } from "firebase-admin/auth";
+
+export function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
     try {
       return func(req, res);
@@ -21,38 +24,31 @@ function jsonOnRequest(options : object, func) {
   });
 }
 
-function getCategoryPublicDb(...parts : string[]) {
+export function getCategoryPublicDb(...parts : string[]) {
   return getDatabase().ref(makePublicPath(...parts));
 }
 
-function getCategoryPrivateDb(...parts : string[]) {
+export function getCategoryPrivateDb(...parts : string[]) {
   return getDatabase().ref(makePrivatePath(...parts));
 }
 
 const pubSubClient = new PubSub();
-function getPubSubClient() {
+export function getPubSubClient() {
   return pubSubClient;
 }
 
-function getDefaultBucket() {
-  return getStorage().bucket(ConfigConstants.STORAGE_BUCKET);
-}
-
 // Global intialization for process.
-function initializeFirebase(opts) {
+export function initializeFirebase(opts) {
   initializeApp(opts);
 }
 
-async function getUser(token) {
+export async function getUser(token) {
   const decodedIdToken = await getAuth().verifyIdToken(token);
   console.error("decoded Id Token", decodedIdToken);
   return await getAuth().getUser(decodedIdToken.uid);
 }
 
-async function getAuthCode(user_id) {
+export async function getAuthCode(user_id) {
   return (await getCategoryPrivateDb("_admin")
     .child("vast").child(user_id).child("password").once("value")).val();
 }
-
-
-export {getCategoryPrivateDb, getCategoryPublicDb, getPubSubClient, getDefaultBucket, initializeFirebase, getUser, jsonOnRequest, getAuthCode};

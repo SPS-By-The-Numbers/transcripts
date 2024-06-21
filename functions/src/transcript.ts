@@ -1,26 +1,15 @@
-import {Stream} from "stream";
-import * as lzma from "lzma-native";
-import {onRequest} from "firebase-functions/v2/https";
-import {createGzip} from "zlib";
-import {pipeline} from "node:stream/promises";
+import { getLzmaCloudStorageAccessor } from './utils/storage';
+import { DiarizedTranscript } from 'common/transcript';
+import { getCategoryPublicDb, getAuthCode } from './utils/firebase';
+import { makeResponseJson } from './utils/response';
+import { onRequest } from 'firebase-functions/v2/https';
 
-import {getDefaultBucket, getCategoryPublicDb, getAuthCode} from "./utils/firebase";
-import {makeDiarizedTranscriptsPath} from "../../utilities/transcript";
-import {makeResponseJson} from "./utils/response";
-import {makeWhisperXTranscriptsPath} from "./utils/path";
-import type {WhisperXTranscript} from "./utils/whisperx";
-import {toDiarizedTranscript} from "./utils/whisperx";
+import type { WhisperXTranscript } from 'common/whisperx';
+import type { Iso6393Code } from 'common/params';
 
+const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 
-const LANGUAGES = new Set(["en"]);
-
-async function writeToStorage(path: string, filter: any, contents: string, fileOptions: object = {}) {
-  const file = getDefaultBucket().file(path);
-  const passthroughStream = new Stream.PassThrough();
-  passthroughStream.write(contents);
-  passthroughStream.end();
-  await pipeline(passthroughStream, filter, file.createWriteStream(fileOptions));
-}
+const storageAccessor = getLzmaCloudStorageAccessor();
 
 const transcript = onRequest(
   {cors: true, region: ["us-west1"]},
@@ -68,18 +57,11 @@ const transcript = onRequest(
         }
       }
 
-      for (const [lang, whisperXTranscript] of Object.entries(transcripts) as [string, WhisperXTranscript][]) {
-        const diarizedTranscript = toDiarizedTranscript(whisperXTranscript, false);
-
-        const archivePath = makeWhisperXTranscriptsPath(category, req.body.vid, lang);
-        const whisperXTranscriptJson = JSON.stringify(whisperXTranscript);
-        console.log(`Writing ${lang} json with ${whisperXTranscriptJson.length} to ${archivePath}`);
-        await writeToStorage(archivePath, lzma.createCompressor({preset: lzma.PRESET_EXTREME}), whisperXTranscriptJson);
-
-        const diarizedJson = JSON.stringify(diarizedTranscript);
-        const diarizedPath = makeDiarizedTranscriptsPath(category, req.body.vid, lang);
-        console.log(`Writing ${lang} json with ${diarizedJson.length} to ${diarizedPath}`);
-        await writeToStorage(diarizedPath, createGzip({level: 9}), diarizedJson, {metadata: {contentEncoding: "gzip"}});
+      for (const [lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
+        const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
+            category, req.body.vid, whisperXTranscript);
+        diarizedTranscript.writeSentenceTable(storageAccessor, lang);
+        diarizedTranscript.writeDiarizedTranscript(storageAccessor);
       }
 
       if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {

@@ -1,7 +1,8 @@
-import {getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser} from "./utils/firebase";
-import {getVideosForCategory} from "./youtube.js";
-import {getAllCategories, sanitizeCategory} from "./utils/path";
-import {makeResponseJson} from "./utils/response";
+import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser, UserRecord } from "./utils/firebase";
+import { getVideosForCategory } from "./youtube.js";
+import { getAllCategories, sanitizeCategory } from "./utils/path";
+import { makeResponseJson } from "./utils/response";
+
 
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
@@ -28,7 +29,7 @@ async function getVideoQueue(req, res) {
 }
 
 async function findNewVideos(req, res) {
-  const all_new_vid_ids = [];
+  const all_new_vid_ids = new Array<string>;
   const add_ts = new Date();
 
   let limit = 0;
@@ -43,7 +44,7 @@ async function findNewVideos(req, res) {
         break;
       }
 
-      if (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists()) {
+      if ('id' in vid && (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists())) {
         new_video_ids[vid.id] = {add: add_ts, lease_expires: "", vast_instance: ""};
       }
     }
@@ -79,7 +80,7 @@ async function removeItem(req, res) {
     return res.status(401).send(makeResponseJson(false, "invalid auth code"));
   }
 
-  const removes = [];
+  const removes = new Array<Promise<void>>;
   for (const vid of req.body.video_ids) {
     removes.push(getCategoryPrivateDb(category).child("new_vids").child(vid).remove());
   }
@@ -113,9 +114,9 @@ async function addNewVideo(req, res) {
     return res.status(400).send(makeResponseJson(false, "Expects category"));
   }
 
-  let user = null;
+  let user : UserRecord;
   try {
-    user = getUser(req.body?.auth);
+    user = await getUser(req.body?.auth);
   } catch (error) {
     return res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
   }
@@ -166,8 +167,8 @@ async function updateEntry(req, res) {
 
   const queue_ref = getCategoryPrivateDb(category).child("new_vids");
   const existing_vids = (await queue_ref.once("value")).val();
-  const all_sets = [];
-  const updated_ids = [];
+  const all_sets = new Array<Promise<void>>;
+  const updated_ids = new Array<string>;
   if (req.body.video_ids.length != 1) {
     return res.status(400).send(makeResponseJson(false, "only supports one video_ids"));
   }

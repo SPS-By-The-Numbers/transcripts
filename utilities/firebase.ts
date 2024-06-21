@@ -18,13 +18,3 @@ export const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const dbPublicRoot = ref(database, '/transcripts/public');
 export const dbPrivateRoot = ref(database, '/transcripts/private');
-
-class FirebaseStorageAccessor implements Transcript.StorageAccessor {
-  getBytes(path: string) : Promise<ArrayBuffer> {
-    const storage = Storage.getStorage(app);
-    return Storage.getBytes(Storage.ref(storage, path));
-  }
-}
-
-export const firebaseStorageAccessor = new FirebaseStorageAccessor();
-
