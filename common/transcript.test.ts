@@ -11,6 +11,8 @@ const TEST_VIDEOID = 'a95KMDHf4vQ';
 const TEST_BUCKET = 'testbucket';
 const TEST_CATEGORY = 'testcategory';
 
+// All data is stored uncompressed in testdata even if the extension is .gz or .xz.
+// This is for simplicity. It might be a bad idea. Who knows.
 class TestStorageAccessor implements StorageAccessor {
   readBytes(path: string) : Promise<ArrayBuffer> {
     return fs.readFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
@@ -31,6 +33,7 @@ class TestStorageAccessor implements StorageAccessor {
   readBytesGzip(path: string) : Promise<ArrayBuffer> {
     return this.readBytes(path);
   }
+
   writeBytesGzip(path: string, data: string) : Promise<unknown> {
     return this.writeBytes(path, data);
   }
@@ -38,6 +41,9 @@ class TestStorageAccessor implements StorageAccessor {
 
 it('fromWhisperXArchive() loads and splits whisper into sentences with correct timings', async () => {
   const accessor = new TestStorageAccessor();
+  // Note: The file in testsdata has an .xz extension but is NOT lzma
+  // encrypted. This allows not loading the lzma compressor in the common
+  // directory.
   const transcript = await DiarizedTranscript.fromWhisperXArchive(accessor, TEST_CATEGORY, TEST_VIDEOID, "eng");
 
   expect(transcript.category).toStrictEqual(TEST_CATEGORY);
@@ -62,7 +68,9 @@ it('fromWhisperXArchive() loads and splits whisper into sentences with correct t
     expect(sentenceId).toEqual(id.toString());
   }
   expect(transcript.languageToSentenceTable[transcript.originalLanguage]).not.toBeNull();
-  expect(transcript.sentenceMetadata.length).toEqual(transcript.languageToSentenceTable[transcript.originalLanguage]);
+  const numTranslatedSentences =
+    Object.keys(transcript.languageToSentenceTable[transcript.originalLanguage]).length;
+  expect(transcript.sentenceMetadata.length).toEqual(numTranslatedSentences);
 });
 
 it('DiarizedTranscript.fromStorage() loads split data files', async () => {
