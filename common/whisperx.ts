@@ -11,6 +11,7 @@
 // in the node.js and browser envrionment.
 
 import * as Constants from "config/constants";
+import langs from 'langs';
 import { makePublicPath } from "common/paths";
 
 import type { StorageAccessor } from 'common/storage';
@@ -45,10 +46,11 @@ export function makeWhisperXTranscriptsPath(
     category: CategoryId,
     videoId: VideoId,
     language: Iso6393Code): string {
+  const iso6391Code = langs.where('3', language)['1'];
   return makePublicPath(
       category,
       Constants.WHISPERX_ARCHIVE_SUBDIR,
-      `${videoId}.${language}.json.xz`);
+      `${videoId}.${iso6391Code}.json.xz`);
 }
 
 export async function getArchivedWhisperXTranscript(
