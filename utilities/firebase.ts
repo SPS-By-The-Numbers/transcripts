@@ -18,3 +18,4 @@ export const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const dbPublicRoot = ref(database, '/transcripts/public');
 export const dbPrivateRoot = ref(database, '/transcripts/private');
+export const storage = getStorage(app);

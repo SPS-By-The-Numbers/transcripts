@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
+    // The following entries to typeRoots, baseUrl, and the "*": ["./node_modules/*"]
+    // in paths are necessary to avoid accidentally searching the parent folder's
+    // node_modules.  See the following comment for more details:
+    //   https://github.com/microsoft/TypeScript/issues/30124#issuecomment-573084787
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
     "paths": {
+      "*": ["./node_modules/*"],
       "common/*": ["../common/*"],
       "config/*": ["../config/*"],
       "utils/*": ["./src/utils/*"]
     },
+    "allowJs": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "esModuleInterop": true,
