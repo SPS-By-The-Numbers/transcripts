@@ -1,8 +1,8 @@
 import * as Constants from 'config/constants';
 import * as fs from 'node:fs';
-import * as streamBuffers from 'stream-buffers';
 import { Storage } from '@google-cloud/storage';
 import { Stream } from "stream";
+import { arrayBuffer } from 'node:stream/consumers';
 import { createGzip, createGunzip } from 'zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -99,8 +99,6 @@ export class CloudStorageAccessor implements StorageAccessor {
   }
 
   async readBytesWithFilter(path: string, filter: any) {
-    const buffer = new streamBuffers.WritableStreamBuffer({ initialSize: 150 * 1024 });
-    await pipeline(this.bucket.file(path).createReadStream(), filter, buffer);
-    return buffer;
+    return await arrayBuffer(this.bucket.file(path).createReadStream().pipe(filter));
   }
 }

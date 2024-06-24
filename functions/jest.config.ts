@@ -3,8 +3,8 @@
  * https://jestjs.io/docs/configuration
  */
 
-const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('./tsconfig');
+import { pathsToModuleNameMapper } from 'ts-jest';
+import { compilerOptions } from './tsconfig.json';
 import type { Config } from 'jest';
 
 const config: Config = {

@@ -3,10 +3,9 @@
   "type": "module",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=lib/index.js --format=esm --external:./node_modules/*",
-    "build:watch": "tsc --watch",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=lib/index.js --format=esm --external:./node_modules/* --packages=external",
     "dev:tsc": "tsc --watch --preserveWatchOutput",
-    "dev:node": "firebase emulators:start --only functions,storage,database",
+    "dev:node": "firebase emulators:start --only functions",
     "dev:esbuild": "npm run build --watch",
     "dev": "run-p dev:*",
     "serve": "npm run build && firebase emulators:start --only functions,storage,database",
@@ -31,7 +30,6 @@
     "lodash.isequal": "^4.5.0",
     "lzma-native": "^8.0.6",
     "sentence-splitter": "^5.0.0",
-    "stream-buffers": "^3.0.2",
     "youtubei.js": "^9.4.0"
   },
   "devDependencies": {
@@ -46,7 +44,7 @@
     "npm-run-all": "^4.1.5",
     "source-map-support": "^0.5.21",
     "ts-jest": "^29.1.4",
-    "typescript": "^4.9.0"
+    "typescript": "^5.5.2"
   },
   "private": true
 }
