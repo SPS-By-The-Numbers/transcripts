@@ -3,16 +3,14 @@ import { getVideosForCategory } from "./youtube.js";
 import { getAllCategories, sanitizeCategory } from "./utils/path";
 import { makeResponseJson } from "./utils/response";
 
-
 async function getVideoQueue(req, res) {
   if (!req.query.user_id) {
-    return res.status(400).send(makeResponseJson(false, "missing user_id"));
+    return res.status(401).send(makeResponseJson(false, "missing user_id"));
   }
 
   const auth_code = (await getAuthCode(req.query.user_id));
-
   if (req.query.auth_code !== auth_code) {
-    return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+    return res.status(401).send(makeResponseJson(false, `invalid auth_code`));
   }
 
   const new_vids = {};
@@ -64,20 +62,20 @@ async function findNewVideos(req, res) {
 }
 
 async function removeItem(req, res) {
-  const category = sanitizeCategory(req.body.category);
-  if (!category) {
-    return res.status(400).send(makeResponseJson(false, "Expects category"));
-  }
-
   // TODO: Extract this auth check.
   if (!req.body.user_id) {
-    return res.status(400).send(makeResponseJson(false, "missing user_id"));
+    return res.status(401).send(makeResponseJson(false, "missing user_id"));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
 
   if (req.body.auth_code !== auth_code) {
-    return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+    return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
+  }
+
+  const category = sanitizeCategory(req.body.category);
+  if (!category) {
+    return res.status(400).send(makeResponseJson(false, "Expects category"));
   }
 
   const removes = new Array<Promise<void>>;
@@ -93,16 +91,16 @@ async function removeItem(req, res) {
 async function removeVastInstance(req, res) {
   // TODO: Extract this auth check.
   if (!req.body.user_id) {
-    return res.status(400).send(makeResponseJson(false, "missing user_id"));
+    return res.status(401).send(makeResponseJson(false, "missing user_id"));
   }
 
-  const vast_ref = getCategoryPrivateDb("_admin").child("vast").child(req.body.user_id);
   const auth_code = (await getAuthCode(req.body.user_id));
 
   if (req.body.auth_code !== auth_code) {
-    return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+    return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
   }
 
+  const vast_ref = getCategoryPrivateDb("_admin").child("vast").child(req.body.user_id);
   await vast_ref.remove();
 
   return res.status(200).send(makeResponseJson(true, "Instance removed"));
@@ -145,20 +143,20 @@ async function addNewVideo(req, res) {
 }
 
 async function updateEntry(req, res) {
-  const category = sanitizeCategory(req.body.category);
-  if (!category) {
-    return res.status(400).send(makeResponseJson(false, "Expects category"));
-  }
-
   // TODO: Extract this auth check.
   if (!req.body.user_id) {
-    return res.status(400).send(makeResponseJson(false, "missing user_id"));
+    return res.status(401).send(makeResponseJson(false, "missing user_id"));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
 
   if (req.body.auth_code !== auth_code) {
-    return res.status(401).send(makeResponseJson(false, "invalid auth code"));
+    return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
+  }
+
+  const category = sanitizeCategory(req.body.category);
+  if (!category) {
+    return res.status(400).send(makeResponseJson(false, "Expects category"));
   }
 
   const lease_expire_ts = new Date();

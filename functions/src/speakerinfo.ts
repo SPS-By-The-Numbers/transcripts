@@ -1,15 +1,13 @@
 import isEqual from "lodash.isequal";
-import {onRequest} from "firebase-functions/v2/https";
-import {makeResponseJson} from "./utils/response";
-
-import {getCategoryPublicDb, getCategoryPrivateDb, getUser} from "./utils/firebase";
+import { getCategoryPublicDb, getCategoryPrivateDb, getUser, jsonOnRequest } from "./utils/firebase";
+import { makeResponseJson } from "./utils/response";
 
 // POST to speaker info with JSON body of type:
 // {
 //    "videoId": "abcd",
 //    "speakerInfo": { "SPEAKER_00": { "name": "some name", "tags": [ "parent", "ptsa" ] }
 // }
-const speakerinfo = onRequest(
+const speakerinfo = jsonOnRequest(
   {cors: true, region: ["us-west1"]},
   async (req, res) => {
     if (req.method !== "POST") {
@@ -141,4 +139,4 @@ const speakerinfo = onRequest(
   }
 );
 
-export {speakerinfo};
+export { speakerinfo };

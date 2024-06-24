@@ -1,7 +1,8 @@
+import * as FirebaseUtils from 'utilities/firebase'
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
-import { DiarizedTranscript } from "common/transcript"
 import { CloudStorageAccessor } from "common/storage"
+import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { getMetadata } from "utilities/metadata-utils"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
@@ -18,7 +19,9 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined }
 };
 
-const cloudStorageAccessor = new CloudStorageAccessor();
+const cloudStorageAccessor = new CloudStorageAccessor({
+    bucket: FirebaseUtils.storage.bucket(Constants.STORAGE_BUCKET)
+  });
 
 export async function generateMetadata(
     { params, searchParams }: Props,

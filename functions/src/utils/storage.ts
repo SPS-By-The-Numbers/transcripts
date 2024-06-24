@@ -1,12 +1,17 @@
-import * as Constants from 'config/constants';
 import * as lzma from 'lzma-native';
 import { CloudStorageAccessor } from 'common/storage';
+import { getStorage } from 'firebase-admin/storage';
 
-export function getLzmaCloudStorageAccessor() {
-  return new CloudStorageAccessor({
-    keyfile: Constants.PRIVILEGED_STORAGE_KEY_FILE,
-    makeLzmaCompressor: () => lzma.createCompressor({preset: lzma.PRESET_EXTREME}),
-    makeLzmaDecompressor: lzma.createDecompressor,
-  });
+let lzmaStorageAccessor : CloudStorageAccessor | null = null;
+
+export function getLzmaStorageAccessor() : CloudStorageAccessor {
+  if (!lzmaStorageAccessor) {
+    lzmaStorageAccessor = new CloudStorageAccessor({
+        bucket: getStorage().bucket(),
+        makeLzmaCompressor: () => lzma.createCompressor({preset: lzma.PRESET_EXTREME}),
+        makeLzmaDecompressor: lzma.createDecompressor,
+      });
+  }
+
+  return lzmaStorageAccessor;
 }
-

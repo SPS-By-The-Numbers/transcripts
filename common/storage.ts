@@ -1,6 +1,3 @@
-import * as Constants from 'config/constants';
-import * as fs from 'node:fs';
-import { Storage } from '@google-cloud/storage';
 import { Stream } from "stream";
 import { arrayBuffer } from 'node:stream/consumers';
 import { createGzip, createGunzip } from 'zlib';
@@ -21,7 +18,7 @@ export interface StorageAccessor {
 }
 
 type CloudStorageAccessorOptions = {
-  keyfile?: string;
+  bucket: Bucket;
   makeLzmaDecompressor?: (() => object);
   makeLzmaCompressor?: (() => object);
 };
@@ -35,19 +32,12 @@ type CloudStorageAccessorOptions = {
 // files so adding the lzma library in is just bloat. This is slightly
 // ugly but it works out as an okay compromise.
 export class CloudStorageAccessor implements StorageAccessor {
-  readonly storage : Storage;
   readonly bucket : Bucket;
   readonly makeLzmaDecompressor?: (() => object);
   readonly makeLzmaCompressor?: (() => object);
 
-  constructor(options : CloudStorageAccessorOptions = {}) {
-    if (options.keyfile) {
-      const serviceAccount = JSON.parse(fs.readFileSync(options.keyfile, {encoding: 'utf8'}));
-      this.storage = new Storage(serviceAccount);
-    } else {
-      this.storage = new Storage();
-    }
-    this.bucket = this.storage.bucket(Constants.STORAGE_BUCKET);
+  constructor(options : CloudStorageAccessorOptions) {
+    this.bucket = options.bucket;
     this.makeLzmaDecompressor = options.makeLzmaDecompressor;
     this.makeLzmaCompressor = options.makeLzmaCompressor;
   }

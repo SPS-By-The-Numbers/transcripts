@@ -11,6 +11,9 @@ import { onRequest } from "firebase-functions/v2/https";
 import { makeResponseJson } from "./response";
 import { makePublicPath, makePrivatePath } from "common/paths";
 
+import type { AppOptions } from "firebase-admin/app";
+
+export { getDatabase } from "firebase-admin/database";
 export { UserRecord } from "firebase-admin/auth";
 
 export function jsonOnRequest(options : object, func) {
@@ -38,7 +41,7 @@ export function getPubSubClient() {
 }
 
 // Global intialization for process.
-export function initializeFirebase(opts) {
+export function initializeFirebase(opts : AppOptions | undefined = undefined) {
   initializeApp(opts);
 }
 
@@ -51,4 +54,9 @@ export async function getUser(token) {
 export async function getAuthCode(user_id) {
   return (await getCategoryPrivateDb("_admin")
     .child("vast").child(user_id).child("password").once("value")).val();
+}
+
+export async function setAuthCode(user_id : string, authCode : string) : Promise<void> {
+  return (await getCategoryPrivateDb("_admin")
+    .child("vast").child(user_id).child("password").set(authCode));
 }
