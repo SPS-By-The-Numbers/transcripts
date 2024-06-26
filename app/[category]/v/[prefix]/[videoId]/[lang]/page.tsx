@@ -1,9 +1,10 @@
-import * as FirebaseUtils from 'utilities/firebase'
+import * as Constants from 'config/constants'
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { CloudStorageAccessor } from "common/storage"
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
+import { Storage } from '@google-cloud/storage';
 import { getMetadata } from "utilities/metadata-utils"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
 
@@ -20,7 +21,7 @@ type Props = {
 };
 
 const cloudStorageAccessor = new CloudStorageAccessor({
-    bucket: FirebaseUtils.storage.bucket(Constants.STORAGE_BUCKET)
+    bucket: (new Storage()).bucket(Constants.STORAGE_BUCKET)
   });
 
 export async function generateMetadata(
