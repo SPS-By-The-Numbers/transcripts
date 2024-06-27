@@ -1,6 +1,4 @@
-// Utilities for talking to firebase services. It does NOT use
-// firebase storage API which are more limited than the Cloud Storage
-// APIs and just not useful. Look at utils/storage.ts instead.
+// Utilities for talking to firebase services.
 
 import { PubSub } from "@google-cloud/pubsub";
 import { initializeApp } from "firebase-admin/app";

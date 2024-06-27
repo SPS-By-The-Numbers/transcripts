@@ -9,14 +9,14 @@
 //  /transcripts/public/[category]/sentences/[vid].eng.json
 
 import * as Constants from 'config/constants';
-import { getLzmaStorageAccessor } from 'utils/storage';
+import { FirebaseAdminStorageAccessor } from 'utils/storage';
 import { DiarizedTranscript, makeSentenceTablePath, makeTranscriptDataPath } from 'common/transcript';
 import { basename } from 'node:path';
 import { makePublicPath } from 'common/paths';
 
 import type { Iso6393Code, VideoId } from "common/params";
 
-const accessor = getLzmaStorageAccessor();
+const accessor = new FirebaseAdminStorageAccessor();
 
 for (const category of Constants.ALL_CATEGORIES) {
   const [allFiles] = await accessor.bucket.getFiles(

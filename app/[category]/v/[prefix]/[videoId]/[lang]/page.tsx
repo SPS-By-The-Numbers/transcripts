@@ -1,7 +1,7 @@
 import * as Constants from 'config/constants'
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
-import { CloudStorageAccessor } from "common/storage"
+import { storageAccessor } from "utilities/firebase"
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { Storage } from '@google-cloud/storage';
@@ -19,10 +19,6 @@ type Props = {
   params: VideoParams
   searchParams: { [key: string]: string | string[] | undefined }
 };
-
-const cloudStorageAccessor = new CloudStorageAccessor({
-    bucket: (new Storage()).bucket(Constants.STORAGE_BUCKET)
-  });
 
 export async function generateMetadata(
     { params, searchParams }: Props,
@@ -72,7 +68,7 @@ export default async function Index({params}: {params: VideoParams}) {
   const loadData = new Array<Promise<any>>;
   loadData.push(getMetadata(params.category, params.videoId));
   loadData.push(DiarizedTranscript.fromStorage(
-      cloudStorageAccessor, params.category, params.videoId, languageOrder));
+      storageAccessor, params.category, params.videoId, languageOrder));
   loadData.push(loadSpeakerControlInfo(params.category, params.videoId));
 
   const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all(loadData);
