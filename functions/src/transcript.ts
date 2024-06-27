@@ -38,7 +38,8 @@ async function uploadTrancript(req, res) {
   }
 
   const transcripts = req.body.transcripts || {};
-  for (const lang of Object.keys(transcripts)) {
+  for (const iso6391Lang of Object.keys(transcripts)) {
+    const lang = langs.where('1', iso6391Lang)['3'];
     if (!LANGUAGES.has(lang)) {
       res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
       return;
