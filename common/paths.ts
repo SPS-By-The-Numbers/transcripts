@@ -1,4 +1,4 @@
-import * as Constants from "config/constants";
+import * as Constants from "../config/constants.js";
 
 export function makePublicPath(...parts) {
   return [Constants.APP_SCOPE, "public", ...parts].join("/");

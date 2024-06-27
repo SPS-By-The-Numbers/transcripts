@@ -8,13 +8,13 @@
 //  /transcripts/public/[category]/diarized/[vid].json
 //  /transcripts/public/[category]/sentences/[vid].eng.json
 
-import * as Constants from 'config/constants';
-import { FirebaseAdminStorageAccessor } from 'utils/storage';
-import { DiarizedTranscript, makeSentenceTablePath, makeTranscriptDataPath } from 'common/transcript';
+import * as Constants from '../../../config/constants.js';
+import { FirebaseAdminStorageAccessor } from '../utils/storage.js';
+import { DiarizedTranscript, makeSentenceTablePath, makeTranscriptDataPath } from '../../../common/transcript.js';
 import { basename } from 'node:path';
-import { makePublicPath } from 'common/paths';
+import { makePublicPath } from '../../../common/paths.js';
 
-import type { Iso6393Code, VideoId } from "common/params";
+import type { Iso6393Code, VideoId } from "../../../common/params.js";
 
 const accessor = new FirebaseAdminStorageAccessor();
 

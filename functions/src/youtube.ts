@@ -1,4 +1,4 @@
-import * as Constants from 'config/constants';
+import * as Constants from '../../config/constants.js';
 import { Innertube, YTNodes } from 'youtubei.js';
 
 let global_youtube : Innertube | null;

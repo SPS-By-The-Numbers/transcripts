@@ -1,14 +1,14 @@
-import * as Constants from 'config/constants';
+import * as Constants from '../config/constants.js';
 import langs from 'langs';
-import { getArchivedWhisperXTranscript } from 'common/whisperx';
+import { getArchivedWhisperXTranscript } from './whisperx.js';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
-import { makePublicPath } from 'common/paths';
+import { makePublicPath } from './paths.js';
 import { split, SentenceSplitterSyntax } from 'sentence-splitter';
 
-import type { CategoryId, Iso6393Code, SegmentId, SpeakerId, VideoId } from 'common/params';
-import type { StorageAccessor } from 'common/storage';
-import type { WhisperXTranscript } from 'common/whisperx';
+import type { CategoryId, Iso6393Code, SegmentId, SpeakerId, VideoId } from './params.js';
+import type { StorageAccessor } from './storage.js';
+import type { WhisperXTranscript } from './whisperx.js';
 
 ///////////////////
 /// Types

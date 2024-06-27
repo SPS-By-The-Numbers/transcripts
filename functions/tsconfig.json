@@ -3,19 +3,15 @@
     "typeRoots": ["./node_modules/@types"],
     "baseUrl": ".",
     "paths": {
-      "*": ["./node_modules/*"],
-      "common/*": ["../common/*"],
-      "config/*": ["../config/*"],
-      "utils/*": ["./src/utils/*"]
+      "*": ["./node_modules/*"]
     },
     "allowJs": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "moduleDetection": "force",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "outDir": "lib",

@@ -6,8 +6,8 @@ import { getDatabase } from "firebase-admin/database";
 import { getAuth } from "firebase-admin/auth";
 import { onRequest } from "firebase-functions/v2/https";
 
-import { makeResponseJson } from "./response";
-import { makePublicPath, makePrivatePath } from "common/paths";
+import { makeResponseJson } from "./response.js";
+import { makePublicPath, makePrivatePath } from "../../../common/paths.js";
 
 import type { AppOptions } from "firebase-admin/app";
 
