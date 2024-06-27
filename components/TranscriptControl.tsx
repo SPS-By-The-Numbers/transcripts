@@ -7,24 +7,13 @@ type TranscriptControlParams = {
 
 export default function TranscriptControl({onTimeStampSelected, children} : TranscriptControlParams) {
   function handleClick(e): void {
-    // Search for nearest span.
-    let span = e.target;
-    while (span && span.tagName !== 'SPAN') {
-      span = span.parentElement;
-    }
+    const clickedTimestamp: string | null = findSelectedTimestamp(e.target);
 
-    // So span found.
-    if (!span) {
+    if (clickedTimestamp === null) {
       return;
     }
 
-    const classList = Array.from(span.classList) as string[];
-    const tsClassName: string | undefined = classList.find((name: string) => name.startsWith('ts-'));
-    if (!tsClassName) {
-      return;
-    }
-
-    onTimeStampSelected(tsClassName.slice(3));
+    onTimeStampSelected(clickedTimestamp);
   }
 
   return (
@@ -32,4 +21,21 @@ export default function TranscriptControl({onTimeStampSelected, children} : Tran
       { children }
     </div>
   );
+}
+
+function findSelectedTimestamp(clickedElement: HTMLElement): string | null {
+  let curElement: HTMLElement | null = clickedElement;
+
+  while (curElement !== null) {
+    const classList = Array.from<string>(curElement.classList);
+    const tsClassName: string | undefined = classList.find((name: string) => name.startsWith('ts-'));
+
+    if (tsClassName !== undefined) {
+      return tsClassName.slice(3);
+    }
+
+    curElement = curElement.parentElement;
+  }
+
+  return null;
 }
