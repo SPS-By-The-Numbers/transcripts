@@ -32,3 +32,14 @@ export const CATEGORY_CHANNEL_MAP = {
 // List of all categories.
 export const ALL_CATEGORIES = Object.keys(CATEGORY_CHANNEL_MAP);
 
+// Firebase configuration for web clients. This data is public.
+export const FIREBASE_CLIENT_CONFIG = {
+  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
+  authDomain: "sps-by-the-numbers.firebaseapp.com",
+  databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
+  projectId: "sps-by-the-numbers",
+  storageBucket: "sps-by-the-numbers.appspot.com",
+  messagingSenderId: "319988578351",
+  appId: "1:319988578351:web:1caaadd0171003126deeda",
+  measurementId: "G-WKM5FTSSLL"
+};

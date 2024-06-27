@@ -1,6 +1,6 @@
-import { getLzmaStorageAccessor } from './utils/storage';
 import { DiarizedTranscript } from 'common/transcript';
 import { getCategoryPublicDb, getAuthCode, jsonOnRequest } from './utils/firebase';
+import { getStorageAccessor } from './utils/storage';
 import { makeResponseJson } from './utils/response';
 
 import type { WhisperXTranscript } from 'common/whisperx';
@@ -48,8 +48,8 @@ async function uploadTrancript(req, res) {
   for (const [lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
         category, req.body.vid, whisperXTranscript);
-    diarizedTranscript.writeSentenceTable(getLzmaStorageAccessor(), lang);
-    diarizedTranscript.writeDiarizedTranscript(getLzmaStorageAccessor());
+    diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
+    diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
   if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
@@ -73,7 +73,7 @@ async function downloadTranscript(req, res) {
   }
   const videoId : VideoId = req.query.vid;
 
-  const diarizedTranscript = await DiarizedTranscript.fromStorage(getLzmaStorageAccessor(), category, videoId, ['eng']);
+  const diarizedTranscript = await DiarizedTranscript.fromStorage(getStorageAccessor(), category, videoId, ['eng']);
   console.log(diarizedTranscript);
   const sentences = new Array<string>;
   for (const [_, segmentId] of diarizedTranscript.sentenceMetadata) {
