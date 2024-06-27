@@ -1,3 +1,4 @@
+import langs from 'langs';
 import { DiarizedTranscript } from '../../common/transcript.js';
 import { getCategoryPublicDb, getAuthCode, jsonOnRequest } from './utils/firebase.js';
 import { getStorageAccessor } from './utils/storage.js';
@@ -10,12 +11,14 @@ const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 
 async function uploadTrancript(req, res) {
   if (!req.body.user_id) {
+    console.log("No UserId");
     res.status(401).send(makeResponseJson(false, "missing user_id"));
     return;
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
   if (req.body.auth_code !== auth_code) {
+    console.log("invalid Auth code");
     res.status(401).send(makeResponseJson(false, "invalid auth_code"));
     return;
   }
@@ -28,25 +31,30 @@ async function uploadTrancript(req, res) {
 
   const category = req.body.category;
   if (!category || category.length > 20) {
+    console.log("Missing category");
     res.status(400).send(makeResponseJson(false, "Expects category"));
     return;
   }
 
   if (!req.body.vid) {
+    console.log("Missing vid");
     res.status(400).send(makeResponseJson(false, "Missing vid"));
     return;
   }
 
   const transcripts = req.body.transcripts || {};
   for (const iso6391Lang of Object.keys(transcripts)) {
-    const lang = langs.where('1', iso6391Lang)['3'];
+    const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
     if (!LANGUAGES.has(lang)) {
+      console.log("Unknown language: ", iso6391Lang);
       res.status(400).send(makeResponseJson(false, `Unknown language ${lang}`));
       return;
     }
   }
 
-  for (const [lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
+  for (const [iso6391Lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
+    const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
+    console.log("Saved vid: ", req.body.vid, " langage: ", lang);
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
         category, req.body.vid, whisperXTranscript);
     diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
@@ -54,6 +62,7 @@ async function uploadTrancript(req, res) {
   }
 
   if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
+    console.log("Failed setting metadata: ", req.body);
     res.status(500).send(makeResponseJson(false, "Internal error"));
     return;
   }
