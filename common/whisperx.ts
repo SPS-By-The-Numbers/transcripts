@@ -10,12 +10,12 @@
 // for this kind of archival. However different libraries work better/worse
 // in the node.js and browser envrionment.
 
-import * as Constants from "config/constants";
+import * as Constants from "../config/constants.js";
 import langs from 'langs';
-import { makePublicPath } from "common/paths";
+import { makePublicPath } from "./paths.js";
 
-import type { StorageAccessor } from 'common/storage';
-import type { CategoryId, Iso6393Code, VideoId } from "common/params";
+import type { StorageAccessor } from './storage.js';
+import type { CategoryId, Iso6393Code, VideoId } from "./params.js";
 
 // Top level WhipserX trannscript ytpe.
 export type WhisperXTranscript = {

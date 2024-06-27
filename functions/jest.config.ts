@@ -3,8 +3,6 @@
  * https://jestjs.io/docs/configuration
  */
 
-import { pathsToModuleNameMapper } from 'ts-jest';
-import { compilerOptions } from './tsconfig.json';
 import type { Config } from 'jest';
 
 const config: Config = {
@@ -94,7 +92,6 @@ const config: Config = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
 
   extensionsToTreatAsEsm: ['.ts'],
 
