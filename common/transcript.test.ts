@@ -1,7 +1,7 @@
-import { DiarizedTranscript } from './transcript.js';
+import { DiarizedTranscript } from 'common/transcript';
 import * as fs from 'node:fs/promises';
 
-import type { StorageAccessor } from './storage.js';
+import type { StorageAccessor } from 'common/storage';
 
 // Work around JSDOM missing TextDecoder.
 import { TextEncoder, TextDecoder } from 'util';

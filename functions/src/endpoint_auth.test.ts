@@ -1,4 +1,4 @@
-import * as TestingUtils from './utils/testing.js';
+import * as TestingUtils from 'utils/testing';
 
 // List of endpoints that should be guarded by user_id/auth_code params.
 const AUTH_CODE_ENDPOINTS = [
