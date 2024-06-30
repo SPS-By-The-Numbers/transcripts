@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["./node_modules/*"]
+    },
     "allowJs": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": false,
