@@ -45,7 +45,7 @@ jobs:
       - run: npm ci
 
       # Firebase webframeworks doesn't do npm install on the functions directory.
-      - run: npm --prefix functions install
+      - run: npm --prefix functions ci
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
