@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bootstrap": "firebase experiments:enable webframeworks",
     "build": "next build",
     "deploy": "firebase deploy --only hosting:transcripts",
     "dev": "next dev",

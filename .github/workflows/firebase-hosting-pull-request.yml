@@ -39,15 +39,17 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: ${{ runner.os }}-firebase-${{ steps.cache-npm.outputs.firebase-tools }}
 
-      # The action-hosting-deploy with the webframeworks does the build but do it here
-      # so test can be run.
+      # The action-hosting-deploy with the webframeworks does a build too but do it here
+      # so tests can be run.
       - run: npm ci
-      - run: npm build
+      - run: npm run bootstrap
+      - run: npm run build
       - run: npm test
 
       # Firebase webframeworks doesn't recur down into the functions directory.
       - run: npm --prefix functions ci
-      - run: npm --prefix functions build
+      - run: npm --prefix functions run bootstrap
+      - run: npm --prefix functions run build
       - run: npm --prefix functions test
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
