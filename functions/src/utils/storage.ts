@@ -5,7 +5,7 @@ import { createGzip, createGunzip } from 'zlib';
 import { getStorage } from 'firebase-admin/storage';
 import { pipeline } from 'node:stream/promises';
 
-import type { StorageAccessor } from "../../../common/storage.js";
+import type { StorageAccessor } from "common/storage";
 
 // Implements the StorageAccessor API using the Firebase Admin SDK
 // and Google Cloud Storage API. Unlike the client API, the Firebase

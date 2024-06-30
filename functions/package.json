@@ -3,9 +3,10 @@
   "type": "module",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
-    "build": "run-s build:tsc",
+    "build": "run-s build:tsc build:esbuild",
+    "build:esbuild": "esbuild src/index.ts --bundle --platform=node --outfile=lib/index.js --format=esm --external:./node_modules/* --packages=external",
     "build:tsc": "tsc",
-    "build:watch": "tsc --watch",
+    "build:watch": "run-p 'build:tsc -- --watch --preserveWatchOutput' 'build:esbuild -- --watch'",
     "dev": "run-p build:watch dev:*",
     "dev:emulators": "firebase emulators:start --only functions,storage,database",
     "serve": "npm run build && firebase emulators:start --only functions,storage,database",
@@ -18,7 +19,7 @@
     "test:watch": "run-p build:watch test:jest:watch",
     "logs": "firebase functions:log"
   },
-  "main": "lib/functions/src/index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/functions-framework": "^3.4.0",
     "@google-cloud/pubsub": "^4.4.0",

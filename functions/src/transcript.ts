@@ -1,11 +1,11 @@
 import langs from 'langs';
-import { DiarizedTranscript } from '../../common/transcript.js';
-import { getCategoryPublicDb, getAuthCode, jsonOnRequest } from './utils/firebase.js';
-import { getStorageAccessor } from './utils/storage.js';
-import { makeResponseJson } from './utils/response.js';
+import { DiarizedTranscript } from 'common/transcript';
+import { getCategoryPublicDb, getAuthCode, jsonOnRequest } from './utils/firebase';
+import { getStorageAccessor } from './utils/storage';
+import { makeResponseJson } from './utils/response';
 
-import type { WhisperXTranscript } from '../../common/whisperx.js';
-import type { Iso6393Code, VideoId } from '../../common/params.js';
+import type { WhisperXTranscript } from 'common/whisperx';
+import type { Iso6393Code, VideoId } from 'common/params';
 
 const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 

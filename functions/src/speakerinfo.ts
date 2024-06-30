@@ -1,6 +1,6 @@
 import isEqual from "lodash.isequal";
-import { getCategoryPublicDb, getCategoryPrivateDb, getUser, jsonOnRequest } from "./utils/firebase.js";
-import { makeResponseJson } from "./utils/response.js";
+import { getCategoryPublicDb, getCategoryPrivateDb, getUser, jsonOnRequest } from "./utils/firebase";
+import { makeResponseJson } from "./utils/response";
 
 // POST to speaker info with JSON body of type:
 // {

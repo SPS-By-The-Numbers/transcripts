@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import * as FirebaseUtils from './firebase.js';
+import * as FirebaseUtils from 'utils/firebase';
 import sourceMapSupport from 'source-map-support'
 
 // First set up unique project id for these tests, so that any other test files run in parallel
