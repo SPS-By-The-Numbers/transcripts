@@ -2,10 +2,11 @@ import fetch from 'node-fetch';
 import * as FirebaseUtils from 'utils/firebase';
 import sourceMapSupport from 'source-map-support'
 
-// First set up unique project id for these tests, so that any other test files run in parallel
-// is not collapsing with this one.
+// Set up unique project id for these tests so they can't hit anything real.
 export const TEST_PROJECT_ID = 'fakeproject';
-export const EMULATOR_ENDPOINT_ROOT = 'http://localhost:5001/sps-by-the-numbers/us-west1';
+
+// Be sure to use 127.0.0.1 instead of localhost to avoid binding the ipv6 ::1
+export const EMULATOR_ENDPOINT_ROOT = 'http://127.0.0.1:5001/sps-by-the-numbers/us-west1';
 
 export const FAKE_USER_ID = 'fakeuser';
 export const FAKE_AUTH_CODE = 'fake_auth';
