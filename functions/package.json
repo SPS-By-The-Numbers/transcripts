@@ -1,6 +1,9 @@
 {
   "name": "functions",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "bootstrap": "firebase experiments:enable webframeworks",
     "build": "run-s build:tsc build:esbuild",

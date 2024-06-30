@@ -14,6 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+
+      - uses: actions/setup-python@v5
+        with:
+          cache: 'pip'
+
       - name: Cache node modules
         id: cache-npm
         uses: actions/cache@v4
@@ -31,9 +39,9 @@ jobs:
       - name: Setup functions-python/venv
         working-directory: functions-python
         run: |
-          python3 -m venv venv
+          python -m venv venv
           . venv/bin/activate
-          python3 -m pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
       - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         name: List the state of node modules
