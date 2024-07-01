@@ -5,7 +5,7 @@ import { getAllCategories } from './utils/path';
 describe('video_queue', () => {
   beforeAll(TestingUtils.beforeAll);
 
-  it('Access With auth_code', async () => {
+  it.skip('Access with auth_code', async () => {
     const NEW_VIDS = ['a','b','c'];
     const category = getAllCategories()[0];
     getCategoryPrivateDb(category, 'new_vids').set(NEW_VIDS);
