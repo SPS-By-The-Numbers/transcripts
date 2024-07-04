@@ -110,23 +110,25 @@ article.b h2 {
 }
 
 /* Transcription Segment */
-article.b span {
-  display: inline;
-  line-height: 1.25;
-  margin-right: 0.5ex;
-  text-decoration: inherit;
-  text-decoration: none;
-  margin-top: 0.375rem; /* 6px */
-  margin-bottom: 0.375rem; /* 6px */
+article.b p {
+  padding: 0.5ex;
+  line-height: 1.2;
 }
 
 /* Colors */
 @media (prefers-color-scheme: light) {
-  article.b span {
+  /* Marked sentence. */
+  p.m {
+    background-color: #f5f5f5;
+  }
+
+  /* One sentence of text. May be multiple languages. */
+  article.b p {
     color: #000000;
   }
 
-  article.b div.s {
+  /* Deemphasized color for paragraph */
+  article.b p > span:nth-child(n+1):last-child {
     color: #666666;
   }
 
@@ -160,11 +162,18 @@ article.b span {
 }
 
 @media (prefers-color-scheme: dark) {
-  article.b span {
+  /* Marked sentence. */
+  p.m {
+    background-color: #9d9d9d;
+  }
+
+  /* One sentence of text. May be multiple languages. */
+  article.b p {
     color: #ffffff;
   }
 
-  article.b div.s {
+  /* Deemphasized color for paragraph */
+  article.b p > span:nth-child(n+1):last-child {
     color: #000000;
   }
 

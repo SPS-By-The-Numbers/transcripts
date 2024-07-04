@@ -38,6 +38,7 @@ function textLines(segmentId, languageOrder, diarizedTranscript) {
       <br key={`br-${language}-segmentId`} />
     );
   }
+  lines.pop();
 
   return lines;
 }
@@ -62,10 +63,10 @@ export default function BoardMeeting({
         <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
           {
             bubble.sentenceMetadata.map(([segmentId, speakerId, start]) => (
-                <span key={ `${i}-${segmentId}` }
+                <p key={ `${i}-${segmentId}` }
                   className={ toTimeClassName(start) }>
                   { textLines( segmentId, languageOrder, diarizedTranscript) }
-                </span>
+                </p>
             ))
           }
         </SpeakerBubble>
