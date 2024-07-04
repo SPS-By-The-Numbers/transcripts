@@ -27,7 +27,7 @@ export interface VideoPlayerControl {
   jumpToTime(hhmmss: string): void;
 }
 
-let markedSpan = '';
+let markedElementClassName = '';
 
 export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, ref: MutableRefObject<VideoPlayerControl>) {
   const ytElement = useRef<any>(null);
@@ -53,22 +53,15 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
       // Found timestamp spans. Update mark.
 
       // HACKHACK: This is a no-no modifying the underlying dom element in React. But it's fast.
-      const oldSpans : HTMLCollectionOf<Element> = document.getElementsByClassName(markedSpan);
-      for (const el of Array.from(oldSpans)) {
-        const markElement = el.parentElement;
-        if (markElement) {
-          markElement.replaceWith(el);
-        }
+      const allMarkedElements : HTMLCollectionOf<Element> = document.getElementsByClassName(markedElementClassName);
+      for (const el of Array.from(allMarkedElements)) {
+        el.classList.remove('m');
       }
 
-      markedSpan = tsClassName;
+      markedElementClassName = tsClassName;
       for (const el of Array.from(spans)) {
-        const markElement = document.createElement('mark');
-        if (el.parentNode) {
-          el.parentNode.insertBefore(markElement, el);
-          markElement.appendChild(el);
-          el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-        }
+        el.classList.add('m');
+        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
       }
     }
   }

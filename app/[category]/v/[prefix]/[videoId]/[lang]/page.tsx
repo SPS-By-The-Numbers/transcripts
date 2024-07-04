@@ -58,11 +58,13 @@ export default async function Index({params}: {params: VideoParams}) {
     );
   }
 
-  const languageOrder = ['eng'];
+  const languageOrder = new Array<string>();
   const translatedSentences = {};
   if (params.lang !== 'eng') {
     languageOrder.push(params.lang);
   }
+  // Ensure English is the last.
+  languageOrder.push('eng');
 
   // Handle the fact that transcript files for english still use the 2-letter ISO-639 code.
   const loadData = new Array<Promise<any>>;
