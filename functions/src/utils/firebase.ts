@@ -17,7 +17,7 @@ export { UserRecord } from "firebase-admin/auth";
 export function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
     try {
-      return func(req, res);
+      return await func(req, res);
     } catch (e) {
       console.log(e);
       return res.status(500).send(makeResponseJson(false, "Exception"));
