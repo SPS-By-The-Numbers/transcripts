@@ -99,35 +99,38 @@ export class DiarizedTranscript {
     // Load the large data files.
     const loadPromises = new Array<Promise<any>>;
     loadPromises.push(storageAccessor.readBytes(makeTranscriptDataPath(category, videoId)));
-    loadPromises.push(...languages.map(
-          l => storageAccessor.readBytes(makeSentenceTablePath(category, videoId, l))));
+    loadPromises.push(...languages.map(l => getSentenceTable(storageAccessor, category, videoId, l)));
 
     // Wait for everything.
-    const allResults = await Promise.allSettled(loadPromises);
+    const [transcriptDataResult, ...sentenceTableResult] = await Promise.allSettled(loadPromises);
 
-    // Decode results. Make sure the order is exactly the same as above!
-    if (allResults[0].status === 'rejected') {
+    if (transcriptDataResult.status === 'rejected') {
       return new DiarizedTranscript(category, videoId, EMPTY_TRANSIT_DATA, {},
           ["Cannout load transcript Data"]);
     }
 
-    const errors : string[] = [];
     const decoder = new TextDecoder('utf-8');
-    const transcriptData : TranscriptData = JSON.parse(decoder.decode(allResults[0].value));
-    allResults.shift();
+    const errors : string[] = [];
+    const transcriptData : TranscriptData = JSON.parse(decoder.decode(transcriptDataResult.value));
+
+    // Process the language table.
     const languageToSentenceTable : LanguageToSentenceTable = {};
-    for (const language of languages) {
-      const result = allResults.shift();
+    const missingLanguages = new Array<string>();
+    for (const [i, language] of languages.entries()) {
+      const result = sentenceTableResult[i];
       if (result?.status === 'rejected') {
-        errors.push(`Unable to load sentences for ${language}`);
+        missingLanguages.push(language);
         continue;
       }
 
-      const sentenceTableRows : [string, string][] =
-          parse(decoder.decode(result?.value), { delimiter: '\t', trim: true });
-      const sentenceTable : SentenceTable = {};
-      sentenceTableRows.forEach(row => sentenceTable[row[0]] = row[1]);
-      languageToSentenceTable[language] = sentenceTable;
+      languageToSentenceTable[language] = result.value;
+    }
+
+    // Process the missing languages.
+    if (missingLanguages.length > 0) {
+      const translatedMissing = await translateToMissingLangauges(category, videoId,
+          transcriptData.language, missingLanguages, errors);
+      Object.assign(languageToSentenceTable, translatedMissing);
     }
 
     return new DiarizedTranscript(category, videoId, transcriptData, languageToSentenceTable, errors);
@@ -315,4 +318,33 @@ function toSentences(speaker : SpeakerId, firstId : number, words : string[], wo
   }
 
   return {sentenceMetadata, sentences};   
+}
+
+function tsvToSentenceTable(tsv : string) : SentenceTable {
+  const sentenceTableRows : [string, string][] =
+    parse(tsv, { delimiter: '\t', trim: true });
+  const sentenceTable : SentenceTable = {};
+  sentenceTableRows.forEach(row => sentenceTable[row[0]] = row[1]);
+  return sentenceTable;
+}
+
+async function translateToMissingLangauges(category : CategoryId, videoId : VideoId,
+    originalLanguage : Iso6393Code, missingLanguages : string[], errors : string[]) : Promise<LanguageToSentenceTable> {
+    const urlParams = new URLSearchParams({ category, videoId, originalLanguage});
+    for (const lang of missingLanguages) {
+      urlParams.append('targetLanguages', lang);
+    }
+    const response = await fetch(`${Constants.ENDPOINTS['sentences']}?${urlParams.toString()}`);
+    const jsonResponse = await response.json() as any;
+    if (!jsonResponse?.ok) {
+      console.error(jsonResponse?.message);
+      return {};
+    }
+    return jsonResponse?.data;
+}
+
+export async function getSentenceTable(storageAccessor : StorageAccessor, category: CategoryId, videoId: VideoId, language: Iso6393Code) {
+  const bytes = await storageAccessor.readBytes(makeSentenceTablePath(category, videoId, language));
+  const decoder = new TextDecoder('utf-8');
+  return tsvToSentenceTable(decoder.decode(bytes));
 }

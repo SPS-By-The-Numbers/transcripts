@@ -1,3 +1,13 @@
+const isProduction = process.env.NODE_ENV === 'production';
+
+function makeEndpointUri(endpoint: string) {
+  return `https://${endpoint}-rdcihhc4la-uw.a.run.app`;
+}
+
+function makeTestEndpointUri(endpoint: string) {
+  return `http://127.0.0.1:5001/sps-by-the-numbers/us-west1/${endpoint}`;
+}
+
 // Prefix used in storage or database paths.
 export const APP_SCOPE = "transcripts";
 
@@ -10,12 +20,6 @@ export const SENTENCE_TABLE_SUBDIR = "sentences";
 
 // Subdirectory for archive of raw WhisperX files.
 export const WHISPERX_ARCHIVE_SUBDIR = "archive/whisperx";
-
-// Storage bucket for whisperx archives. Can be cheaper/slower storage class.
-export const STORAGE_BUCKET = "sps-by-the-numbers.appspot.com";
-
-// The path to keyfile that has write permissions to google cloud storage.
-export const PRIVILEGED_STORAGE_KEY_FILE = "";
 
 // Map of ALL_CATEGORIES to channels.
 export const CATEGORY_CHANNEL_MAP = {
@@ -32,6 +36,9 @@ export const CATEGORY_CHANNEL_MAP = {
 // List of all categories.
 export const ALL_CATEGORIES = Object.keys(CATEGORY_CHANNEL_MAP);
 
+// Storage bucket for whisperx archives. Can be cheaper/slower storage class.
+export const STORAGE_BUCKET = "sps-by-the-numbers.appspot.com";
+
 // Firebase configuration for web clients. This data is public.
 export const FIREBASE_CLIENT_CONFIG = {
   apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
@@ -43,3 +50,15 @@ export const FIREBASE_CLIENT_CONFIG = {
   appId: "1:319988578351:web:1caaadd0171003126deeda",
   measurementId: "G-WKM5FTSSLL"
 };
+
+const ENDPOINT_NAMES = [
+  'sentences',
+  'speakerinfo',
+  'transcript',
+  'vast',
+  'video_queue',
+];
+
+export const PRODUCTION_ENDPOINTS = Object.fromEntries(ENDPOINT_NAMES.map(n => [n, makeEndpointUri(n)]));
+export const TEST_ENDPOINTS = Object.fromEntries(ENDPOINT_NAMES.map(n => [n, makeTestEndpointUri(n)]));
+export const ENDPOINTS = isProduction ? PRODUCTION_ENDPOINTS : TEST_ENDPOINTS;

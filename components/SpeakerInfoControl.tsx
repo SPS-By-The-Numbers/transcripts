@@ -153,7 +153,8 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
     };
 
     setSubmitStatus({...submitStatus, has_submitted: true, in_progress: true});
-    fetch('https://speakerinfo-rdcihhc4la-uw.a.run.app',
+
+    fetch(Constants.ENDPOINTS['speakerinfo'],
       {
         method: "POST",
         headers: {
