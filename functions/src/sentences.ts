@@ -115,7 +115,6 @@ export const sentences = jsonOnRequest(
 async function translateStrings(
     sourceText : Array<string>,
     targetLanguage : string) : Promise<Array<string>> {
-  console.log("Translating to ", targetLanguage);
   const batches = new Array<Array<string>>();
 
   let numBytes = 0;
@@ -143,9 +142,7 @@ async function translateStrings(
     allRequests.push(translationClient.translateText(request));
   }
   const responses = await Promise.all(allRequests);
-  console.log(responses);
   const stuff = responses.flatMap(r => r[0].translations.map(t => t.translatedText));
-  console.log(stuff);
   return stuff;
 }
 
