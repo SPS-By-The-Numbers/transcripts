@@ -1,4 +1,4 @@
-const isProduction = process.env.NODE_ENV === 'production';
+export const isProduction = process.env.NODE_ENV === 'production';
 
 function makeEndpointUri(endpoint: string) {
   return `https://${endpoint}-rdcihhc4la-uw.a.run.app`;
