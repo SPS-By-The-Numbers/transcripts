@@ -35,6 +35,8 @@ export async function generateMetadata(
   }
 }
 
+
+/*
 const SUPPORTED_LANGUAGES = {
   "amh": "Amharic",
   "jpn": "Japanese",
@@ -46,10 +48,12 @@ const SUPPORTED_LANGUAGES = {
   'zho-HANS': 'Simplified Chinese',
   'zho-HANT': 'Traditional Chinese',
 };
+*/
 
 export default async function Index({params}: {params: VideoParams}) {
   const lang = params.lang === undefined ? 'eng' : params.lang;
 
+/*
   if (!(lang in SUPPORTED_LANGUAGES)) {
     return (
       <div>
@@ -57,6 +61,7 @@ export default async function Index({params}: {params: VideoParams}) {
       </div>
     );
   }
+  */
 
   const languageOrder = new Array<string>();
   const translatedSentences = {};
