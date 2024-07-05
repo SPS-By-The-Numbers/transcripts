@@ -1,8 +1,10 @@
 import 'styles/globals.scss'
+
+import * as Constants from 'config/constants'
 import Nav from 'components/Nav'
+import Providers from './providers';
 import Script from 'next/script'
 import { Metadata } from 'next'
-import Providers from './providers';
 
 export const dynamic = 'force-static';
 export const revalidate = 60;
@@ -10,6 +12,14 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'SPS By The Numbers - Transcriptions',
   description: 'Public meeting transcriptions from SPS By The Numbers',
+}
+
+function getDevBanner() {
+  if (Constants.isProduction) {
+    return undefined;
+  }
+
+  return (<p style={{ backgroundColor: "red", textAlign: "center" }}>Is Dev Mode</p>);
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'GA_MEASUREMENT_ID');
           `}
         </Script>
+        { getDevBanner() }
         <Providers>
           <Nav />
           {children}
