@@ -23,7 +23,7 @@ const speakerinfo = jsonOnRequest(
 
     let user;
     try {
-      user = getUser(req.body?.auth);
+      user = await getUser(req.body?.auth);
     } catch (error) {
       res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
       return;
