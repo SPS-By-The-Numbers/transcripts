@@ -51,6 +51,7 @@ export const FIREBASE_CLIENT_CONFIG = {
   measurementId: "G-WKM5FTSSLL"
 };
 
+// Generate URLs for use in fetch() calls based on envrionment type.
 const ENDPOINT_NAMES = [
   'sentences',
   'speakerinfo',
@@ -59,6 +60,21 @@ const ENDPOINT_NAMES = [
   'video_queue',
 ];
 
+// List of production endpoint names.
 export const PRODUCTION_ENDPOINTS = Object.fromEntries(ENDPOINT_NAMES.map(n => [n, makeEndpointUri(n)]));
+
+// List of testing endpoint names. Should point at the firebase emulator on localhost.
 export const TEST_ENDPOINTS = Object.fromEntries(ENDPOINT_NAMES.map(n => [n, makeTestEndpointUri(n)]));
+
+// Constant for the endpoints that changes between the production and test endpoints based on
+// the environment. Most code should use this.
 export const ENDPOINTS = isProduction ? PRODUCTION_ENDPOINTS : TEST_ENDPOINTS;
+
+// Languages listed here are put on the top of the select element list for choosing translations.
+export const TOP_LANGUAGES = [
+  'spa',
+  'zho-HANS',
+  'zho-HANT',
+  'vie',
+  'amh',
+];

@@ -1,35 +1,23 @@
 import Link from 'next/link'
 import DownloadLinks from 'components/DownloadLinks'
 
+import type { ReactNode } from 'react';
+
 type TranscriptHeaderParams = {
   category: string;
   title: string;
   description: string;
   videoId: string;
+  translationNav: ReactNode;
 };
 
-export default function TranscriptHeader({category, title, description, videoId} : TranscriptHeaderParams) {
-/*
-  const translationLinks = (
-      <div>
-        AI Translation: <Link href="./eng"> English </Link>
-        <Link href="./amh"> Amharic </Link>
-        <Link href="./jap"> Japansee </Link>
-        <Link href="./kor"> Korean </Link>
-        <Link href="./som"> Somoli </Link>
-        <Link href="./spa"> Spanish </Link>
-        <Link href="./vie"> Vietnamese </Link>
-        <Link href="./zho-HANS"> Simplified Chinese </Link>
-        <Link href="./zho-HANT"> Traditional Chinese </Link>
-        </div>
-        );
-        */
-
+export default function TranscriptHeader({category, title, description, videoId, translationNav} : TranscriptHeaderParams) {
   return(
     <header>
       <div className="p-2 bg-slate-50 my-2 border-dashed border-2 border-black">
         <nav className="flex">
           <DownloadLinks className="flex-auto text-left" category={category} videoId={videoId} />
+          <div className="flex-auto text-center">{ translationNav }</div>
           <div className="flex-auto text-right">
             <i>Code adapted from <Link href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">{"Majdoddin's collab example"}</Link></i>
           </div>
