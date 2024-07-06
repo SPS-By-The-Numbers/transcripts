@@ -20,6 +20,13 @@
 import nmtLangs from './google-nmt-langs.json';
 import langs from 'langs';
 
+export type SupportedLanguageInfo = {
+  [ id: string ] : {
+    googleLang: string;
+    displayName: string;
+  }
+}
+
 // Special overrides where the Google NMT model code is NOT the ISO-693-1 code.
 const LangOverride = {
   'zh-CN': 'zho-HANS',
@@ -47,7 +54,7 @@ const LangIgnore = [
   'zh',  // Duplicate of zh-CN.
 ];
 
-function generateSupportLangs() {
+function generateSupportLangs() : SupportedLanguageInfo {
   if (!nmtLangs[0]?.languages) {
     throw "Invalid google nmt json dump";
   }
