@@ -39,7 +39,6 @@ export default function BoardMeetingControl({
   }
 
   const errorPanel = errors.length === 0 ? undefined : (<div key="errors">{errors.map((e,i) => (<div key={i}>{e}</div>))}</div>)
-  console.log(errors);
 
   return (
     <>

@@ -1,12 +1,13 @@
 import * as Constants from 'config/constants'
 import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
-import { storageAccessor } from "utilities/firebase"
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { Storage } from '@google-cloud/storage';
+import { SupportedLanguages } from 'common/languages';
 import { getMetadata } from "utilities/metadata-utils"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
+import { storageAccessor } from "utilities/firebase"
 
 export type VideoParams = {
     category: string,
@@ -36,32 +37,16 @@ export async function generateMetadata(
 }
 
 
-/*
-const SUPPORTED_LANGUAGES = {
-  "amh": "Amharic",
-  "jpn": "Japanese",
-  "kor": "Korean",
-  "som": "Somali",
-  "spa": "Spanish",
-  'eng': 'English',
-  'vie': 'Vietnamese',
-  'zho-HANS': 'Simplified Chinese',
-  'zho-HANT': 'Traditional Chinese',
-};
-*/
-
 export default async function Index({params}: {params: VideoParams}) {
   const lang = params.lang === undefined ? 'eng' : params.lang;
 
-/*
-  if (!(lang in SUPPORTED_LANGUAGES)) {
+  if (!(lang in SupportedLanguages)) {
     return (
       <div>
       Invalid language code {params.lang}
       </div>
     );
   }
-  */
 
   const languageOrder = new Array<string>();
   const translatedSentences = {};

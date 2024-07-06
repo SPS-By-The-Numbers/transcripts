@@ -1,6 +1,7 @@
 import * as Constants from 'config/constants';
 import langs from 'langs';
 import { DiarizedTranscript, getSentenceTable } from 'common/transcript';
+import { SupportedLanguages } from 'common/languages';
 import { getStorageAccessor } from './utils/storage';
 import { jsonOnRequest } from './utils/firebase';
 import { makeResponseJson } from './utils/response';
@@ -16,34 +17,11 @@ const translationClient = new v3.TranslationServiceClient();
 const REQ_MAX_CODEPOINTS = 30000;
 const REQ_MAX_ENTRIES = 1024;
 
-// Map of Iso6393Code to Google Cloud Translate language.
-const SupportedLanguages : { [iso6393Lang : Iso6393Code] : string } = {
-  'amh': 'am',
-  'eng': 'en',
-  'som': 'co',
-  'spa': 'es',
-  'vie': 'vi',
-  'zho-HANS': 'zh-CN',
-  'zho-HANT': 'zh-TW',
-};
-
-// TODO: Just get the whole set of language codes from google and hard code it.
 function getGoogleTranslateLang(iso6393Lang: Iso6393Code) {
   if (iso6393Lang in SupportedLanguages) {
-    return SupportedLanguages[iso6393Lang];
+    return SupportedLanguages[iso6393Lang].googleLang;
   }
-
-  // Check if it's one of the silly google languages xx-bork, xx-elmer, xx-hacker, xx-klingon, xx-pirate,
-  if (iso6393Lang.startsWith('xx-')) {
-    return iso6393Lang;
-  }
-
-  // Convert to Iso639-1 by default.
-  const langEntry = langs.where("3", iso6393Lang);
-  if (!langEntry) {
-    return undefined;
-  }
-  return langEntry['1'];
+  return undefined;
 }
 
 export const sentences = jsonOnRequest(
