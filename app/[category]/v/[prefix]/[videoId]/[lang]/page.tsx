@@ -32,7 +32,10 @@ export async function generateMetadata(
 
   return {
     title: `Transcript of ${params.category} -  ${videoMetadata.title}`,
-    description: `Transcript of ${params.category} - ${videoMetadata.title}`
+    description: `Transcript of ${params.category} - ${videoMetadata.title}`,
+    openGraph: {
+      images: `https://i.ytimg.com/vi/${params.videoId}/maxresdefault.jpg`,
+    },
   }
 }
 
