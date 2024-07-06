@@ -42,12 +42,17 @@ const LangOverride = {
   'nso': 'nso',
 };
 
+// Languages to ignore from the Google list.
+const LangIgnore = [
+  'zh',  // Duplicate of zh-CN.
+];
+
 function generateSupportLangs() {
   if (!nmtLangs[0]?.languages) {
     throw "Invalid google nmt json dump";
   }
 
-  const availableTargets = nmtLangs[0].languages.filter(entry => entry.supportTarget);
+  const availableTargets = nmtLangs[0].languages.filter(entry => entry.supportTarget && !LangIgnore.find(e => e === entry.languageCode));
   return Object.fromEntries(availableTargets.map(entry => {
       let targetLang = LangOverride[entry.languageCode];
       if (!targetLang) {

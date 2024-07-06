@@ -1,12 +1,13 @@
 import BoardMeetingControl from 'components/BoardMeetingControl';
-import SpeakerBubble from 'components/SpeakerBubble'
-import TranscriptHeader from 'components/TranscriptHeader'
-import { UnknownSpeakerNum } from 'utilities/speaker-info'
+import LanguageNav from 'components/LanguageNav';
+import SpeakerBubble from 'components/SpeakerBubble';
+import TranscriptHeader from 'components/TranscriptHeader';
+import { UnknownSpeakerNum } from 'utilities/speaker-info';
 import { toTimeClassName } from 'utilities/client/css'
 
-import type { DiarizedTranscript } from 'common/transcript'
+import type { DiarizedTranscript } from 'common/transcript';
 import type { ReactNode } from 'react';
-import type { SpeakerInfoData } from 'utilities/speaker-info'
+import type { SpeakerInfoData } from 'utilities/speaker-info';
 
 type BoardMeetingParams = {
   metadata: any,
@@ -73,11 +74,14 @@ export default function BoardMeeting({
       );
   });
 
-  const transcriptHeader = <TranscriptHeader
+  const langNav = (<LanguageNav name='lang-nav' curLang={languageOrder[0]} />);
+
+  const transcriptHeader = (<TranscriptHeader
             category={category}
             title={metadata.title}
             description={metadata.description}
-            videoId={metadata.video_id} />
+            videoId={metadata.video_id}
+            translationNav={langNav}/>);
 
   const transcriptSection = (
     <section>

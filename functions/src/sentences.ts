@@ -1,5 +1,4 @@
 import * as Constants from 'config/constants';
-import langs from 'langs';
 import { DiarizedTranscript, getSentenceTable } from 'common/transcript';
 import { SupportedLanguages } from 'common/languages';
 import { getStorageAccessor } from './utils/storage';
