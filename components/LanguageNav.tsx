@@ -57,7 +57,8 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
   const navigateToNewLang = (newOption) => {
     setNewLang(newOption.value);
     const pathParts = window.location.pathname.split('/');
-    if (pathParts.at[pathParts.length - 1] in SupportedLanguages) {
+    const lastPart = pathParts.at(-1) ?? '';
+    if (lastPart in SupportedLanguages) {
       // Has language in path. Strip it replace.
       pathParts[pathParts.length - 1] = newOption.value;
     } else {
