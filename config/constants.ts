@@ -72,6 +72,7 @@ export const ENDPOINTS = isProduction ? PRODUCTION_ENDPOINTS : TEST_ENDPOINTS;
 
 // Languages listed here are put on the top of the select element list for choosing translations.
 export const TOP_LANGUAGES = [
+  'eng',
   'spa',
   'zho-HANS',
   'zho-HANT',
