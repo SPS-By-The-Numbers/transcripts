@@ -1,8 +1,9 @@
 import * as Constants from 'config/constants';
+import TranscriptIndex from './TranscriptIndex';
 import { getLastDateForCategory } from 'utilities/metadata-utils';
-import Transcripts, { DefaultFiltersByCategory } from './Transcripts';
-import { TranscriptFilterSelection } from 'components/TranscriptFilter';
 import { startOfMonth, subMonths } from 'date-fns';
+
+import type { DefaultFiltersByCategory } from './TranscriptIndex';
 
 const defaultCategory = 'sps-board';
 
@@ -18,7 +19,7 @@ export default async function Index() {
 
   return (
     <main className="mx-5 my-5 max-w-screen-md">
-      <Transcripts defaultCategory={defaultCategory} defaultsByCategory={defaultsByCategory} />
+      <TranscriptIndex defaultCategory={defaultCategory} defaultsByCategory={defaultsByCategory} />
     </main>
   );
 }
