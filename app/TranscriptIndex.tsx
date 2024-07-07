@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import type { ReadonlyURLSearchParams } from 'next/navigation';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { compareDesc, isValid } from 'date-fns';
-
-import TranscriptFilter, { TranscriptFilterSelection, DateRange } from 'components/TranscriptFilter';
-import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
-import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import LoadingSpinner from 'components/LoadingSpinner';
+import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
+import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
+import { compareDesc, isValid } from 'date-fns';
+import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import type { DateRange, TranscriptIndexFilterSelection } from 'components/TranscriptIndexFilter';
 
 export type DefaultFiltersByCategory = {
     [category: string]: { defaultStart: Date | null }
@@ -20,12 +20,12 @@ type Props = {
   defaultsByCategory: DefaultFiltersByCategory,
 };
 
-export default function Transcripts({ defaultCategory, defaultsByCategory }: Props) {
+export default function TranscriptIndex({ defaultCategory, defaultsByCategory }: Props) {
   const { filterParams, updateFilterParams } = useFilterParams(defaultCategory, defaultsByCategory);
-  const [filters, updateFilters]: [TranscriptFilterSelection, any] = useState(filterParams);
+  const [filters, updateFilters]: [TranscriptIndexFilterSelection, any] = useState(filterParams);
   const { videos, isLoading } = useFilteredVideos(filters);
 
-  function handleFilterChange(filters: TranscriptFilterSelection) {
+  function handleFilterChange(filters: TranscriptIndexFilterSelection) {
     updateFilters(filters);
     updateFilterParams(filters);
   }
@@ -55,15 +55,15 @@ export default function Transcripts({ defaultCategory, defaultsByCategory }: Pro
 
   return (
     <>
-      <TranscriptFilter selection={filters} onFilterChange={handleFilterChange} />
+      <TranscriptIndexFilter selection={filters} onFilterChange={handleFilterChange} />
       {isLoading ? loadingSection : resultsSection}
     </>
   );
 }
 
 function useFilterParams(defaultCategory: string, defaultsByCategory: DefaultFiltersByCategory): {
-   filterParams: TranscriptFilterSelection,
-   updateFilterParams: (newFilters: TranscriptFilterSelection) => void
+   filterParams: TranscriptIndexFilterSelection,
+   updateFilterParams: (newFilters: TranscriptIndexFilterSelection) => void
 } {
   const searchParams: URLSearchParams = useSearchParams();
   const pathName: string = usePathname();
@@ -71,12 +71,12 @@ function useFilterParams(defaultCategory: string, defaultsByCategory: DefaultFil
 
   const category: string = getCategoryFromParams(searchParams, defaultCategory, defaultsByCategory);
 
-  const filterParams: TranscriptFilterSelection = {
+  const filterParams: TranscriptIndexFilterSelection = {
     category,
     dateRange: getDateRangeFromParams(searchParams, defaultsByCategory[category].defaultStart),
   };
 
-  const updateFilterParams = (newFilters: TranscriptFilterSelection) => {
+  const updateFilterParams = (newFilters: TranscriptIndexFilterSelection) => {
     push(buildUrl(pathName, newFilters), { scroll: false });
   }
 
@@ -86,7 +86,7 @@ function useFilterParams(defaultCategory: string, defaultsByCategory: DefaultFil
   };
 }
 
-function useFilteredVideos(filters: TranscriptFilterSelection): {
+function useFilteredVideos(filters: TranscriptIndexFilterSelection): {
   videos: VideoData[], isLoading: boolean
 } {
   const [isLoading, setLoading] = useState(true);
@@ -160,7 +160,7 @@ function getDateFromParams(params: URLSearchParams, key: string): Date | null {
   return date;
 }
 
-function buildUrl(basePath: string, filterParams: TranscriptFilterSelection): string {
+function buildUrl(basePath: string, filterParams: TranscriptIndexFilterSelection): string {
   const parameters: string[] = [
     filterParams.category && `category=${filterParams.category}`,
     filterParams.dateRange.start && `start=${formatDateForPath(filterParams.dateRange.start)}`,

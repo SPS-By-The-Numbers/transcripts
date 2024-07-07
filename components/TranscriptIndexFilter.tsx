@@ -7,17 +7,17 @@ export type DateRange = {
   end: Date | null
 };
 
-export type TranscriptFilterSelection = {
+export type TranscriptIndexFilterSelection = {
   dateRange: DateRange,
   category: string
 }
 
-export type TranscriptFilterProps = {
-  selection: TranscriptFilterSelection;
-  onFilterChange: (filters: TranscriptFilterSelection) => void
+export type TranscriptIndexFilterProps = {
+  selection: TranscriptIndexFilterSelection;
+  onFilterChange: (filters: TranscriptIndexFilterSelection) => void
 }
 
-export default function TranscriptFilter({selection, onFilterChange}: TranscriptFilterProps) {
+export default function TranscriptIndexFilter({selection, onFilterChange}: TranscriptIndexFilterProps) {
   function handleCategoryChange(event) {
     onFilterChange({...selection, category: event.target.value});
   }
