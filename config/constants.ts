@@ -74,6 +74,7 @@ export const ENDPOINTS = isProduction ? PRODUCTION_ENDPOINTS : TEST_ENDPOINTS;
 export const TOP_LANGUAGES = [
   'eng',
   'spa',
+  'som',
   'zho-HANS',
   'zho-HANT',
   'vie',
