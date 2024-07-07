@@ -1,9 +1,9 @@
 'use client'
 
+import * as Constants from 'config/constants';
 import { app } from 'utilities/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
-import { getAllCategories } from 'utilities/metadata-utils'
 import { useState, useEffect } from 'react'
 
 type SubmitStatus = {

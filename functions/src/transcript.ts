@@ -93,13 +93,13 @@ async function downloadTranscript(req, res) {
 }
 
 function setMetadata(category, metadata) {
-  const category_public = getCategoryPublicDb(category);
   if (!metadata || !metadata["video_id"]) {
     console.log("Invalid metadata: ", metadata);
     return false;
   }
 
   const video_id = metadata["video_id"];
+  const category_public = getCategoryPublicDb(category);
   category_public.child("metadata").child(video_id).set(metadata);
 
   // Add to the index.

@@ -1,13 +1,13 @@
+import * as Constants from 'config/constants';
 import * as TestingUtils from './utils/testing';
 import { getCategoryPrivateDb } from './utils/firebase';
-import { getAllCategories } from './utils/path';
 
 describe('video_queue', () => {
   beforeAll(TestingUtils.beforeAll);
 
   it.skip('Access with auth_code', async () => {
     const NEW_VIDS = ['a','b','c'];
-    const category = getAllCategories()[0];
+    const category = Constants.ALL_CATEGORIES[0];
     getCategoryPrivateDb(category, 'new_vids').set(NEW_VIDS);
     const response = await TestingUtils.fetchEndpoint(
         'video_queue',

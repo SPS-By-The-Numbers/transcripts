@@ -7,6 +7,7 @@ import CreatableSelect from 'react-select/creatable'
 import { app } from 'utilities/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
+import { fetchEndpoint } from 'utilities/client/endpoint'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
 import { toSpeakerNum } from "utilities/speaker-info"
@@ -155,15 +156,9 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
 
     setSubmitStatus({...submitStatus, has_submitted: true, in_progress: true});
 
-    fetch(Constants.ENDPOINTS['speakerinfo'],
-      {
-        method: "POST",
-        headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }).then(response => setSubmitStatus({has_submitted: true, in_progress: false, last_status: response.status}));
+    const response = await fetchEndpoint('speakerinfo', 'POST', data);
+
+    setSubmitStatus({has_submitted: true, in_progress: false, last_status: response.status});
   }
 
   // Must be deleted once
@@ -202,7 +197,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
     // key is the counterpart to the secret key you set in the Firebase console.
     if (!appCheck) {
       appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8'),
+        provider: new ReCaptchaV3Provider(Constants.RECAPTCHA_KEY),
 
         // Optional argument. If true, the SDK automatically refreshes App Check
         // tokens as needed.
