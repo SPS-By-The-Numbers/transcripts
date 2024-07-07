@@ -8,7 +8,7 @@
     "build:tsc": "tsc",
     "build:watch": "run-p 'build:tsc -- --watch --preserveWatchOutput' 'build:esbuild -- --watch'",
     "dev": "run-p build:watch dev:*",
-    "dev:emulators": "firebase emulators:start --only functions,database",
+    "dev:emulators": "firebase emulators:start --only functions",
     "lint": "eslint --ext .js,.ts .",
     "serve": "npm run build && firebase emulators:start --only functions,storage,database",
     "shell": "npm run build && firebase functions:shell",

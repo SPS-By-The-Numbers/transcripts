@@ -51,13 +51,17 @@ export const FIREBASE_CLIENT_CONFIG = {
   measurementId: "G-WKM5FTSSLL"
 };
 
+// Used by appcheck.
+export const RECAPTCHA_KEY = '6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8';
+
 // Generate URLs for use in fetch() calls based on envrionment type.
 const ENDPOINT_NAMES = [
+  'metadata',
   'sentences',
   'speakerinfo',
-  'transcript',
   'vast',
   'video_queue',
+  'transcript',
 ];
 
 // List of production endpoint names.

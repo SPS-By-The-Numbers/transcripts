@@ -1,5 +1,6 @@
+import * as Constants from 'config/constants';
 import { MetadataRoute } from 'next';
-import { getAllCategories, getAllVideosForCategory, getDatesForCategory } from 'utilities/metadata-utils';
+import { getAllVideosForCategory, getDatesForCategory } from 'utilities/metadata-utils';
 import { getCategoryPath, getDatePath, getVideoPath } from 'utilities/path-utils';
 
 type ChangeFrequency = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
@@ -19,11 +20,9 @@ function buildUrl(relativePath): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const categories: string[] = await getAllCategories();
-
   const videoPages: SiteMapEntry[] = [];
 
-  for (const category of categories) {
+  for (const category of Constants.ALL_CATEGORIES) {
     const videos = await getAllVideosForCategory(category);
 
     videoPages.push(...videos.map(v => ({

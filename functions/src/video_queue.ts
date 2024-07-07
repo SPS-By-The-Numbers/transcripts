@@ -1,6 +1,8 @@
 import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser, UserRecord } from "./utils/firebase";
+import * as Constants from 'config/constants';
+
 import { getVideosForCategory } from "./youtube.js";
-import { getAllCategories, sanitizeCategory } from "./utils/path";
+import { sanitizeCategory } from "./utils/path";
 import { makeResponseJson } from "./utils/response";
 
 async function getVideoQueue(req, res) {
@@ -14,7 +16,7 @@ async function getVideoQueue(req, res) {
   }
 
   const new_vids = {};
-  for (const category of getAllCategories()) {
+  for (const category of Constants.ALL_CATEGORIES) {
     const category_vids = (await getCategoryPrivateDb(category).child("new_vids").once("value")).val();
     if (category_vids) {
       new_vids[category] = category_vids;
@@ -32,7 +34,7 @@ async function findNewVideos(req, res) {
 
   let limit = 0;
   // Can be empty in test and initial bootstrap.
-  for (const category of getAllCategories()) {
+  for (const category of Constants.ALL_CATEGORIES) {
     const metadata_ref = getCategoryPublicDb(category, "metadata");
     const metadata_snapshot = await metadata_ref.once("value");
     const new_video_ids = {};

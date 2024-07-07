@@ -1,4 +1,5 @@
-import { getAllCategories, getLastDateForCategory } from 'utilities/metadata-utils';
+import * as Constants from 'config/constants';
+import { getLastDateForCategory } from 'utilities/metadata-utils';
 import Transcripts, { DefaultFiltersByCategory } from './Transcripts';
 import { TranscriptFilterSelection } from 'components/TranscriptFilter';
 import { startOfMonth, subMonths } from 'date-fns';
@@ -6,11 +7,9 @@ import { startOfMonth, subMonths } from 'date-fns';
 const defaultCategory = 'sps-board';
 
 export default async function Index() {
-  const allCategories: string[] = await getAllCategories();
-
   const defaultsByCategory: DefaultFiltersByCategory = {};
 
-  for (const category of allCategories) {
+  for (const category of Constants.ALL_CATEGORIES) {
     const lastDate: Date | null = await getLastDateForCategory(defaultCategory);
     const start: Date | null = lastDate !== null ? startOfMonth(subMonths(lastDate, 1)) : null
 

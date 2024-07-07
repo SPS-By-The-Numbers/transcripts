@@ -25,12 +25,6 @@ export async function getCategoryPublicRoot(category: string): Promise<any> {
     return (await get(dbPublicRoot)).child(category);
 }
 
-export async function getAllCategories(): Promise<string[]> {
-    const result = (await get(dbPublicRoot)).val();
-
-    return Object.keys(result);
-}
-
 export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
     const result = (await getCategoryPublicRoot(category)).child(`metadata`).val();
     if (!result) {
@@ -102,16 +96,4 @@ export async function getAllVideosForDateRange(
     );
 
     return videos;
-}
-
-export async function getMetadata(category: string, id: string): Promise<any> {
-    return (await getCategoryPublicRoot(category)).child(`metadata/${id}`).val();
-}
-
-export async function getVideoRef(category: string, id: string): Promise<any> {
-    return (await getCategoryPublicRoot(category)).child(`v/${id}`);
-}
-
-export async function getExistingRef(category: string): Promise<any> {
-    return (await getCategoryPublicRoot(category)).child('existing');
 }

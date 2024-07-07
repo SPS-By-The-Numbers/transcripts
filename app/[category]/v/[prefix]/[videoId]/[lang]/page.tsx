@@ -5,7 +5,7 @@ import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { Storage } from '@google-cloud/storage';
 import { SupportedLanguages } from 'common/languages';
-import { getMetadata } from "utilities/metadata-utils"
+import { getMetadata } from "utilities/client/metadata"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
 import { storageAccessor } from "utilities/firebase"
 
