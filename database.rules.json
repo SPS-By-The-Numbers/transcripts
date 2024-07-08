@@ -4,7 +4,14 @@
       ".read": true,
       "public": {
         ".read": true,
-        ".write": false
+        ".write": false,
+        "$category": {
+          "metadata": {
+            "$videoId": {
+              ".indexOn": [ "publish_date" ]
+            }
+          }
+        }
       },
       "private": {
         ".read": false,
