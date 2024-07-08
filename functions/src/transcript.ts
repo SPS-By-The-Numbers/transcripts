@@ -1,6 +1,7 @@
 import langs from 'langs';
 import { DiarizedTranscript } from 'common/transcript';
-import { getCategoryPublicDb, getAuthCode, jsonOnRequest } from './utils/firebase';
+import { getAuthCode, jsonOnRequest } from './utils/firebase';
+import { setMetadata } from './utils/metadata';
 import { getStorageAccessor } from './utils/storage';
 import { makeResponseJson } from './utils/response';
 
@@ -54,14 +55,14 @@ async function uploadTrancript(req, res) {
 
   for (const [iso6391Lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
-    console.log("Saved vid: ", req.body.vid, " langage: ", lang);
+    console.log("Saved vid: ", req.body.vid, " language: ", lang);
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
         category, req.body.vid, whisperXTranscript);
     diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
-  if (req.body.metadata && !setMetadata(req.body.category, req.body.metadata)) {
+  if (req.body.metadata && ! (await setMetadata(req.body.category, req.body.metadata))) {
     console.log("Failed setting metadata: ", req.body);
     res.status(500).send(makeResponseJson(false, "Internal error"));
     return;
@@ -90,24 +91,6 @@ async function downloadTranscript(req, res) {
     sentences.push(diarizedTranscript.languageToSentenceTable['eng'][segmentId]);
   }
   res.status(200).send(makeResponseJson(true, 'transcript', {sentences}));
-}
-
-function setMetadata(category, metadata) {
-  if (!metadata || !metadata["video_id"]) {
-    console.log("Invalid metadata: ", metadata);
-    return false;
-  }
-
-  const video_id = metadata["video_id"];
-  const category_public = getCategoryPublicDb(category);
-  category_public.child("metadata").child(video_id).set(metadata);
-
-  // Add to the index.
-  const published = new Date(metadata["publish_date"]).toISOString().split("T")[0];
-  category_public.child("index").child("date").child(published)
-    .child(video_id).set(metadata);
-
-  return true;
 }
 
 const transcript = jsonOnRequest(

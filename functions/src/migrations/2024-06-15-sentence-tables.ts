@@ -9,12 +9,16 @@
 //  /transcripts/public/[category]/sentences/[vid].eng.json
 
 import * as Constants from 'config/constants';
+import langs from 'langs';
 import { FirebaseAdminStorageAccessor } from 'utils/storage';
 import { DiarizedTranscript, makeSentenceTablePath, makeTranscriptDataPath } from 'common/transcript';
 import { basename } from 'node:path';
 import { makePublicPath } from 'common/paths';
+import { doAuth } from './auth';
 
 import type { Iso6393Code, VideoId } from "common/params";
+
+doAuth();
 
 const accessor = new FirebaseAdminStorageAccessor();
 
@@ -26,17 +30,19 @@ for (const category of Constants.ALL_CATEGORIES) {
 
   for (const file of allFiles) {
     try {
-      const splits = basename(file.name).split('.')[0];
+      const splits = basename(file.name).split('.');
       const vid : VideoId = splits[0];
-      const language : Iso6393Code = splits[1];
+      const iso6391Code : string = splits[1];
+      const language : Iso6393Code = langs.where('1', iso6391Code)['3'];
 
       // Generate the filenames.
       const diarizedPath = makeTranscriptDataPath(category, vid);
       const sentencesPath = makeSentenceTablePath(category, vid, language);
-      const diarizedTranscriptExists = (await accessor.bucket.file(diarizedPath).exists())[0];
-      const sentenceTableExists = (await accessor.bucket.file(sentencesPath).exists())[0];
-      
+      const [[diarizedTranscriptExists], [sentenceTableExists]] =
+        await Promise.all([accessor.bucket.file(diarizedPath).exists(),
+                          accessor.bucket.file(sentencesPath).exists()]);
       if (!diarizedTranscriptExists || !sentenceTableExists) {
+        console.log('Writing ', file.name);
         const diarizedTranscript = await DiarizedTranscript.fromWhisperXArchive(accessor, category, vid, language);
 
         if (!sentenceTableExists) {
