@@ -1,7 +1,7 @@
 import * as Constants from 'config/constants';
 import { MetadataRoute } from 'next';
-import { getAllVideosForCategory, getDatesForCategory } from 'utilities/metadata-utils';
-import { getCategoryPath, getDatePath, getVideoPath } from 'utilities/path-utils';
+import { getAllVideosForCategory } from 'utilities/metadata-utils';
+import { getVideoPath } from 'utilities/path-utils';
 
 type ChangeFrequency = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 
@@ -12,11 +12,8 @@ type SiteMapEntry = {
     priority?: number;
 };
 
-// TODO: Move this to an environment variable
-const hostName = 'https://transcripts.sps-by-the-numbers.com';
-
 function buildUrl(relativePath): string {
-  return `${hostName}/${relativePath}`;
+  return `${Constants.SITE_ROOT_URL}/${relativePath}`;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

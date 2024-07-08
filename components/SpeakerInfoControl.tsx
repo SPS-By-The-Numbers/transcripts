@@ -4,7 +4,7 @@ import React from 'react';
 
 import * as Constants from 'config/constants'
 import CreatableSelect from 'react-select/creatable'
-import { app } from 'utilities/firebase'
+import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
 import { fetchEndpoint } from 'utilities/client/endpoint'
@@ -42,7 +42,7 @@ type OptionType = {
 };
 
 // Initialize Firebase
-const auth = getAuth(app);
+const auth = getAuth(firebaseApp);
 const provider = new GoogleAuthProvider();
 let appCheck;
 
@@ -196,7 +196,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
     // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
     // key is the counterpart to the secret key you set in the Firebase console.
     if (!appCheck) {
-      appCheck = initializeAppCheck(app, {
+      appCheck = initializeAppCheck(firebaseApp, {
         provider: new ReCaptchaV3Provider(Constants.RECAPTCHA_KEY),
 
         // Optional argument. If true, the SDK automatically refreshes App Check

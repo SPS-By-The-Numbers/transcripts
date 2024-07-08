@@ -1,4 +1,4 @@
-import { getCategoryPublicRoot } from "utilities/metadata-utils"
+import { getCategoryPublicData } from "utilities/metadata-utils"
 
 import type { SpeakerInfoData } from 'utilities/speaker-info'
 
@@ -13,20 +13,11 @@ type DbInfoEntry ={
   tags : Array<string>;
 };
 
-async function getVideoRef(category: string, id: string): Promise<any> {
-    return (await getCategoryPublicRoot(category)).child(`v/${id}`);
-}
-
-async function getExistingRef(category: string): Promise<any> {
-    return (await getCategoryPublicRoot(category)).child('existing');
-}
-
 export async function loadSpeakerControlInfo(category: string, videoId: string) : Promise<SpeakerControlInfo> {
-  const videoRef = await getVideoRef(category, videoId);
-  const existingRef = await getExistingRef(category);
+  const videoData = await getCategoryPublicData(category, `v/${videoId}`);
+  const existingOptions = await getCategoryPublicData(category, 'existing');
 
   const speakerInfo = {};
-  const videoData = videoRef.val();
   if (videoData && videoData.speakerInfo) {
     for (const [k,v] of Object.entries(videoData.speakerInfo)) {
       const entry = v as DbInfoEntry;
@@ -41,8 +32,6 @@ export async function loadSpeakerControlInfo(category: string, videoId: string) 
       }
     }
   }
-
-  const existingOptions = existingRef.val();
 
   const existingNames = {...existingOptions?.names};
   const existingTags = new Set<string>();

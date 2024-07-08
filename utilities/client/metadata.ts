@@ -1,3 +1,4 @@
+// Fetches the metadata from cloud functions.
 import { fetchEndpoint } from 'utilities/client/endpoint';
 
 export async function getMetadata(category: string, videoId: string): Promise<any> {

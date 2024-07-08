@@ -7,7 +7,7 @@ import { Storage } from '@google-cloud/storage';
 import { SupportedLanguages } from 'common/languages';
 import { getMetadata } from "utilities/client/metadata"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
-import { storageAccessor } from "utilities/firebase"
+import { storageAccessor } from "utilities/client/storage"
 
 export type VideoParams = {
     category: string,

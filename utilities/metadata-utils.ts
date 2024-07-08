@@ -1,17 +1,13 @@
-import { get, child, QueryConstraint, startAt, endAt, query, DataSnapshot, orderByKey, limitToLast } from "firebase/database"
-import { dbPublicRoot } from 'utilities/firebase';
+import * as Database from 'firebase/database';
+import { get, child, QueryConstraint, startAt, endAt, query, orderByKey, limitToLast } from "firebase/database"
+import { dbPublicRoot } from 'utilities/client/firebase';
 import { parseISO } from 'date-fns';
 import { parseDateFromPath } from "./path-utils";
 
-export type VideoData = {
-    videoId: string,
-    title: string,
-    description: string,
-    publishDate: Date,
-    channelId: string,
-}
+import type { CategoryId, VideoMetadata } from 'common/params';
+import type { DataSnapshot } from 'firebase/database';
 
-function metadataToVideoData(entry: any): VideoData {
+function metadataToVideoMetadata(entry: any): VideoMetadata {
     return {
         videoId: entry.video_id,
         title: entry.title,
@@ -21,25 +17,25 @@ function metadataToVideoData(entry: any): VideoData {
     };
 }
 
-export async function getCategoryPublicRoot(category: string): Promise<any> {
-    return (await get(dbPublicRoot)).child(category);
-}
-
-export async function getAllVideosForCategory(category: string): Promise<VideoData[]> {
-    const result = (await getCategoryPublicRoot(category)).child(`metadata`).val();
+export async function getAllVideosForCategory(category: string): Promise<VideoMetadata[]> {
+    const result = (await Database.get(Database.child(dbPublicRoot, `${category}/metadata`))).val();
     if (!result) {
       return [];
     }
 
-    const allVideos: VideoData[] = Object.entries(result).map(
-      ([videoId, metadata]) => metadataToVideoData(metadata)
+    const allVideos: VideoMetadata[] = Object.entries(result).map(
+      ([videoId, metadata]) => metadataToVideoMetadata(metadata)
     );
 
     return allVideos;
 }
 
+export async function getCategoryPublicData(category: CategoryId, path: string): Promise<any> {
+    return (await Database.get(Database.child(dbPublicRoot, `${category}/${path}`))).val();
+}
+
 export async function getDatesForCategory(category: string): Promise<string[]> {
-    const result = (await getCategoryPublicRoot(category)).child(`index/date`).val();
+    const result = getCategoryPublicData(category, 'index/date');
     if (!result) {
       return [];
     }
@@ -65,15 +61,15 @@ export async function getLastDateForCategory(category: string): Promise<Date | n
   return parseDateFromPath(datePaths[0]);
 }
 
-export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoData[]> {
-    const result = (await getCategoryPublicRoot(category)).child(`index/date/${datePath}`).val();
+export async function getAllVideosForPublishDate(category: string, datePath: string): Promise<VideoMetadata[]> {
+    const result = await getCategoryPublicData(category, `index/date/${datePath}`);
 
-    return Object.entries(result).map(([videoId, metadata]) => metadataToVideoData(metadata));
+    return Object.entries(result).map(([videoId, metadata]) => metadataToVideoMetadata(metadata));
 }
 
 export async function getAllVideosForDateRange(
     category: string, startDate: string | null, endDate: string | null
-): Promise<VideoData[]> {
+): Promise<VideoMetadata[]> {
     const constraints: QueryConstraint[] = [orderByKey()];
 
     if (startDate !== null) {
@@ -87,12 +83,12 @@ export async function getAllVideosForDateRange(
     const data: DataSnapshot = await get(query(child(dbPublicRoot, `${category}/index/date`), ...constraints));
     const videosByDate: {
         [dateString: string]: {
-            [videoId: string]: VideoData
+            [videoId: string]: VideoMetadata
         }
     } = data.val();
 
-    const videos: VideoData[] = Object.entries(videosByDate).flatMap(([dateString, videosById]) =>
-        Object.entries(videosById).map(([videoId, videoData]) => metadataToVideoData(videoData))
+    const videos: VideoMetadata[] = Object.entries(videosByDate).flatMap(([dateString, videosById]) =>
+        Object.entries(videosById).map(([videoId, videoData]) => metadataToVideoMetadata(videoData))
     );
 
     return videos;

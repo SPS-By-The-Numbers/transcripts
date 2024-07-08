@@ -1,7 +1,7 @@
 'use client'
 
 import * as Constants from 'config/constants';
-import { app } from 'utilities/firebase'
+import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { useState, useEffect } from 'react'
@@ -14,7 +14,7 @@ type SubmitStatus = {
 
 const CATEGORIES = ['sps-board', 'seattle-city-council'];
 
-const auth = getAuth(app);
+const auth = getAuth(firebaseApp);
 const provider = new GoogleAuthProvider();
 let appCheck : any = null;
 
@@ -88,8 +88,8 @@ export default function AddVideo() {
 
   if (isMounted) {
     if (!appCheck) {
-      appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8'),
+      appCheck = initializeAppCheck(firebaseApp, {
+        provider: new ReCaptchaV3Provider(Constants.RECAPTCHA_KEY),
 
         // Optional argument. If true, the SDK automatically refreshes App Check
         // tokens as needed.
