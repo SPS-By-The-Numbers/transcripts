@@ -1,16 +1,7 @@
-import * as Constants from 'config/constants';
-import * as Storage from "firebase/storage";
-import * as Transcript from 'common/transcript';
-import { getDatabase, ref } from "firebase/database";
-import { initializeApp } from "firebase/app";
+import * as Storage from 'firebase/storage';
+import { firebaseApp } from 'utilities/client/firebase';
 
-import type { StorageAccessor } from "common/storage";
-
-export const app = initializeApp(Constants.FIREBASE_CLIENT_CONFIG);
-
-export const database = getDatabase(app);
-export const dbPublicRoot = ref(database, '/transcripts/public');
-export const dbPrivateRoot = ref(database, '/transcripts/private');
+import type { StorageAccessor } from 'common/storage';
 
 // Accessor for the web client using firebase. The web client just uses
 // readonly access and in fact only reads uncompressed data as the
@@ -20,7 +11,7 @@ export const dbPrivateRoot = ref(database, '/transcripts/private');
 // can just be implemented.
 export class FirebaseWebClientStorageAccessor implements StorageAccessor {
   readBytes(path: string) : Promise<ArrayBuffer> {
-    const fileRef = Storage.ref(Storage.getStorage(), path);
+    const fileRef = Storage.ref(Storage.getStorage(firebaseApp), path);
     return Storage.getBytes(fileRef);
   }
 
@@ -45,3 +36,4 @@ export class FirebaseWebClientStorageAccessor implements StorageAccessor {
 }
 
 export const storageAccessor : StorageAccessor = new FirebaseWebClientStorageAccessor();
+

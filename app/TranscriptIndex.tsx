@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import LoadingSpinner from 'components/LoadingSpinner';
 import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
-import { VideoData, getAllVideosForDateRange } from 'utilities/metadata-utils';
+import { getAllVideosForDateRange } from 'utilities/metadata-utils';
 import { compareDesc, isValid } from 'date-fns';
 import { formatDateForPath, getVideoPath, parseDateFromPath } from 'utilities/path-utils';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { DateRange, TranscriptIndexFilterSelection } from 'components/TranscriptIndexFilter';
+import type { VideoMetadata } from 'common/params';
 
 export type DefaultFiltersByCategory = {
     [category: string]: { defaultStart: Date | null }
@@ -87,10 +88,10 @@ function useFilterParams(defaultCategory: string, defaultsByCategory: DefaultFil
 }
 
 function useFilteredVideos(filters: TranscriptIndexFilterSelection): {
-  videos: VideoData[], isLoading: boolean
+  videos: VideoMetadata[], isLoading: boolean
 } {
   const [isLoading, setLoading] = useState(true);
-  const [videos, setVideos]: [VideoData[], any] = useState([]);
+  const [videos, setVideos]: [VideoMetadata[], any] = useState([]);
 
   useEffect(() => {
     if (filters.dateRange.start === null && filters.dateRange.end === null) {
