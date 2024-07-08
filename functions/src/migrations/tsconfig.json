@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": "../..",
+    "paths": {
+      "*": ["./node_modules/*"],
+      "common/*": ["../common/*"],
+      "config/*": ["../config/*"],
+      "utils/*": ["./src/utils/*"]
+    },
+    "allowJs": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": false,
+    "strictNullChecks": true,
+    "target": "esnext",
+    "lib": ["esnext"]
+  },
+  "compileOnSave": true,
+  "include": [
+    "src/**/*.ts",
+    "../common/**/*.ts",
+    "../config/**/*.ts"
+  ]
+}

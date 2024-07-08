@@ -10,6 +10,7 @@
     "dev": "run-p build:watch dev:*",
     "dev:emulators": "firebase emulators:start --only functions",
     "lint": "eslint --ext .js,.ts .",
+    "run:migration": "tsx --tsconfig src/migrations/tsconfig.json",
     "serve": "npm run build && firebase emulators:start --only functions,storage,database",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
@@ -52,6 +53,7 @@
     "jest": "^29.7.0",
     "npm-run-all": "^4.1.5",
     "ts-jest": "^29.1.4",
+    "tsx": "^4.16.2",
     "typescript": "^5.5.2"
   },
   "private": true
