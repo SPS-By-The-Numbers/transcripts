@@ -1,7 +1,13 @@
 import { getCategoryPublicDb } from 'utils/firebase';
-
-import type { CategoryId, VideoId } from 'common/params';
 import { parseISO } from 'date-fns';
+
+import type { CategoryId, VideoId, VideoMetadata } from 'common/params';
+
+export type MatchOptions = {
+  limit? : number;
+  startDate? : Date;
+  endDate? : Date;
+};
 
 export type StoredMetadata = {
   title: string;
@@ -12,6 +18,16 @@ export type StoredMetadata = {
 };
 
 export const PUBLISHED_INDEX_PATH = 'index/published';
+
+function metadataToVideoMetadata(entry: StoredMetadata): VideoMetadata {
+    return {
+        videoId: entry.video_id,
+        title: entry.title,
+        description: entry.description,
+        publishDate: parseISO(entry.publish_date),
+        channelId: entry.channel_id
+    };
+}
 
 export function makePublishedIndexKey(metadata : StoredMetadata) {
   return `${metadata.publish_date};${metadata.video_id}`;
@@ -45,4 +61,31 @@ export async function setMetadata(category : CategoryId, metadata : StoredMetada
   }
 
   return false;
+}
+
+function toDateString(date: Date) {
+  return date.toISOString().split('T')[0];
+}
+
+export async function getMatchingMetdata(category: CategoryId, matchOptions : MatchOptions) : Promise<VideoMetadata[]> {
+  // Two modes of operation: With dates or without.
+  // If there are no dates, the most recent LIMIT_RESULTS is returned.
+  // If there are are dates, there is no limit assumed unless one is passed in.
+  let query = getCategoryPublicDb(category, PUBLISHED_INDEX_PATH).orderByKey();
+  console.log('hi', matchOptions);
+  if (matchOptions.startDate) {
+    console.log('starting', toDateString(matchOptions.startDate));
+    query = query.startAt(toDateString(matchOptions.startDate));
+    console.log('end starting');
+  }
+  if (matchOptions.endDate) {
+    console.log('ending', toDateString(matchOptions.endDate));
+    query = query.endAt(toDateString(matchOptions.endDate));
+    console.log('end ending');
+  }
+  if (matchOptions.limit) {
+    query = query.limitToLast(matchOptions.limit);
+  }
+  const result = (await query.once("value")).val() as Array<StoredMetadata>;
+  return Object.values(result).map(v => metadataToVideoMetadata(v));
 }
