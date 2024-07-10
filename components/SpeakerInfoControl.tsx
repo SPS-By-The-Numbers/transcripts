@@ -6,11 +6,11 @@ import * as Constants from 'config/constants'
 import CreatableSelect from 'react-select/creatable'
 import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/speaker-info'
+import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/client/speaker'
 import { fetchEndpoint } from 'utilities/client/endpoint'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
-import { toSpeakerNum } from "utilities/speaker-info"
+import { toSpeakerNum } from "utilities/client/speaker"
 import { useEffect, useState } from 'react'
 import { useTranscriptContext } from 'components/TranscriptControlProvider'
 

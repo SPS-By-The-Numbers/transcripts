@@ -1,8 +1,9 @@
 'use client'
  
-import { SpeakerInfoData } from 'utilities/speaker-info'
 import { YouTubePlayer } from 'react-youtube'
 import { createContext, useContext, useState } from 'react'
+
+import type { SpeakerInfoData } from 'utilities/client/speaker'
 
 export type TranscriptControlContext = {
   speakerInfo: SpeakerInfoData;

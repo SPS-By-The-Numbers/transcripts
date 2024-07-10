@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranscriptContext } from 'components/TranscriptControlProvider'
-import { getSpeakerAttributes } from 'utilities/speaker-info'
+import { getSpeakerAttributes } from 'utilities/client/speaker'
 
 type SpeakerBubbleTitleParams = {
   speakerNum : number;

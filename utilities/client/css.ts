@@ -15,3 +15,8 @@ export function fromHhmmss(hhmmss: string): number {
     const parts = hhmmss.split(':');
     return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
 }
+
+export function toSpeakerColorClass(speakerNum: number) {
+  return `c-${speakerNum % 7}`;
+}
+
