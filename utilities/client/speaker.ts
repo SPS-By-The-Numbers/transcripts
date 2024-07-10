@@ -37,10 +37,10 @@ export function toSpeakerKey(speakerNum: number) {
 }
 
 export function getSpeakerAttributes(speakerNum : number, speakerInfo : SpeakerInfoData ) {
-  const data = speakerInfo ? speakerInfo[speakerNum] : undefined;
+  const data = speakerInfo?.[speakerNum];
 
   const name = data?.name || toSpeakerKey(speakerNum);
-  const tags = data?.tags || new Set<string>();
+  const tags = data?.tags ? new Set<string>(data.tags) : new Set<string>();
 
   const colorClass = toSpeakerColorClass(speakerNum);
 
