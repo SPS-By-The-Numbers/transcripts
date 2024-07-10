@@ -78,7 +78,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     if (newName && !existingNames.hasOwnProperty(newName)) {
       const newExistingNames = Object.assign({}, existingNames);
-      const recentTags = info.tags ? Array.from(info.tags) : [];
+      const recentTags = info.tags || [];
       newExistingNames[newName] = { recentTags };
       // TODO: Extract all these isEquals() checks.
       if (!isEqual(existingNames, newExistingNames)) {
@@ -133,10 +133,10 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
       newTags.add(option.value);
       newExistingTags.add(option.value);
     }
-    info.tags = newTags;
+    info.tags = Array.from(newTags);
     setSpeakerInfo(newSpeakerInfo);
 
-    if (!isEqual(existingTags, newExistingTags)) {
+    if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
       setExistingTags(newExistingTags);
     }
   }
@@ -185,9 +185,10 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   }
 
   const tagOptions : OptionType[] = [];
-  for (const tag of Array.from(existingTags.keys()).sort()) {
+  for (const tag of existingTags.sort()) {
     tagOptions.push({label: tag, value: tag});
   }
+  console.log(tagOptions);
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];
