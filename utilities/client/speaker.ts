@@ -1,5 +1,7 @@
-import { getCategoryPublicData } from "utilities/metadata-utils"
+import * as Database from 'firebase/database';
+import { dbPublicRoot } from 'utilities/client/firebase';
 
+import type { CategoryId } from 'common/params';
 import type { SpeakerInfoData } from 'utilities/speaker-info'
 
 type SpeakerControlInfo = {
@@ -12,6 +14,10 @@ type DbInfoEntry ={
   name : string;
   tags : Array<string>;
 };
+
+async function getCategoryPublicData(category: CategoryId, path: string): Promise<any> {
+    return (await Database.get(Database.child(dbPublicRoot, `${category}/${path}`))).val();
+}
 
 export async function loadSpeakerControlInfo(category: string, videoId: string) : Promise<SpeakerControlInfo> {
   const videoData = await getCategoryPublicData(category, `v/${videoId}`);

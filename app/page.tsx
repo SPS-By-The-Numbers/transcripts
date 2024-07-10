@@ -1,25 +1,60 @@
 import * as Constants from 'config/constants';
 import TranscriptIndex from './TranscriptIndex';
-import { getLastDateForCategory } from 'utilities/metadata-utils';
-import { startOfMonth, subMonths } from 'date-fns';
+import { encodeDate, decodeDate } from 'common/params';
+import { fetchEndpoint } from 'utilities/client/endpoint';
+import { parseISO } from 'date-fns';
 
-import type { DefaultFiltersByCategory } from './TranscriptIndex';
+import type { DateRange } from 'components/TranscriptIndexFilter';
 
-const defaultCategory = 'sps-board';
+const mostRecentLimit = 50;
 
-export default async function Index() {
-  const defaultsByCategory: DefaultFiltersByCategory = {};
+type SearchParams = {
+  [key: string]: string | string[] | undefined;
+};
 
-  for (const category of Constants.ALL_CATEGORIES) {
-    const lastDate: Date | null = await getLastDateForCategory(defaultCategory);
-    const start: Date | null = lastDate !== null ? startOfMonth(subMonths(lastDate, 1)) : null
+export default async function Index({ searchParams } : { searchParams?: SearchParams }) {
 
-    defaultsByCategory[category] = { defaultStart: start };
+  const category = (searchParams?.category && typeof searchParams.category === 'string') ? searchParams.category : Constants.DEFAULT_CATEGORY;
+  const parameters : Record<string, string> = { category };
+  const range : DateRange = { start: null, end: null };
+
+  // Extract dates. Reencode before sending to metadata endpoint to sanitize.
+  if (searchParams?.start && typeof(searchParams.start) === 'string') {
+    range.start = decodeDate(searchParams.start);
+    parameters['start'] = encodeDate(range.start);
+  }
+
+  if (searchParams?.end && typeof(searchParams.end) === 'string') {
+    range.end = decodeDate(searchParams.end);
+    parameters['end'] = encodeDate(range.end);
+  }
+
+  // If no start or end, grab the most recent videos to RecentLimit
+  if (!searchParams?.start && !searchParams?.end) {
+    parameters.limit = mostRecentLimit.toString();
+  }
+
+  const response = await fetchEndpoint('metadata', 'GET', parameters);
+  let videos : Array<any> = [];
+  let banner = <></>;
+  if (response.ok && response.data.length > 0) {
+    videos = response.data.map(v => ({
+        videoId: v.videoId,
+        title: v.title,
+        publishDate: v.publishDate}));
+    // No dates huh? Set the start to oldest video.
+    if (parameters.limit) {
+      banner = (<p>Showing first {mostRecentLimit} videos. Change Start Date to find older.</p>);
+      range.start = parseISO(videos[0].publishDate);
+    }
   }
 
   return (
-    <main className="mx-5 my-5 max-w-screen-md">
-      <TranscriptIndex defaultCategory={defaultCategory} defaultsByCategory={defaultsByCategory} />
-    </main>
+    <>
+      { banner }
+      <main className="mx-5 my-5 max-w-screen-md">
+        <TranscriptIndex category={category} videos={videos} range={range}/>
+      </main>
+    </>
   );
 }

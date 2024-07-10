@@ -1,3 +1,5 @@
+import * as Constants from 'config/constants';
+
 import { MenuItem, Select } from '@mui/material';
 import { DatePicker } from "@mui/x-date-pickers";
 import { isAfter, isBefore } from "date-fns";
@@ -57,16 +59,12 @@ export default function TranscriptIndexFilter({selection, onFilterChange}: Trans
     handleDateRangeChange(newRange);
   }
 
-  function handleDateRangeChange(range: DateRange): void {
-    onFilterChange({...selection, dateRange: range});
+  function handleDateRangeChange(dateRange: DateRange): void {
+    onFilterChange({...selection, dateRange});
   }
 
-  const options = [
-    { value: 'sps-board', label: 'SPS Board' },
-    { value: 'seattle-city-council', label: 'Seattle City Council' }
-  ].map(({ value, label }) => <MenuItem key={value} value={value}>{label}</MenuItem>);
-
-  // const selectedOption = options.find(option => option.value === selection.category);
+  const options = Object.entries(Constants.CATEGORY_CHANNEL_MAP).map(
+    ([category, info]) => (<MenuItem key={category} value={category}>{info.name}</MenuItem>));
 
   return <search className="flex flex-row space-x-5">
     <Select

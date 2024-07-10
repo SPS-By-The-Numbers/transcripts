@@ -1,6 +1,6 @@
+import { decodeDate } from 'common/params';
 import { getCategoryPublicDb, jsonOnRequest } from "./utils/firebase";
 import { makeResponseJson } from "./utils/response";
-import { parseISO } from 'date-fns';
 import { sanitizeCategory } from "./utils/path";
 import { getMatchingMetdata } from "./utils/metadata";
 
@@ -31,11 +31,14 @@ async function getMetadata(req, res) {
   }
 
   // Parse into dates as a validation step.
-  if (req.query.start_date) {
-    matchOptions.startDate = parseISO(req.query.start_date);
+  if (req.query.start) {
+    matchOptions.startDate = decodeDate(req.query.start);
   }
-  if (req.query.end_date) {
-    matchOptions.endDate = parseISO(req.query.end_date);
+  if (req.query.end) {
+    const endDate = decodeDate(req.query.end);
+    // Move to day after to get all before.
+    endDate.setDate(endDate.getDate() + 1);
+    matchOptions.endDate = endDate;
   }
 
   // Otherwise return list metadata for the category based on search params.

@@ -40,6 +40,7 @@ export function splitPublishedIndexKey(key : string) : [Date, VideoId] {
 }
 
 export async function indexMetadata(category : CategoryId, metadata : StoredMetadata) {
+  console.log("Writing index for ", metadata.video_id);
   getCategoryPublicDb(category, PUBLISHED_INDEX_PATH, makePublishedIndexKey(metadata)).set(metadata);
 }
 
@@ -48,6 +49,8 @@ export async function setMetadata(category : CategoryId, metadata : StoredMetada
     console.error("Invalid metadata: ", metadata);
     return false;
   }
+
+  console.log("Setting metadata for ", metadata.video_id);
 
   try {
     let promises : Array<Promise<unknown>> = [];
@@ -68,24 +71,24 @@ function toDateString(date: Date) {
 }
 
 export async function getMatchingMetdata(category: CategoryId, matchOptions : MatchOptions) : Promise<VideoMetadata[]> {
+  console.log("Finding matches for ", matchOptions);
+
   // Two modes of operation: With dates or without.
   // If there are no dates, the most recent LIMIT_RESULTS is returned.
   // If there are are dates, there is no limit assumed unless one is passed in.
   let query = getCategoryPublicDb(category, PUBLISHED_INDEX_PATH).orderByKey();
-  console.log('hi', matchOptions);
   if (matchOptions.startDate) {
-    console.log('starting', toDateString(matchOptions.startDate));
     query = query.startAt(toDateString(matchOptions.startDate));
-    console.log('end starting');
   }
   if (matchOptions.endDate) {
-    console.log('ending', toDateString(matchOptions.endDate));
-    query = query.endAt(toDateString(matchOptions.endDate));
-    console.log('end ending');
+    query = query.endBefore(toDateString(matchOptions.endDate));
   }
   if (matchOptions.limit) {
     query = query.limitToLast(matchOptions.limit);
   }
   const result = (await query.once("value")).val() as Array<StoredMetadata>;
+  if (!result) {
+    return [];
+  }
   return Object.values(result).map(v => metadataToVideoMetadata(v));
 }
