@@ -9,6 +9,9 @@ import { getMetadata } from "utilities/client/metadata"
 import { loadSpeakerControlInfo } from 'utilities/client/speaker'
 import { storageAccessor } from "utilities/client/storage"
 
+export const dynamic = 'force-static';
+export const revalidate = 600;
+
 export type VideoParams = {
     category: string,
     prefix: string,

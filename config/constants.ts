@@ -27,16 +27,21 @@ export const WHISPERX_ARCHIVE_SUBDIR = "archive/whisperx";
 export const CATEGORY_CHANNEL_MAP = {
   'sps-board': {
     id: "UC07MVxpRKdDJmqwWDGYqotA",
+    name: 'SPS Board',
     type: 'channel',
   },
   'seattle-city-council': {
     id: "PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f",
+    name: 'Seattle City Council',
     type: 'playlist',
   }
 };
 
 // List of all categories.
 export const ALL_CATEGORIES = Object.keys(CATEGORY_CHANNEL_MAP);
+
+// Default category to use in UI.
+export const DEFAULT_CATEGORY = 'sps-board';
 
 // Storage bucket for whisperx archives. Can be cheaper/slower storage class.
 export const STORAGE_BUCKET = "sps-by-the-numbers.appspot.com";
