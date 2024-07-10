@@ -133,7 +133,6 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
       newTags.add(option.value);
       newExistingTags.add(option.value);
     }
-    info.tags = Array.from(newTags);
     setSpeakerInfo(newSpeakerInfo);
 
     if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
@@ -185,7 +184,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   }
 
   const tagOptions : OptionType[] = [];
-  for (const tag of existingTags.sort()) {
+  for (const tag of Array.from(existingTags).sort()) {
     tagOptions.push({label: tag, value: tag});
   }
   console.log(tagOptions);

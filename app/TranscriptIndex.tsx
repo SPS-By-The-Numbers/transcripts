@@ -7,7 +7,7 @@ import { compareDesc, isValid } from 'date-fns';
 import { encodeDate } from 'common/params';
 import { getVideoPath } from 'common/paths';
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import type { DateRange, TranscriptIndexFilterSelection } from 'components/TranscriptIndexFilter';
 import type { VideoMetadata, VideoId } from 'common/params';
@@ -28,7 +28,7 @@ type Props = {
   range: DateRange;
 };
 
-export default async function TranscriptIndex({ category, videos, range }: Props) {
+export default function TranscriptIndex({ category, videos, range }: Props) {
   let isLoading = false;
 
   const pathName: string = usePathname();
