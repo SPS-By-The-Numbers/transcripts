@@ -5,7 +5,7 @@ import LoadingSpinner from 'components/LoadingSpinner';
 import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
 import { compareDesc, isValid } from 'date-fns';
 import { encodeDate } from 'common/params';
-import { getVideoPath } from 'utilities/path-utils';
+import { getVideoPath } from 'common/paths';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
