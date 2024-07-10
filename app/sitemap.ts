@@ -1,6 +1,6 @@
 import * as Constants from 'config/constants';
 import { MetadataRoute } from 'next';
-import { getAllVideosForCategory } from 'utilities/metadata-utils';
+import { fetchEndpoint } from 'utilities/client/endpoint';
 import { getVideoPath } from 'utilities/path-utils';
 
 type ChangeFrequency = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
@@ -19,8 +19,16 @@ function buildUrl(relativePath): string {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const videoPages: SiteMapEntry[] = [];
 
-  for (const category of Constants.ALL_CATEGORIES) {
-    const videos = await getAllVideosForCategory(category);
+  const results = await Promise.all(Constants.ALL_CATEGORIES.map(
+    category => fetchEndpoint('metadata', 'GET', {category})));
+  for (const [i, category] of Constants.ALL_CATEGORIES.entries()) {
+    const result = results[i];
+    if (!result.ok) {
+      console.error("Bad response: ", result);
+      continue;
+    }
+
+    const videos = result.data;
 
     videoPages.push(...videos.map(v => ({
       url: buildUrl(getVideoPath(category, v.videoId)),

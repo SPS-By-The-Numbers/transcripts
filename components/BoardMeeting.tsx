@@ -2,12 +2,12 @@ import BoardMeetingControl from 'components/BoardMeetingControl';
 import LanguageNav from 'components/LanguageNav';
 import SpeakerBubble from 'components/SpeakerBubble';
 import TranscriptHeader from 'components/TranscriptHeader';
-import { UnknownSpeakerNum } from 'utilities/speaker-info';
+import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
 import type { DiarizedTranscript } from 'common/transcript';
 import type { ReactNode } from 'react';
-import type { SpeakerInfoData } from 'utilities/speaker-info';
+import type { SpeakerInfoData } from 'utilities/client/speaker';
 
 type BoardMeetingParams = {
   metadata: any,

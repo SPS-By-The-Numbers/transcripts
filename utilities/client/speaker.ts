@@ -1,49 +1,56 @@
-import * as Database from 'firebase/database';
-import { dbPublicRoot } from 'utilities/client/firebase';
+import { fetchEndpoint } from 'utilities/client/endpoint';
+import { toSpeakerColorClass } from 'utilities/client/css';
 
-import type { CategoryId } from 'common/params';
-import type { SpeakerInfoData } from 'utilities/speaker-info'
+import type { CategoryId, VideoId } from 'common/params';
 
-type SpeakerControlInfo = {
+export type SpeakerInfoData = {
+  [key: number] : {name: string, tags: Set<string>, color: string};
+};
+
+export type SpeakerControlInfo = {
   speakerInfo: SpeakerInfoData,
   existingNames: object,
   existingTags: Set<string>,
 };
 
-type DbInfoEntry ={
-  name : string;
-  tags : Array<string>;
-};
+export const UnknownSpeakerNum : number = 99;
 
-async function getCategoryPublicData(category: CategoryId, path: string): Promise<any> {
-    return (await Database.get(Database.child(dbPublicRoot, `${category}/${path}`))).val();
+export function toSpeakerNum(speakerKey: string) {
+  if (!speakerKey) {
+    return UnknownSpeakerNum;
+  }
+
+  const parts = speakerKey.split('_');
+  if (parts.length < 2) {
+    console.error('Invalid speakerKey', speakerKey, parts);
+    return UnknownSpeakerNum;
+  }
+  return Number(speakerKey.split('_')[1]);
 }
 
-export async function loadSpeakerControlInfo(category: string, videoId: string) : Promise<SpeakerControlInfo> {
-  const videoData = await getCategoryPublicData(category, `v/${videoId}`);
-  const existingOptions = await getCategoryPublicData(category, 'existing');
-
-  const speakerInfo = {};
-  if (videoData && videoData.speakerInfo) {
-    for (const [k,v] of Object.entries(videoData.speakerInfo)) {
-      const entry = v as DbInfoEntry;
-      const n = entry?.name;
-      const t = entry?.tags;
-      speakerInfo[k] = speakerInfo[k] || {};
-      if (n && speakerInfo[k].name === undefined) {
-        speakerInfo[k].name = n;
-      }
-      if (t && speakerInfo[k].tags === undefined) {
-        speakerInfo[k].tags = new Set<string>(t);
-      }
-    }
+export function toSpeakerKey(speakerNum: number) {
+  if (speakerNum < 10) {
+    return `SPEAKER_0${speakerNum}`;
   }
 
-  const existingNames = {...existingOptions?.names};
-  const existingTags = new Set<string>();
-  if (existingOptions?.tags) {
-    Object.keys(existingOptions.tags).forEach(tag => existingTags.add(tag));
-  }
+  return `SPEAKER_${speakerNum}`;
+}
 
-  return {speakerInfo, existingNames, existingTags};
+export function getSpeakerAttributes(speakerNum : number, speakerInfo : SpeakerInfoData ) {
+  const data = speakerInfo ? speakerInfo[speakerNum] : undefined;
+
+  const name = data?.name || toSpeakerKey(speakerNum);
+  const tags = data?.tags || new Set<string>();
+
+  const colorClass = toSpeakerColorClass(speakerNum);
+
+  return { name, colorClass, tags };
+}
+
+export async function getSpeakerControlInfo(category: CategoryId, videoId: VideoId) : Promise<SpeakerControlInfo> {
+  const response = await fetchEndpoint('speakerinfo', 'GET', {category, videoId});
+  if (!response.ok) {
+    throw response;
+  }
+  return response.data;
 }

@@ -1,5 +1,5 @@
-import SpeakerBubbleTitle from 'components/SpeakerBubbleTitle'
-import { toColorClass } from 'utilities/speaker-info'
+import SpeakerBubbleTitle from 'components/SpeakerBubbleTitle';
+import { toSpeakerColorClass } from 'utilities/client/css';
 
 type SpeakerBubbleParams = {
   speakerNum : number;
@@ -8,7 +8,7 @@ type SpeakerBubbleParams = {
 
 export default function SpeakerBubble({speakerNum, children} : SpeakerBubbleParams) {
   return (
-    <article className={`b ${toColorClass(speakerNum)}`}>
+    <article className={`b ${toSpeakerColorClass(speakerNum)}`}>
       <SpeakerBubbleTitle speakerNum={speakerNum} />
       { children }
     </article>

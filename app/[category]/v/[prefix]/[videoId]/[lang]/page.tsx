@@ -3,14 +3,14 @@ import BoardMeeting from 'components/BoardMeeting'
 import TranscriptControlProvider from 'components/TranscriptControlProvider'
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
-import { Storage } from '@google-cloud/storage';
 import { SupportedLanguages } from 'common/languages';
 import { getMetadata } from "utilities/client/metadata"
-import { loadSpeakerControlInfo } from 'utilities/client/speaker'
+import { getSpeakerControlInfo } from 'utilities/client/speaker'
 import { storageAccessor } from "utilities/client/storage"
 
+// Really want these pages to be cacheable.
 export const dynamic = 'force-static';
-export const revalidate = 600;
+export const revalidate = 3600;
 
 export type VideoParams = {
     category: string,
@@ -62,14 +62,13 @@ export default async function Index({params}: {params: VideoParams}) {
   // Ensure English is the last.
   languageOrder.push('eng');
 
-  // Handle the fact that transcript files for english still use the 2-letter ISO-639 code.
   const loadData = new Array<Promise<any>>;
-  loadData.push(getMetadata(params.category, params.videoId));
-  loadData.push(DiarizedTranscript.fromStorage(
-      storageAccessor, params.category, params.videoId, languageOrder));
-  loadData.push(loadSpeakerControlInfo(params.category, params.videoId));
-
-  const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all(loadData);
+  const [metadata, diarizedTranscript, speakerControlInfo] = await Promise.all([
+      getMetadata(params.category, params.videoId),
+      DiarizedTranscript.fromStorage(
+          storageAccessor, params.category, params.videoId, languageOrder),
+      getSpeakerControlInfo(params.category, params.videoId)
+    ]);
 
   return (
     <TranscriptControlProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
