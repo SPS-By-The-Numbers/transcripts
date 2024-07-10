@@ -1,7 +1,7 @@
 import * as Constants from 'config/constants';
 import { MetadataRoute } from 'next';
 import { fetchEndpoint } from 'utilities/client/endpoint';
-import { getVideoPath } from 'utilities/path-utils';
+import { getVideoPath } from 'common/paths';
 
 type ChangeFrequency = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 

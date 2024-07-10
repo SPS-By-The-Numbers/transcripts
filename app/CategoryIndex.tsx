@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getCategoryPath } from '../utilities/path-utils';
+import { getCategoryPath } from '../common/paths';
 
 type Props = {
     categories: string[]
