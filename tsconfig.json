@@ -5,6 +5,8 @@
       "dom.iterable",
       "esnext"
     ],
+
+    "baseUrl": ".",
     "paths": {
       "styles/*": ["./styles/*"],
       "components/*": ["./components/*"],
