@@ -15,7 +15,7 @@ import type { WhisperXTranscript } from 'common/whisperx';
 ///////////////////
 
 // Use array to compress size of keys in json serialization.
-export type SentenceMetadata = [
+export type SentenceInfo = [
   SegmentId,  // Id string that is unique to one transcript.
   SpeakerId,  // Number for the speaker.
   number,  // Start time
@@ -27,16 +27,16 @@ export type TranscriptVersion = 1;
 export type TranscriptData = {
   version : TranscriptVersion;
   language : string;
-  sentenceMetadata : SentenceMetadata[];
+  sentenceInfo : SentenceInfo[];
 };
 
 export type SentenceTable = {
   [id : string] : string;
 };
 
-export type MetadataBySpeaker = {
+export type SentenceInfoBySpeaker = {
   speaker: number;
-  sentenceMetadata : SentenceMetadata[];
+  sentenceInfo : SentenceInfo[];
 };
 
 export type SpeakerNameMap = {
@@ -62,7 +62,7 @@ export const UnknownSpeakerNum : number = 99;
 const EMPTY_TRANSIT_DATA : TranscriptData = {
   version: 1,
   language: 'eng',
-  sentenceMetadata: [],
+  sentenceInfo: [],
 };
 
 ///////////////////
@@ -73,7 +73,7 @@ export class DiarizedTranscript {
   readonly videoId: VideoId;
   readonly transcriptData: TranscriptData;
   readonly originalLanguage: Iso6393Code;
-  readonly sentenceMetadata: SentenceMetadata[];
+  readonly sentenceInfo: SentenceInfo[];
   readonly languageToSentenceTable: LanguageToSentenceTable;
   readonly loadErrors: string[];
 
@@ -86,7 +86,7 @@ export class DiarizedTranscript {
     this.category = category;
     this.videoId = videoId;
     this.originalLanguage = transcriptData.language;
-    this.sentenceMetadata = transcriptData.sentenceMetadata;
+    this.sentenceInfo = transcriptData.sentenceInfo;
     this.languageToSentenceTable = languageToSentenceTable;
     this.loadErrors = loadErrors;
   }
@@ -148,7 +148,7 @@ export class DiarizedTranscript {
   static fromWhisperX(category: CategoryId, videoId: VideoId,
       whisperXTranscript : WhisperXTranscript) : DiarizedTranscript {
     // Accumualted output.
-    const sentenceMetadata = new Array<SentenceMetadata>;
+    const sentenceInfo = new Array<SentenceInfo>;
     const sentences = new Array<string>;
 
     // Grouping variables.
@@ -170,7 +170,7 @@ export class DiarizedTranscript {
       if (newSpeaker !== curSpeakerNum) {
         if (words.length > 0) {
           const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
-          sentenceMetadata.push(...result.sentenceMetadata);
+          sentenceInfo.push(...result.sentenceInfo);
           sentences.push(...result.sentences);
         }
 
@@ -194,7 +194,7 @@ export class DiarizedTranscript {
 
     if (words.length > 0) {
       const result = toSentences(curSpeakerNum, sentences.length, words, wordStarts, wordEnds);
-      sentenceMetadata.push(...result.sentenceMetadata);
+      sentenceInfo.push(...result.sentenceInfo);
       sentences.push(...result.sentences);
     }
 
@@ -204,7 +204,7 @@ export class DiarizedTranscript {
     const transcriptData : TranscriptData = {
       version: 1,
       language: languageInFile,
-      sentenceMetadata
+      sentenceInfo
     };
     const sentenceTable : SentenceTable = {};
     for (const [id, text] of sentences.entries()) {
@@ -221,13 +221,13 @@ export class DiarizedTranscript {
     return this.languageToSentenceTable[language]?.[segmentId] || `<missing ${language}-${segmentId}>`;
   }
 
-  groupMetadataBySpeaker(speakerNames : SpeakerNameMap = {}) : MetadataBySpeaker[] {
-    const result = new Array<MetadataBySpeaker>;
-    for (const metadata of this.sentenceMetadata) {
+  groupSentenceInfoBySpeaker(speakerNames : SpeakerNameMap = {}) : SentenceInfoBySpeaker[] {
+    const result = new Array<SentenceInfoBySpeaker>;
+    for (const metadata of this.sentenceInfo) {
       if (result.at(-1)?.speaker !== metadata[1]) {
-        result.push({speaker: metadata[1], sentenceMetadata: new Array<SentenceMetadata>});
+        result.push({speaker: metadata[1], sentenceInfo: new Array<SentenceInfo>});
       }
-      result.at(-1)?.sentenceMetadata.push(metadata);
+      result.at(-1)?.sentenceInfo.push(metadata);
     }
     return result;
   }
@@ -248,14 +248,14 @@ export class DiarizedTranscript {
   }
 
   async writeDiarizedTranscript(storageAccessor: StorageAccessor) : Promise<unknown> {
-    if (!this.sentenceMetadata) {
-      throw "Missing sentenceMetadata";
+    if (!this.sentenceInfo) {
+      throw "Missing sentenceInfo";
     }
 
     const transcriptData : TranscriptData = {
       version: 1,
       language: this.originalLanguage,
-      sentenceMetadata: this.sentenceMetadata,
+      sentenceInfo: this.sentenceInfo,
     };
 
     return storageAccessor.writeBytesGzip(
@@ -304,7 +304,7 @@ function toSentences(speaker : SpeakerId, firstId : number, words : string[], wo
      });
   let totalWords = 0;
 
-  const sentenceMetadata = new Array<SentenceMetadata>;
+  const sentenceInfo = new Array<SentenceInfo>;
   const sentences = new Array<string>;
   for (const [id, text] of sentenceTexts.entries()) {
     const numWords = (text.match(/ /g)||[]).length + 1;
@@ -312,12 +312,12 @@ function toSentences(speaker : SpeakerId, firstId : number, words : string[], wo
     const end = wordEnds[totalWords + numWords - 1];
     totalWords += numWords;
 
-    const metdata : SentenceMetadata = [(id + firstId).toString(), speaker, start, end];
-    sentenceMetadata.push(metdata);
+    const metdata : SentenceInfo = [(id + firstId).toString(), speaker, start, end];
+    sentenceInfo.push(metdata);
     sentences.push(text);
   }
 
-  return {sentenceMetadata, sentences};   
+  return {sentenceInfo, sentences};   
 }
 
 function tsvToSentenceTable(tsv : string) : SentenceTable {
