@@ -59,7 +59,7 @@ const SMALL_TS_INCREMENT_S = WHISPERX_GRANULARITY_S / 100;
 
 export const UnknownSpeakerNum : number = 99;
 
-const EMPTY_TRANSIT_DATA : TranscriptData = {
+const EMPTY_TRASCRIPT_DATA : TranscriptData = {
   version: 1,
   language: 'eng',
   sentenceInfo: [],
@@ -105,13 +105,21 @@ export class DiarizedTranscript {
     const [transcriptDataResult, ...sentenceTableResult] = await Promise.allSettled(loadPromises);
 
     if (transcriptDataResult.status === 'rejected') {
-      return new DiarizedTranscript(category, videoId, EMPTY_TRANSIT_DATA, {},
+      return new DiarizedTranscript(category, videoId, EMPTY_TRASCRIPT_DATA, {},
           ["Cannout load transcript Data"]);
     }
 
     const decoder = new TextDecoder('utf-8');
     const errors : string[] = [];
-    const transcriptData : TranscriptData = JSON.parse(decoder.decode(transcriptDataResult.value));
+    const rawInput = JSON.parse(decoder.decode(transcriptDataResult.value));
+    if (rawInput.sentenceMetadata) {
+      // TODO: Fix diarized files.
+      // If this executes, there's an old version of the data file.
+      rawInput.sentenceInfo = rawInput.sentenceMetadata;
+      delete rawInput.sentenceMetadata;
+    }
+    // TODO: Use Json schema to check for data corruption here.
+    const transcriptData : TranscriptData = rawInput as TranscriptData;
 
     // Process the language table.
     const languageToSentenceTable : LanguageToSentenceTable = {};
@@ -223,11 +231,11 @@ export class DiarizedTranscript {
 
   groupSentenceInfoBySpeaker(speakerNames : SpeakerNameMap = {}) : SentenceInfoBySpeaker[] {
     const result = new Array<SentenceInfoBySpeaker>;
-    for (const metadata of this.sentenceInfo) {
-      if (result.at(-1)?.speaker !== metadata[1]) {
-        result.push({speaker: metadata[1], sentenceInfo: new Array<SentenceInfo>});
+    for (const sentenceInfo of this.sentenceInfo) {
+      if (result.at(-1)?.speaker !== sentenceInfo[1]) {
+        result.push({speaker: sentenceInfo[1], sentenceInfo: new Array<SentenceInfo>});
       }
-      result.at(-1)?.sentenceInfo.push(metadata);
+      result.at(-1)?.sentenceInfo.push(sentenceInfo);
     }
     return result;
   }

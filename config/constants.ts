@@ -29,11 +29,13 @@ export const CATEGORY_CHANNEL_MAP = {
     id: "UC07MVxpRKdDJmqwWDGYqotA",
     name: 'SPS Board',
     type: 'channel',
+    language: 'eng',
   },
   'seattle-city-council': {
     id: "PLhfhh0Ed-ZC2d0zuuzyCf1gaPaKfH4k4f",
     name: 'Seattle City Council',
     type: 'playlist',
+    language: 'eng',
   }
 };
 
@@ -60,6 +62,10 @@ export const FIREBASE_CLIENT_CONFIG = {
 
 // Used by appcheck.
 export const RECAPTCHA_KEY = '6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8';
+
+// API key for read-only meilisearch.
+export const MEILI_KEY = isProduction ? 'fcb72b464bc4d53e1e6b69a315607874daf5e9880b5f41c1bda96a4172dc3518' : 'a80c9ab03478c9b34433267143829080d8e619fedcfb376e9ad3fba559482d8b'; 
+export const MEILI_ENDPOINT = isProduction ? makeEndpointUri('meilisearch') : 'http://127.0.0.1:7700';
 
 // Generate URLs for use in fetch() calls based on envrionment type.
 const ENDPOINT_NAMES = [
