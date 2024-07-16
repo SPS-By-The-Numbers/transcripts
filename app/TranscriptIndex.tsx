@@ -6,7 +6,6 @@ import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
 import { compareDesc, isValid } from 'date-fns';
 import { encodeDate } from 'common/params';
 import { getVideoPath } from 'common/paths';
-import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import type { DateRange, TranscriptIndexFilterSelection } from 'components/TranscriptIndexFilter';

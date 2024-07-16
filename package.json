@@ -75,9 +75,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "meilisearch": "^0.40.0",
     "react-query": "^3.39.3",
+    "stopwords-en": "^0.3.0",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
-    "type-fest": "^4.18.2",
-    "why-is-node-running": "^3.2.0"
+    "type-fest": "^4.18.2"
   }
 }

@@ -87,7 +87,7 @@ async function downloadTranscript(req, res) {
   const diarizedTranscript = await DiarizedTranscript.fromStorage(getStorageAccessor(), category, videoId, ['eng']);
   console.log(diarizedTranscript);
   const sentences = new Array<string>;
-  for (const [_, segmentId] of diarizedTranscript.sentenceMetadata) {
+  for (const [_, segmentId] of diarizedTranscript.sentenceInfo) {
     sentences.push(diarizedTranscript.languageToSentenceTable['eng'][segmentId]);
   }
   res.status(200).send(makeResponseJson(true, 'transcript', {sentences}));
