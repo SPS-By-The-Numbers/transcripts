@@ -71,6 +71,12 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
   
   return (<>
     <Select
+      styles={{
+        control: (baseStyles, state) => ({
+          ...baseStyles,
+          backgroundColor: state.isFocused ? 'grey' : 'rgb(67,130,247)',
+        }),
+      }}
       id={name}
       value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
       options={ LangOptions }
