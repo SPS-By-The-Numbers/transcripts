@@ -75,13 +75,12 @@ function isValidSort(sortType: string) {
       || sortType === 'publishDate:desc');
 }
 
-function doSearch(category : string, query : string, sortType : string, setResults) {
+function doSearch(category : string, query : string, sortType : string, groupType: string, setResults) {
   const indexName = `${category}-${Constants.CATEGORY_CHANNEL_MAP[category].language}`;
   const index = client.index(indexName);
 
   const sort = isValidSort(sortType) ? [ sortType ] : undefined;
-
-  index.search(query, {
+  const queryOptions = {
       attributesToSearchOn: ['text'],
       attributesToRetrieve: ['videoId', 'start', 'publishDate', 'title'],
       attributesToCrop: [ 'text' ],
@@ -90,7 +89,20 @@ function doSearch(category : string, query : string, sortType : string, setResul
       cropLength: 256,
       hitsPerPage: 1000, // Force exact for now.
       limit: 1000,
-    })
+    };
+  if (groupType === 'speaker') {
+    queryOptions['distinct'] = 'id';  // Make meilisearch return all documents individually.
+
+    // But sort them according to video and time.
+    const groupSort = ['videoId:asc', 'start:asc'];
+    if (queryOptions.sort) {
+      queryOptions.sort.push(...groupSort);
+    } else {
+      queryOptions.sort = groupSort;
+    }
+  }
+
+  index.search(query, queryOptions)
     .then((result : any) => {
       console.log(result);
       setResults(result);
@@ -136,13 +148,16 @@ function ResultList({ category, results }: ResultParams) {
   const resultElements = hits.map((h,i) => {
     return (
       <article key={i} className="mx-3 mb-2 bg-gray-300 p-2 rounded-lg">
-        <Link href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
-        {h.title}
-        </Link>
-        <br />
-        <b>Published:</b> [{formatDate(h.publishDate)}]
-        <br />
+        <p>
+          <Link className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
+          {h.title}
+          </Link>
+          <br />
+          <span className="text-sm"><b>Published:</b> {formatDate(h.publishDate)}, <b>VideoId:</b> {h.videoId}, <b>Time:</b> {toHhmmss(h.start)}</span>
+        </p>
+        <p>
         <Snippet text={h._formatted.text} matchesPosition={h._matchesPosition} />
+        </p>
       </article>
     );
   });
@@ -161,6 +176,7 @@ function ResultList({ category, results }: ResultParams) {
 export default function Search({ params }: { params: SearchParams }) {
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
+  const [groupType, setGroupType] = useState<string>("video");
   const [results, setResults] = useState<SearchResults | undefined>();
 
   return (
@@ -169,8 +185,14 @@ export default function Search({ params }: { params: SearchParams }) {
             className="flex items-center justify-center"
             onSubmit={(e) => {
               e.preventDefault();
-              doSearch(params.category, query, sortType, setResults);
+              doSearch(params.category, query, sortType, groupType, setResults);
             }}>
+          <label> Result Grouping: 
+          <select onChange={(e) => setGroupType(e.target.value)} className="m-2 border-black border-2" value={groupType}>
+            <option value="video">By Video</option>
+            <option value="speaker">By Speaker Turn</option>
+          </select>
+          </label>
           <label> Result Sort: 
           <select onChange={(e) => setSortType(e.target.value)} className="m-2 border-black border-2" value={sortType}>
             <option value="relevance">Relevance</option>

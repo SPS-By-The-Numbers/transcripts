@@ -18,8 +18,9 @@ console.log("Updating Settings");
 const newSettings: Settings = {
   distinctAttribute: 'videoId',
   proximityPrecision: 'byWord',
-  searchableAttributes: ['text', 'videoId', 'start', 'end', 'transcribeDate', 'publishDate', 'title'],
-  sortableAttributes: ['start', 'end', 'publishDate', 'transcribeDate'],
+  searchableAttributes: ['text', 'videoId', 'start', 'end', 'transcribeDate', 'publishDate', 'title', 'speaker'],
+  filterableAttributes: ['id', 'transcribeDate', 'publishDate', 'speaker'],
+  sortableAttributes: ['videoId', 'start', 'end', 'publishDate', 'transcribeDate', 'speaker'],
   stopWords,
 };
 console.log('new settings ', newSettings);

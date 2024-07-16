@@ -2,7 +2,8 @@ import { CATEGORY, CATEGORY_ORIG_LANG, index } from './client.mts';
 import { readFile, writeFile } from 'node:fs/promises';
 import { DiarizedTranscript } from 'common/transcript';
 import { FirebaseWebClientStorageAccessor } from 'utilities/client/storage';
-import allMetadata from './allMetadata.json';
+//import allMetadata from './allMetadata.json';
+import allMetadata from './allMetadata-sea.json';
 const metadataMap = Object.fromEntries(allMetadata.map(e => [e.videoId, e]));
 
 import type { Document } from './client.mts';
@@ -28,21 +29,26 @@ function makeId(videoId, start) {
 
 async function indexBatch(batch) {
   const resultsArray : Document = await Promise.all(batch.map(async (videoId) => {
-    const transcript = await DiarizedTranscript.fromStorage(accessor, CATEGORY, videoId, [CATEGORY_ORIG_LANG]);
-    
-    const bySpeaker = transcript.groupSentenceInfoBySpeaker();
-    const sentences = transcript.languageToSentenceTable[CATEGORY_ORIG_LANG];
+    try {
+      const transcript = await DiarizedTranscript.fromStorage(accessor, CATEGORY, videoId, [CATEGORY_ORIG_LANG]);
+      
+      const bySpeaker = transcript.groupSentenceInfoBySpeaker();
+      const sentences = transcript.languageToSentenceTable[CATEGORY_ORIG_LANG];
 
-    return bySpeaker.map(groupedInfo => ({
-        id: makeId(videoId, groupedInfo.sentenceInfo[0][2]),
-        videoId,
-        start: groupedInfo.sentenceInfo[0][2],
-        end: groupedInfo.sentenceInfo.at(-1)[3],
-        text: groupedInfo.sentenceInfo.map(info => sentences[info[0]]).join(' '),
-        title: metadataMap[videoId].title,
-        publishDate: metadataMap[videoId].publishDate,
-        transcribDate: metadataMap[videoId].publishDate ?? '2024-07-14T00:00:00.000Z',
-    }));
+      return bySpeaker.map(groupedInfo => ({
+          id: makeId(videoId, groupedInfo.sentenceInfo[0][2]),
+          videoId,
+          start: groupedInfo.sentenceInfo[0][2],
+          end: groupedInfo.sentenceInfo.at(-1)[3],
+          text: groupedInfo.sentenceInfo.map(info => sentences[info[0]]).join(' '),
+          title: (metadataMap[videoId]?.title ?? `${videoId} missing title`),
+          publishDate: metadataMap[videoId]?.publishDate ?? '1950-01-01T00:00:00.000Z',
+          transcribDate: metadataMap[videoId]?.publishDate ?? '2024-07-14T00:00:00.000Z',
+      }));
+    } catch (e) {
+       console.error('failed: ', videoId, ' ', e);
+       throw e;
+    }
   }));
 
   await insertDocs(resultsArray.flat());

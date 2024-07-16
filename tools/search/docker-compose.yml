@@ -19,7 +19,7 @@ services:
     volumes:
       - ./meili_data:/meili_data
     restart: unless-stopped
-    command: meilisearch --import-dump /meili_data/dumps/20240715-065459316.dump
+    command: meilisearch
 
 networks:
   meilisearch:
