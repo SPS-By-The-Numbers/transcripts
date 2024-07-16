@@ -54,8 +54,8 @@ it('fromWhisperXArchive() loads and splits whisper into sentences with correct t
 
   // Basic integrity check of the data.
   const expectedSentences = 88;  // Golden test number.
-  expect(transcript.sentenceMetadata.length).toStrictEqual(expectedSentences);
-  const allSentenceIds = transcript.sentenceMetadata.map(s => s[0]);
+  expect(transcript.sentenceInfo.length).toStrictEqual(expectedSentences);
+  const allSentenceIds = transcript.sentenceInfo.map(s => s[0]);
   expect(allSentenceIds.length).toStrictEqual(expectedSentences);
 
   for (const [id, sentenceId] of allSentenceIds.entries()) {
@@ -70,7 +70,7 @@ it('fromWhisperXArchive() loads and splits whisper into sentences with correct t
   expect(transcript.languageToSentenceTable[transcript.originalLanguage]).not.toBeNull();
   const numTranslatedSentences =
     Object.keys(transcript.languageToSentenceTable[transcript.originalLanguage]).length;
-  expect(transcript.sentenceMetadata.length).toEqual(numTranslatedSentences);
+  expect(transcript.sentenceInfo.length).toEqual(numTranslatedSentences);
 });
 
 it('DiarizedTranscript.fromStorage() loads split data files', async () => {
@@ -80,7 +80,7 @@ it('DiarizedTranscript.fromStorage() loads split data files', async () => {
   expect(Object.keys(transcript.languageToSentenceTable)).toStrictEqual(['eng']);
 
   // Check golden file value. There are 101 sentences in the file.
-  expect(transcript.sentenceMetadata.length).toBe(101);
+  expect(transcript.sentenceInfo.length).toBe(101);
   expect(Object.keys(transcript.languageToSentenceTable['eng']).length).toBe(101);
   expect(transcript.loadErrors.length).toBe(0);
 });
