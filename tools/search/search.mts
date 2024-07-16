@@ -6,6 +6,7 @@ const search = await index.search(process.argv.slice(2).join(' '), {
   attributesToRetrieve: ['videoId', 'start', 'publishDate', 'title'],
   attributesToCrop: [ 'text' ],
   cropLength: 50,
+  distinct: 'id',
   limit: 1000
   })
 console.log(JSON.stringify(search, null, 2))
