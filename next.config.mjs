@@ -20,11 +20,6 @@ const baseNextConfig = {
 
     return [
       ...categories.map(category => ({
-        source: `/${category}`,
-        destination: `/?category=${category}`,
-        permanent: true,
-      })),
-      ...categories.map(category => ({
         source: `/${category}/:date(\\d{4}-\\d{2}-\\d{2})`,
         destination: `/?category=${category}&start=:date&end=:date`,
         permanent: true,
