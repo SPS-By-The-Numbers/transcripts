@@ -2,9 +2,13 @@
 
 import * as Constants from 'config/constants';
 import Link from 'next/link';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { MeiliSearch } from 'meilisearch';
 import { getVideoPath } from 'common/paths';
 import { parseISO } from 'date-fns';
+import { styled } from '@mui/material/styles';
 import { toHhmmss } from 'utilities/client/css';
 import { useState } from 'react';
 
@@ -134,13 +138,20 @@ function Snippet({ text, matchesPosition }: { text: string, matchesPosition: Mat
   );
 }
 
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgb(209 213 219)' : 'rgb(209 213 219)',
+  ...theme.typography.body2,
+  padding: theme.spacing(2),
+  color: theme.palette.text.primary,
+}));
+
 function ResultList({ category, results }: ResultParams) {
   if (!results) {
     return (
-      <section>
+      <Paper>
         <p className="text-lg">Do a search!</p>
         <p className="text-sm">(The first search may be really slow...like 2-3 mins...cause the engine needs to warm up)</p>
-      </section>);
+      </Paper>);
   }
 
   const hits = results.hits;
@@ -150,30 +161,44 @@ function ResultList({ category, results }: ResultParams) {
 
   const resultElements = hits.map((h,i) => {
     return (
-      <article key={i} className="mx-3 mb-2 bg-gray-300 p-2 rounded-lg">
-        <div>
+      <Item key={i}>
+        <Typography sx={{ fontSize: 14 }} color="text.primary" variant="h2">
           <Link className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
-          {h.title}
+            {h.title}
           </Link>
-          <br />
-          <span className="text-sm"><b>Published:</b> {formatDate(h.publishDate)}, <b>VideoId:</b> {h.videoId}, <b>Time:</b> {toHhmmss(h.start)}</span>
-        </div>
-        <div>
+        </Typography>
+        <Typography sx={{ fontSize: 14 }} color="text.primary" gutterBottom>
+          <b>Published:</b> {formatDate(h.publishDate)}, <b>VideoId:</b> {h.videoId}, <b>Time:</b> {toHhmmss(h.start)}
+        </Typography>
+
+        <Typography sx={{ fontSize: 14 }} color="text.secondary">
           <Snippet text={h._formatted.text} matchesPosition={h._matchesPosition} />
-        </div>
-      </article>
+        </Typography>
+      </Item>
     );
   });
 
   return (
-      <section>
-        <div className="p-2 m-3 bg-gray-400 text-xs rounded-lg">
+      <Stack spacing={2}>
+        <Item>
          <b>Query:</b> {results.query}<br/>
          <b>Results:</b> {results.estimatedTotalHits || results.totalHits}<br/>
          <b>Processing Time:</b> {results.processingTimeMs}ms<br/>
-        </div>
+        </Item>
         { resultElements }
-      </section>);
+      </Stack>);
+}
+
+function extractCategory(param) {
+  if (param === undefined) {
+    return Constants.DEFAULT_CATEGORY;
+  }
+
+  if (Array.isArray(param)) {
+    return param[0];
+  }
+
+  return param;
 }
 
 export default function TranscriptSearch({ searchParams }: { searchParams: SearchParams }) {
@@ -182,7 +207,7 @@ export default function TranscriptSearch({ searchParams }: { searchParams: Searc
   const [groupType, setGroupType] = useState<string>("video");
   const [results, setResults] = useState<SearchResults | undefined>();
 
-  const category = searchParams.category ?? Constants.DEFAULT_CATEGORY;
+  const category = extractCategory(searchParams.category);
 
   return (
       <div className="p-2">
