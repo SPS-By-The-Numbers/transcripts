@@ -1,5 +1,5 @@
 import * as Constants from 'config/constants';
-import TranscriptIndex from './TranscriptIndex';
+import TranscriptIndex from 'components/TranscriptIndex';
 import { encodeDate, decodeDate } from 'common/params';
 import { fetchEndpoint } from 'utilities/client/endpoint';
 import { parseISO } from 'date-fns';
@@ -44,15 +44,15 @@ export default async function Index({ searchParams } : { searchParams?: SearchPa
         publishDate: v.publishDate}));
     // No dates huh? Set the start to oldest video.
     if (parameters.limit) {
-      banner = (<p>Showing first {mostRecentLimit} videos. Change Start Date to find older.</p>);
+      banner = (<p className="my-3">Showing first {mostRecentLimit} videos. Change Start Date to find older ones.</p>);
       range.start = parseISO(videos[0].publishDate);
     }
   }
 
   return (
     <>
-      { banner }
       <main className="mx-5 my-5 max-w-screen-md">
+        { banner }
         <TranscriptIndex category={category} videos={videos} range={range}/>
       </main>
     </>
