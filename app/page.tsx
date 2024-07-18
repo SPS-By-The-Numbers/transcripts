@@ -11,6 +11,10 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 type SearchParams = {
+  [key: string]: string | string[] | undefined;
+};
+
+type TranscriptSearchParams = {
     category: string,
 };
 
@@ -104,7 +108,6 @@ function doSearch(category : string, query : string, sortType : string, groupTyp
 
   index.search(query, queryOptions)
     .then((result : any) => {
-      console.log(result);
       setResults(result);
     });
 }
@@ -148,16 +151,16 @@ function ResultList({ category, results }: ResultParams) {
   const resultElements = hits.map((h,i) => {
     return (
       <article key={i} className="mx-3 mb-2 bg-gray-300 p-2 rounded-lg">
-        <p>
+        <div>
           <Link className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
           {h.title}
           </Link>
           <br />
           <span className="text-sm"><b>Published:</b> {formatDate(h.publishDate)}, <b>VideoId:</b> {h.videoId}, <b>Time:</b> {toHhmmss(h.start)}</span>
-        </p>
-        <p>
-        <Snippet text={h._formatted.text} matchesPosition={h._matchesPosition} />
-        </p>
+        </div>
+        <div>
+          <Snippet text={h._formatted.text} matchesPosition={h._matchesPosition} />
+        </div>
       </article>
     );
   });
@@ -173,11 +176,13 @@ function ResultList({ category, results }: ResultParams) {
       </section>);
 }
 
-export default function Search({ params }: { params: SearchParams }) {
+export default function TranscriptSearch({ searchParams }: { searchParams: SearchParams }) {
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
   const [groupType, setGroupType] = useState<string>("video");
   const [results, setResults] = useState<SearchResults | undefined>();
+
+  const category = searchParams.category ?? Constants.DEFAULT_CATEGORY;
 
   return (
       <div className="p-2">
@@ -185,7 +190,7 @@ export default function Search({ params }: { params: SearchParams }) {
             className="flex items-center justify-center"
             onSubmit={(e) => {
               e.preventDefault();
-              doSearch(params.category, query, sortType, groupType, setResults);
+              doSearch(category, query, sortType, groupType, setResults);
             }}>
           <label> Result Grouping: 
           <select onChange={(e) => setGroupType(e.target.value)} className="m-2 border-black border-2" value={groupType}>
@@ -215,7 +220,7 @@ export default function Search({ params }: { params: SearchParams }) {
         <hr className="my-2"/>
         <div>
           <br />
-          <ResultList category={params.category} results={results} />
+          <ResultList category={category} results={results} />
         </div>
       </div>);
 }
