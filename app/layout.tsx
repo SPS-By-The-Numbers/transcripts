@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Script src=`https://www.googletagmanager.com/gtag/js?id=${Constants.GA_MEASUREMENT_ID}` />
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${Constants.GA_MEASUREMENT_ID}`} />
         <Script id="google-analytics">
           {`
             window.dataLayer = window.dataLayer || [];

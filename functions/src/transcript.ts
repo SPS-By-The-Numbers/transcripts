@@ -1,3 +1,4 @@
+import * as Constants from 'config/constants';
 import langs from 'langs';
 import { DiarizedTranscript } from 'common/transcript';
 import { getAuthCode, jsonOnRequest } from './utils/firebase';
