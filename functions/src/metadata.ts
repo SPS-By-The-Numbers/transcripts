@@ -50,7 +50,7 @@ async function getMetadataForVideo(category: CategoryId, videoId: VideoId) : Pro
 }
 
 export const metadata = jsonOnRequest(
-  {cors: true, region: ["us-west1"]},
+  {cors: true, region: [Constants.GCP_REGION]},
   async (req, res) => {
     if (req.method === "GET") {
       return getMetadata(req, res);

@@ -9,12 +9,18 @@ export const SITE_ROOT_URL = 'https://transcripts.sps-by-the-numbers.com';
 //  https://foo.com/category/v/AB/ABCD123 becomes https://foo.com/category/v/ABCD123
 export const LEGACY_PREFIX_REDIRECT = true;
 
+// Google analytics ID.
+export const GA_MEASUREMENT_ID = 'GTM-WLJHZHL';
+
+// GCP region cloud functions and other things run in.
+export const GCP_REGION = 'us-west1';
+
 function makeEndpointUri(endpoint: string) {
   return `https://${endpoint}-rdcihhc4la-uw.a.run.app`;
 }
 
 function makeTestEndpointUri(endpoint: string) {
-  return `http://127.0.0.1:5001/sps-by-the-numbers/us-west1/${endpoint}`;
+  return `http://127.0.0.1:5001/sps-by-the-numbers/${GCP_REGION}/${endpoint}`;
 }
 
 // Prefix used in storage or database paths.
