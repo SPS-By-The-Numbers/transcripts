@@ -2,6 +2,13 @@ export const isProduction = process.env.NODE_ENV === 'production';
 
 export const SITE_ROOT_URL = 'https://transcripts.sps-by-the-numbers.com';
 
+// Originally this was a static HTML site with files spit into a prefix tree directory
+// structure to avoid having too many files in one directory. This isn't necessary
+// anymore. Setting LEGACY_PREFIX_REDIRECT to true redirect URLS where there is a
+// 2 -character prefix to the current URL pattern w/o the prefix. Example:
+//  https://foo.com/category/v/AB/ABCD123 becomes https://foo.com/category/v/ABCD123
+export const LEGACY_PREFIX_REDIRECT = true;
+
 function makeEndpointUri(endpoint: string) {
   return `https://${endpoint}-rdcihhc4la-uw.a.run.app`;
 }

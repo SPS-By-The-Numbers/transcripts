@@ -22,3 +22,7 @@ export function encodeDate(date: Date): string {
 export function decodeDate(dateString: string): Date {
     return startOfDay(parse(dateString, pathDateFormat, new Date()));
 }
+
+export function isValidVideoId(videoId: VideoId): Date {
+   return videoId.match(/^[A-Za-z0-9_-]{11}$/) !== null;
+}

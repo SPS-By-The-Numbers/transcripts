@@ -17,5 +17,5 @@ export function getDatePath(category: string, date: string): string {
 }
 
 export function getVideoPath(category: string, videoId: string): string {
-    return `${getCategoryPath(category)}/v/${videoId.substr(0,2).toUpperCase()}/${videoId}`;
+    return `${getCategoryPath(category)}/v/${videoId}`;
 }
