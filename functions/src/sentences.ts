@@ -24,7 +24,7 @@ function getGoogleTranslateLang(iso6393Lang: Iso6393Code) {
 }
 
 export const sentences = jsonOnRequest(
-  {cors: true, region: ["us-west1"]},
+  {cors: true, region: [Constants.GCP_REGION]},
   async (req, res) => {
     const category : CategoryId = req.query.category;
     const videoId : VideoId = req.query.videoId;

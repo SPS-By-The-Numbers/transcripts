@@ -160,7 +160,7 @@ async function getSpeakerInfo(req, res) {
 }
 
 export const speakerinfo = jsonOnRequest(
-  {cors: true, region: ["us-west1"]},
+  {cors: true, region: [Constants.GCP_REGION]},
   async (req, res) => {
     if (req.method === "GET") {
       return getSpeakerInfo(req, res);

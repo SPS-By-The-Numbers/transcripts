@@ -194,7 +194,7 @@ async function updateEntry(req, res) {
 }
 
 const video_queue = jsonOnRequest(
-  {cors: true, region: ["us-west1"]},
+  {cors: true, region: [Constants.GCP_REGION]},
   async (req, res) => {
     if (req.method === "GET") {
       return getVideoQueue(req, res);
@@ -213,7 +213,7 @@ const video_queue = jsonOnRequest(
 );
 
 const vast = jsonOnRequest(
-  {cors: true, region: ["us-west1"]},
+  {cors: true, region: [Constants.GCP_REGION]},
   async (req, res) => {
     if (req.method === "DELETE") {
       return removeVastInstance(req, res);
