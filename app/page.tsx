@@ -47,6 +47,7 @@ export default async function Index({ searchParams } : { searchParams?: SearchPa
       banner = (<p className="my-3">Showing first {mostRecentLimit} videos. Change Start Date to find older ones.</p>);
       range.start = parseISO(videos[0].publishDate);
     }
+
   }
 
   return (

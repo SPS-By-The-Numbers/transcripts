@@ -1,12 +1,14 @@
 'use client'
 
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
-import LoadingSpinner from 'components/LoadingSpinner';
 import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
 import { compareDesc, isValid } from 'date-fns';
 import { encodeDate } from 'common/params';
 import { getVideoPath } from 'common/paths';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 
 import type { DateRange, TranscriptIndexFilterSelection } from 'components/TranscriptIndexFilter';
 import type { VideoMetadata, VideoId } from 'common/params';
@@ -28,13 +30,15 @@ type Props = {
 };
 
 export default function TranscriptIndex({ category, videos, range }: Props) {
-  let isLoading = false;
+  const [isNavigating, startNavigation] = useTransition();
 
   const pathName: string = usePathname();
   const { push } = useRouter();
+
   const handleFilterChange = (newFilters: TranscriptIndexFilterSelection) => {
-    isLoading = true;
-    push(buildUrl(pathName, newFilters), { scroll: false });
+    startNavigation(() => {
+        push(buildUrl(pathName, newFilters), { scroll: false });
+    });
   }
 
   const videoLinks: React.ReactNode[] = videos
@@ -47,9 +51,14 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
       </li>
     ));
 
-  const loadingSection =  <section className="my-4 flex flex-row">
-    <LoadingSpinner />
-  </section>
+  const loadingSection = (
+      <Box
+          display='flex'
+          justifyContent="center"
+          alignItems="center"
+          my={4} >
+        <CircularProgress />
+      </Box>);
 
   const resultsSection: React.ReactNode = <section>
     <h2 className="my-4 text-lg">
@@ -67,7 +76,7 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
   return (
     <>
       <TranscriptIndexFilter selection={filters} onFilterChange={handleFilterChange} />
-      {isLoading ? loadingSection : resultsSection}
+      {isNavigating ? loadingSection : resultsSection}
     </>
   );
 }

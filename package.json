@@ -20,7 +20,6 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mdx-js/loader": "^3.0.1",
-    "@mui/base": "^5.0.0-beta.40",
     "@mui/icons-material": "^5.15.19",
     "@mui/material": "^5.15.19",
     "@mui/system": "^5.15.15",

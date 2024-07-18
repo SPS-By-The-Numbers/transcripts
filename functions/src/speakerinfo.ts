@@ -1,3 +1,4 @@
+import * as Constants from 'config/constants';
 import isEqual from "lodash.isequal";
 import { getCategoryPublicDb, getCategoryPrivateDb, getUser, jsonOnRequest } from "./utils/firebase";
 import { sanitizeCategory } from "./utils/path";
