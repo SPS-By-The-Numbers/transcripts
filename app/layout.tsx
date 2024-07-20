@@ -1,6 +1,8 @@
-import 'styles/globals.scss'
-
 import * as Constants from 'config/constants'
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import Nav from 'components/Nav'
 import Providers from './providers';
 import Script from 'next/script'
@@ -16,7 +18,7 @@ function getDevBanner() {
     return undefined;
   }
 
-  return (<p style={{ backgroundColor: "red", textAlign: "center" }}>Is Dev Mode</p>);
+  return (<Alert variant="filled" severity="warning">Is Dev Mode</Alert>);
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -41,10 +43,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'GA_MEASUREMENT_ID');
           `}
         </Script>
-        { getDevBanner() }
         <Providers>
+          <CssBaseline />
+          <InitColorSchemeScript />
+          { getDevBanner() }
           <Nav />
+          <Box
+            width={'80%'}
+            margin="auto"
+            mt="2ex"
+          >
           {children}
+          </Box>
         </Providers>
       </body>
     </html>

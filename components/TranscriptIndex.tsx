@@ -3,6 +3,8 @@
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
+import SearchResult from 'components/SearchResult';
+import Stack from '@mui/material/Stack';
 import TranscriptIndexFilter from 'components/TranscriptIndexFilter';
 import { compareDesc, isValid } from 'date-fns';
 import { encodeDate } from 'common/params';
@@ -44,11 +46,7 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
   const videoLinks: React.ReactNode[] = videos
     .sort((a, b) => compareDesc(a.publishDate, b.publishDate))
     .map(video => (
-      <li key={video.videoId} className="mx-3 list-disc">
-        <Link href={getVideoPath(category, video.videoId)}>
-          {video.title}
-        </Link>
-      </li>
+      <SearchResult category={category} videoId={video.videoId} title={video.title} publishDate={video.publishDate} />
     ));
 
   const loadingSection = (
@@ -64,9 +62,9 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
     <h2 className="my-4 text-lg">
       Transcripts:
     </h2>
-    <ul className="flex flex-col flex-wrap h-screen">
+    <Stack spacing={1}>
       {videoLinks}
-    </ul>
+    </Stack>
   </section>;
 
   const filters : TranscriptIndexFilterSelection = {

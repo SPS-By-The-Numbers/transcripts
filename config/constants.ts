@@ -1,6 +1,7 @@
 export const isProduction = process.env.NODE_ENV === 'production';
 
 export const SITE_ROOT_URL = 'https://transcripts.sps-by-the-numbers.com';
+export const HOME_URL = 'https://sps-by-the-numbers.com';
 
 // Originally this was a static HTML site with files spit into a prefix tree directory
 // structure to avoid having too many files in one directory. This isn't necessary
