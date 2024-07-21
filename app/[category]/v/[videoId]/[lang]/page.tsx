@@ -1,6 +1,7 @@
 import * as Constants from 'config/constants'
 import BoardMeeting from 'components/BoardMeeting'
-import TranscriptControlProvider from 'components/TranscriptControlProvider'
+import SpeakerInfoProvider from 'components/SpeakerInfoProvider'
+import VideoControlContextProvider from 'components/VideoControlProvider'
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { SupportedLanguages } from 'common/languages';
@@ -92,16 +93,18 @@ export default async function Index({params}: {params: VideoParams}) {
     ]);
 
   return (
-    <TranscriptControlProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
-      <BoardMeeting
-          metadata={ metadata }
-          category={ params.category }
-          diarizedTranscript={ diarizedTranscript }
-          languageOrder={ languageOrder }
-          speakerInfo={ speakerControlInfo.speakerInfo }
-          initialExistingNames={ speakerControlInfo.existingNames }
-          initialExistingTags={ speakerControlInfo.existingTags } />
-    </TranscriptControlProvider>
+    <SpeakerInfoProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
+      <VideoControlContextProvider>
+        <BoardMeeting
+            metadata={ metadata }
+            category={ params.category }
+            diarizedTranscript={ diarizedTranscript }
+            languageOrder={ languageOrder }
+            speakerInfo={ speakerControlInfo.speakerInfo }
+            initialExistingNames={ speakerControlInfo.existingNames }
+            initialExistingTags={ speakerControlInfo.existingTags } />
+      </VideoControlContextProvider>
+    </SpeakerInfoProvider>
   );
 }
 

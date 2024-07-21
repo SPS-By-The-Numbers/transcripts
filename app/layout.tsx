@@ -8,6 +8,8 @@ import Providers from './providers';
 import Script from 'next/script'
 import { Metadata } from 'next'
 
+import '../styles/globals.scss';
+
 export const metadata: Metadata = {
   title: 'SPS By The Numbers - Transcriptions',
   description: 'Public meeting transcriptions from SPS By The Numbers',

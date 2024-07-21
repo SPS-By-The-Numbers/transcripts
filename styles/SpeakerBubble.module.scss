@@ -4,13 +4,6 @@
   font-weight: bold;
 }
 
-// Speak bubble
-.b {
-  margin: 0 0 1ex 0;
-  padding-top: 2ex;
-  padding-bottom: 1ex;
-}
-
 /* Name of speech bubble */
 .b h2 {
   color: darkblue;
@@ -20,8 +13,7 @@
 
 /* Transcription Segment */
 .b p {
-  padding-left: 2ex;
-  padding-right: 2ex;
+  padding: 0.5ex;
   line-height: 1.2;
 }
 

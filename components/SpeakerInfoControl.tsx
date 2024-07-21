@@ -4,15 +4,15 @@ import React from 'react';
 
 import * as Constants from 'config/constants'
 import CreatableSelect from 'react-select/creatable'
+import { SpeakerInfoContext } from 'components/SpeakerInfoContextProvider'
+import { fetchEndpoint } from 'utilities/client/endpoint'
 import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/client/speaker'
-import { fetchEndpoint } from 'utilities/client/endpoint'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
 import { toSpeakerNum } from "utilities/client/speaker"
 import { useEffect, useState } from 'react'
-import { useTranscriptContext } from 'components/TranscriptControlProvider'
 
 const useMount = (fun) => useEffect(fun);
 
@@ -68,7 +68,7 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
   const [existingNames, setExistingNames] = useState<object>(initialExistingNames);
   const [existingTags, setExistingTags] = useState<Set<string>>(initialExistingTags);
   const [authState, setAuthState] = useState<object>({});
-  const {speakerInfo, setSpeakerInfo} = useTranscriptContext();
+  const {speakerInfo, setSpeakerInfo} = useContext(SpeakerInfoContext);
   const [submitStatus, setSubmitStatus] = useState<SpeakerInfoSubmitStatus>(
       { has_submitted: false, in_progress: false, last_status: 0 });
 

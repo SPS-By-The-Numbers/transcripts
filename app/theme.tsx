@@ -24,6 +24,19 @@ const theme = extendTheme({
     secondary: {
       main: '#c28426',
     },
+    bubbles: {
+      main: '#ffffff',
+      deemphasized: '#000000',
+      bg: {
+        0: '#9b7b79',
+        1: '#967c88',
+        2: '#858392',
+        3: '#6a8890',
+        4: '#768973',
+        5: '#888569',
+        6: '#977f6d',
+      },
+    },
   },
 });
 
