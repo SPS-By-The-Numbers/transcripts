@@ -39,7 +39,7 @@ export default function Nav() {
               <Typography
                   noWrap
                   component="a"
-                  href="/seattle-city-council"
+                  href="/sps-board"
                   sx={{ mr: 2, flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
                 SPS Board
               </Typography>

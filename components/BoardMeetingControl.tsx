@@ -1,5 +1,6 @@
 'use client'
 
+import Box from '@mui/material/Box';
 import SpeakerInfoControl from './SpeakerInfoControl';
 import TranscriptControl from './TranscriptControl';
 import VideoPlayer, { VideoPlayerControl } from './VideoPlayer';
@@ -31,31 +32,33 @@ export default function BoardMeetingControl({
   initialExistingTags,
   speakerNums
 }: BoardMeetingLayoutParams): ReactNode {
-  const videoPlayer = useRef<VideoPlayerControl | null>(null);
+  const { onTimeStampSelected } = useTranscriptContext();
 
   function handleTimeStampSelected(timeStamp: string): void {
     history.pushState(null, '', `#${timeStamp}`);
-    videoPlayer.current?.jumpToTime(timeStamp);
+    if (onTimeStampSelected) {
+      onTimeStampSelected(timeStamp);
+    }
   }
 
   const errorPanel = errors.length === 0 ? undefined : (<div key="errors">{errors.map((e,i) => (<div key={i}>{e}</div>))}</div>)
 
   return (
     <>
-        { header }
-        <section className="p">
-          <VideoPlayer
-            videoId={videoId}
-            ref={videoPlayer} />
-          <SpeakerInfoControl
-              className="c px-2 border border-2 border-black rounded"
-              category={category}
-              initialExistingNames={initialExistingNames}
-              initialExistingTags={initialExistingTags}
-              speakerNums={speakerNums}
-              videoId={videoId} />
-        </section>
-        {errorPanel}
+        <Box>
+          { header }
+          <section className="p">
+            <VideoPlayer videoId={videoId} />
+            <SpeakerInfoControl
+                className="c px-2 border border-2 border-black rounded"
+                category={category}
+                initialExistingNames={initialExistingNames}
+                initialExistingTags={initialExistingTags}
+                speakerNums={speakerNums}
+                videoId={videoId} />
+          </section>
+          {errorPanel}
+        </Box>
         <TranscriptControl onTimeStampSelected={handleTimeStampSelected}>
           { transcriptNode }
         </TranscriptControl>

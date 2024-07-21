@@ -1,7 +1,14 @@
 import BoardMeetingControl from 'components/BoardMeetingControl';
+import TranscriptControl from 'components/TranscriptControl';
+import Card from '@mui/material/Card';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Unstable_Grid2';
+import Stack from '@mui/material/Stack';
 import LanguageNav from 'components/LanguageNav';
 import SpeakerBubble from 'components/SpeakerBubble';
 import TranscriptHeader from 'components/TranscriptHeader';
+import VideoPlayer from './VideoPlayer';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
@@ -17,14 +24,6 @@ type BoardMeetingParams = {
   diarizedTranscript: DiarizedTranscript,
   speakerInfo: SpeakerInfoData,
   languageOrder: string[],
-};
-
-const mainStyle = {
-    fontFamily: 'sans-serif',
-    fontSize: '14px',
-    color: '#111',
-    padding: '1em 1em 1em 1em',
-    backgroundColor: 'white',
 };
 
 function textLines(segmentId, languageOrder, diarizedTranscript) {
@@ -76,20 +75,34 @@ export default function BoardMeeting({
 
   const langNav = (<LanguageNav name='lang-nav' curLang={languageOrder[0]} />);
 
-  const transcriptHeader = (<TranscriptHeader
-            category={category}
-            title={metadata.title}
-            description={metadata.description}
-            videoId={metadata.video_id}
-            translationNav={langNav}/>);
-
-  const transcriptSection = (
-    <section>
-      {speakerBubbles}
-    </section>);
-
   return (
-      <main style={mainStyle}>
+      <>
+        <Grid container spacing={2}>
+          <Grid xs={12} sx={{border: "1px dashed"}} >
+           <TranscriptHeader
+              category={category}
+              title={metadata.title}
+              description={metadata.description}
+              videoId={metadata.video_id}
+              translationNav={langNav}/>
+          </Grid>
+          <Grid xs={7} >
+            <TranscriptControl>
+              <main>
+                {speakerBubbles}
+              </main>
+            </TranscriptControl>
+          </Grid>
+          <Grid xs={5}>
+            <Card sx={{position: "sticky", top: "1rem"}} >
+              <VideoPlayer videoId={videoId} />
+            </Card>
+          </Grid>
+        </Grid>
+      </>
+  );
+}
+/*
         <BoardMeetingControl
           header={transcriptHeader}
           transcriptNode={transcriptSection}
@@ -100,6 +113,4 @@ export default function BoardMeeting({
           initialExistingTags={initialExistingTags}
           speakerNums={speakerNums}
         />
-      </main>
-  );
-}
+        */

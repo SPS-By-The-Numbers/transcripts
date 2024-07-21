@@ -2,17 +2,13 @@
 
 import YouTube from 'react-youtube'
 import { Options } from 'youtube-player/dist/types';
-import { forwardRef, MutableRefObject, useRef, useEffect, useState } from 'react';
+import { VideoControlContext } from 'components/VideoControlProvider';
+import { forwardRef, MutableRefObject, useRef, useEffect } from 'react';
 import { fromHhmmss, toHhmmss } from 'utilities/client/css'
+import { useContext } from 'react'
 
 type VideoPlayerParams = {
   videoId: string;
-};
-
-const ytplayerStyle = {
-    aspectRatio: '16 / 9',
-    width: '100%',
-    height: 'auto',
 };
 
 const youtubeOpts : Options = {
@@ -31,9 +27,18 @@ let markedElementClassName = '';
 
 export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, ref: MutableRefObject<VideoPlayerControl>) {
   const ytElement = useRef<any>(null);
+  const { setVideoControl } = useContext(VideoControlContext);
 
   useEffect(() => {
-    //Implementing the setInterval method
+    setVideoControl({
+        jumpToTime: (hhmmss: string) => {
+            console.log('Boo:',hhmmss);
+          if (hhmmss) {
+            jumpToTimeInternal(fromHhmmss(hhmmss));
+          }
+        }
+      });
+    // Start the periodic update.
     const interval = setInterval(() => {
         if (ytElement.current) {
           const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
@@ -41,7 +46,7 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
         }
     }, 1000);
 
-    //Clearing the interval
+    // Stop the periodic updates at end.
     return () => clearInterval(interval);
   }, []);
 
@@ -67,17 +72,12 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
   }
 
   function jumpToTimeInternal(timeSec: number) {
+        console.log(timeSec);
     if (ytElement.current) {
       ytElement.current.seekTo(timeSec, true);
       ytElement.current.playVideo();
     }
   }
-
-  ref.current = {
-    jumpToTime: (hhmmss: string) => {
-      jumpToTimeInternal(fromHhmmss(hhmmss));
-    }
-  };
 
   function handleReady(event) {
     if (event.target) {
@@ -91,6 +91,6 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
   }
 
   return (
-    <YouTube style={ytplayerStyle} videoId={videoId} opts={youtubeOpts} onReady={handleReady} />
+    <YouTube videoId={videoId} opts={youtubeOpts} onReady={handleReady} />
   );
 });

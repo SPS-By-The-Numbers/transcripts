@@ -1,11 +1,15 @@
 'use client'
 
+import { VideoControlContext } from 'components/VideoControlProvider';
+import { useContext } from 'react'
+
 type TranscriptControlParams = {
-  onTimeStampSelected: (timeStamp: string) => void,
   children : React.ReactNode,
 };
 
-export default function TranscriptControl({onTimeStampSelected, children} : TranscriptControlParams) {
+export default function TranscriptControl({children} : TranscriptControlParams) {
+  const { videoControl } = useContext(VideoControlContext);
+
   function handleClick(e): void {
     const clickedTimestamp: string | null = findSelectedTimestamp(e.target);
 
@@ -13,7 +17,11 @@ export default function TranscriptControl({onTimeStampSelected, children} : Tran
       return;
     }
 
-    onTimeStampSelected(clickedTimestamp);
+    history.pushState(null, '', `#${clickedTimestamp}`);
+    // Video player may not be loaded yet.
+    if (videoControl) {
+      videoControl.jumpToTime(clickedTimestamp);
+    }
   }
 
   return (
