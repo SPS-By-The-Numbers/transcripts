@@ -1,5 +1,7 @@
 import * as Constants from 'config/constants';
 import AppBar from '@mui/material/AppBar';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -21,33 +23,43 @@ export default function Nav() {
                 startIcon={<Avatar src={'/logo.png'} variant='square' />}
               >
             </Button>
+
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              <Typography
-                  noWrap
-                  component="a"
-                  href="/"
-                  sx={{ mr: 2, flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
-                Recents
-              </Typography>
-              <Typography
-                  noWrap
-                  component="a"
-                  href="/seattle-city-council"
-                  sx={{ mr: 2, flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
-                Seattle City Council
-              </Typography>
-              <Typography
-                  noWrap
-                  component="a"
-                  href="/sps-board"
-                  sx={{ mr: 2, flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
-                SPS Board
-              </Typography>
+              <Stack
+                  direction="row"
+                  divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
+                  spacing={1}
+                  sx={{ opacity: 1 }}
+              >
+                <Typography
+                    noWrap
+                    component="a"
+                    href="/"
+                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
+                  Recents
+                </Typography>
+                <Typography
+                    noWrap
+                    component="a"
+                    href="/seattle-city-council"
+                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
+                  Seattle City Council
+                </Typography>
+                <Typography
+                    noWrap
+                    component="a"
+                    href="/sps-board"
+                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
+                  SPS Board
+                </Typography>
+              </Stack>
+            </Box>
+            <Box sx={{flexGrow: 0}}>
               <Typography
                   noWrap
                   component="a"
                   href="/about"
-                  sx={{ mr: 2, flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
+                  sx={{ color: 'inherit', textDecoration: 'none' }}>
                 About
               </Typography>
             </Box>

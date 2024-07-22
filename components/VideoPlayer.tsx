@@ -41,8 +41,11 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
     // Start the periodic update.
     const interval = setInterval(() => {
         if (ytElement.current) {
-          const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
-          scrollTranscriptTo(hhmmss);
+          // Scroll if playing.
+          if (ytElement.current.getPlayerState() === 1) {
+            const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
+            scrollTranscriptTo(hhmmss);
+          }
         }
     }, 1000);
 
