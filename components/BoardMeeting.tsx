@@ -3,7 +3,6 @@ import TranscriptControl from 'components/TranscriptControl';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
 import LanguageNav from 'components/LanguageNav';
 import SpeakerBubble from 'components/SpeakerBubble';
@@ -77,28 +76,28 @@ export default function BoardMeeting({
 
   return (
       <>
-        <Grid container spacing={2}>
-          <Grid xs={12} sx={{border: "1px dashed"}} >
-           <TranscriptHeader
+        <Stack>
+          <div>
+            <TranscriptHeader
               category={category}
               title={metadata.title}
               description={metadata.description}
               videoId={metadata.video_id}
               translationNav={langNav}/>
-          </Grid>
-          <Grid xs={7} >
+          </div>
+          <Stack direction="row">
             <TranscriptControl>
               <main>
                 {speakerBubbles}
               </main>
             </TranscriptControl>
-          </Grid>
-          <Grid xs={5}>
-            <Card sx={{position: "sticky", top: "1rem"}} >
-              <VideoPlayer videoId={videoId} />
-            </Card>
-          </Grid>
-        </Grid>
+            <Stack>
+              <Card sx={{position: "sticky", top: "1rem"}} >
+                <VideoPlayer videoId={videoId} />
+              </Card>
+            </Stack>
+          </Stack>
+        </Stack>
       </>
   );
 }

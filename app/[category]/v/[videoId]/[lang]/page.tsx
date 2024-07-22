@@ -52,7 +52,6 @@ export async function generateMetadata(
   }
 }
 
-
 export default async function Index({params}: {params: VideoParams}) {
   // Handle the legacy URL redirect.
     console.log("videoId", params.videoId);
@@ -107,4 +106,3 @@ export default async function Index({params}: {params: VideoParams}) {
     </SpeakerInfoProvider>
   );
 }
-
