@@ -4,7 +4,6 @@ import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
-import LanguageNav from 'components/LanguageNav';
 import SpeakerBubble from 'components/SpeakerBubble';
 import TranscriptHeader from 'components/TranscriptHeader';
 import VideoPlayer from './VideoPlayer';
@@ -72,8 +71,6 @@ export default function BoardMeeting({
       );
   });
 
-  const langNav = (<LanguageNav name='lang-nav' curLang={languageOrder[0]} />);
-
   return (
       <>
         <Stack>
@@ -83,7 +80,7 @@ export default function BoardMeeting({
               title={metadata.title}
               description={metadata.description}
               videoId={metadata.video_id}
-              translationNav={langNav}/>
+              curLang={languageOrder[0]}/>
           </div>
           <Stack direction="row">
             <TranscriptControl>
