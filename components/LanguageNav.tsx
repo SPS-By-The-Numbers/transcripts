@@ -1,7 +1,8 @@
 'use client'
 
 import * as Constants from 'config/constants';
-import Select from 'react-select';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { useState } from 'react'
 import { SupportedLanguages } from 'common/languages';
 
@@ -9,7 +10,7 @@ import type { Iso6393Code } from 'common/params';
 
 function makeLangOptions() {
   const options = Object.entries(SupportedLanguages).map(
-      ([langCode, info]) => { return { label: info.displayName, value: langCode}; });
+      ([langCode, info]) => ({ label: info.displayName, value: langCode}));
   const moveTopToFront = (x,y) => {
     const xLocation = Constants.TOP_LANGUAGES.findIndex(element => element === x.value);
     const yLocation = Constants.TOP_LANGUAGES.findIndex(element => element === y.value);
@@ -70,16 +71,19 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
 
   
   return (<>
-    <Select
-      styles={{
-        control: (baseStyles, state) => ({
-          ...baseStyles,
-          backgroundColor: state.isFocused ? 'grey' : 'rgb(67,130,247)',
-        }),
-      }}
+    <Autocomplete
+      disableClearable
       id={name}
       value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
       options={ LangOptions }
-      onChange={newValue => navigateToNewLang(newValue)} />
+      onChange={(_event, newValue) => navigateToNewLang(newValue)}
+      renderInput={(params) => <TextField {...params} label="Language" variant="standard" />}
+      sx={{
+        "& label.Mui-focused": {
+          backgroundColor: 'grey'
+        },
+        backgroundColor: 'rgb(67,130,247)',
+      }}
+      />
     </>);
 }

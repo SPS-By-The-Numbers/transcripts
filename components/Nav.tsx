@@ -29,7 +29,6 @@ export default function Nav() {
                   direction="row"
                   divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
                   spacing={1}
-                  sx={{ opacity: 1 }}
               >
                 <Typography
                     noWrap
