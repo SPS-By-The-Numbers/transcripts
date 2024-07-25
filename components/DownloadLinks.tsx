@@ -1,7 +1,13 @@
 import Link from 'next/link'
 
-function cloudDownloadURL(category, videoId, ext) {
-    return `https://storage.googleapis.com/sps-by-the-numbers.appspot.com/transcription/${category}/${videoId[0]}/${videoId}.${ext}`
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import { getEndpointUrl } from 'utilities/client/endpoint';
+
+function getDownloadURL(category, videoId, ext) {
+    return getEndpointUrl('transcript', {videoId: videoId, type: ext});
 }
 
 type DownloadLinksParams = {
@@ -12,13 +18,28 @@ type DownloadLinksParams = {
 
 export default function DownloadLinks({category, videoId, className} : DownloadLinksParams) {
   return (
-    <div className={className}>
-      <b>Data Files:</b>
-      <Link className={"px-1"} href={cloudDownloadURL(category, videoId, 'json')}>json</Link>
-      <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, videoId, 'tsv')}>tsv</Link>
-      <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, videoId, 'txt')}>txt</Link>
-      <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, videoId, 'srt')}>srt</Link>
-      <Link className={"px-1 border-l-2 border-gray-600 border-dashed"} href={cloudDownloadURL(category, videoId, 'vtt')}>vtt</Link>
-    </div>
+    <Stack direction="row" spacing={2} sx={{fontSize: 'small'}}>
+      <Stack
+          direction="row"
+          spacing={1}
+          divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
+      >
+        <Box sx={{mx:1}}>
+          <Link href={getDownloadURL(category, videoId, 'json')}>json</Link>
+        </Box>
+        <Box sx={{mx:1}}>
+          <Link href={getDownloadURL(category, videoId, 'tsv')}>tsv</Link>
+        </Box>
+        <Box sx={{mx:1}}>
+          <Link href={getDownloadURL(category, videoId, 'txt')}>txt</Link>
+        </Box>
+        <Box sx={{mx:1}}>
+          <Link href={getDownloadURL(category, videoId, 'srt')}>srt</Link>
+        </Box>
+        <Box sx={{mx:1}}>
+          <Link href={getDownloadURL(category, videoId, 'vtt')}>vtt</Link>
+        </Box>
+      </Stack>
+    </Stack>
   );
 }

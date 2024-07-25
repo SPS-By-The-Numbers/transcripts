@@ -2,14 +2,22 @@
 
 import * as Constants from 'config/constants';
 
-export async function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string> | object) {
+export function getEndpointUrl(endpoint : string, parameters : Record<string,string> | object | undefined) {
   const urlRoot = `${Constants.ENDPOINTS[endpoint]}`;
+  if (parameters !== undefined) {
+    return urlRoot + '?' + new URLSearchParams(<Record<string, string>>parameters).toString();
+  }
+
+  return urlRoot;
+}
+
+export async function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string> | object) {
   if (method === 'GET') {
-    const fullUrl = urlRoot + '?' + new URLSearchParams(<Record<string, string>>parameters).toString();
+    const fullUrl = getEndpointUrl(endpoint, <Record<string, string>>parameters);
     return await (await fetch(fullUrl)).json();
   }
 
-  return await (await fetch(urlRoot, {
+  return await (await fetch(getEndpointUrl(endpoint), {
       method,
       headers: {
         "Content-Type": "application/json",

@@ -1,14 +1,12 @@
 'use client'
  
-import { createContext, useContext, useState, useMemo } from 'react'
+import { createContext, useContext, useState, useMemo } from 'react';
 
-type VideoControl = {
-  jumpToTime : (ts: string) => void;
-};
+import type { VideoPlayerControl } from 'components/VideoPlayer';
 
 type VideoControlContextType = {
-  videoControl : VideoControl;
-  setVideoControl: (vc: VideoControl) => void;
+  videoControl : VideoPlayerControl;
+  setVideoControl: (vc: VideoPlayerControl) => void;
 };
 
 type VideoControlProviderParams = {

@@ -11,9 +11,12 @@ type VideoPlayerParams = {
   videoId: string;
 };
 
+export const YtEmbedWidth = 560;
+export const YtEmbedHeight = 315;
+
 const youtubeOpts : Options = {
-    height: '390',
-    width: '640',
+    width: YtEmbedWidth,
+    height: YtEmbedHeight,
     playerVars: {
         playsinline: 1
     }

@@ -73,15 +73,13 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
   return (<>
     <Autocomplete
       disableClearable
+      size="small"
       id={name}
       value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
       options={ LangOptions }
       onChange={(_event, newValue) => navigateToNewLang(newValue)}
-      renderInput={(params) => <TextField {...params} label="Language" variant="standard" />}
+      renderInput={(params) => <TextField {...params}  sx={{input: {textAlign: "center"}}} />}
       sx={{
-        "& label.Mui-focused": {
-          backgroundColor: 'grey'
-        },
         backgroundColor: 'rgb(67,130,247)',
       }}
       />

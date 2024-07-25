@@ -6,7 +6,7 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import SpeakerBubble from 'components/SpeakerBubble';
 import TranscriptHeader from 'components/TranscriptHeader';
-import VideoPlayer from './VideoPlayer';
+import VideoPlayer, { YtEmbedWidth, YtEmbedHeight } from './VideoPlayer';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
@@ -74,22 +74,25 @@ export default function BoardMeeting({
   return (
       <>
         <Stack>
-          <div>
-            <TranscriptHeader
-              category={category}
-              title={metadata.title}
-              description={metadata.description}
-              videoId={metadata.video_id}
-              curLang={languageOrder[0]}/>
-          </div>
-          <Stack direction="row">
+          <TranscriptHeader
+            category={category}
+            title={metadata.title}
+            description={metadata.description}
+            videoId={metadata.video_id}
+            curLang={languageOrder[0]}/>
+          <Stack direction="row" spacing={1}>
             <TranscriptControl>
               <main>
                 {speakerBubbles}
               </main>
             </TranscriptControl>
+
             <Stack>
-              <Card sx={{position: "sticky", top: "1rem"}} >
+              <Card style={{
+                  position: "sticky",
+                  top: "65px",
+                  width: YtEmbedWidth, height:
+                  YtEmbedHeight}} >
                 <VideoPlayer videoId={videoId} />
               </Card>
             </Stack>
@@ -98,15 +101,3 @@ export default function BoardMeeting({
       </>
   );
 }
-/*
-        <BoardMeetingControl
-          header={transcriptHeader}
-          transcriptNode={transcriptSection}
-          errors={diarizedTranscript.loadErrors}
-          category={category}
-          videoId={videoId}
-          initialExistingNames={initialExistingNames}
-          initialExistingTags={initialExistingTags}
-          speakerNums={speakerNums}
-        />
-        */

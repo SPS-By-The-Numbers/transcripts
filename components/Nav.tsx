@@ -12,9 +12,9 @@ import Button from '@mui/material/Button';
 
 export default function Nav() {
   return (
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Container maxWidth="xl">
-          <Toolbar disableGutters>
+          <Toolbar disableGutters variant="dense">
             <Button
                 variant="contained"
                 href={Constants.HOME_URL}

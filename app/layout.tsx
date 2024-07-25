@@ -50,12 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <InitColorSchemeScript />
           { getDevBanner() }
           <Nav />
-          <Box
-            width={'80%'}
-            margin="auto"
-            mt="2ex"
-          >
-          {children}
+          <Box mx="2ex" >
+            {children}
           </Box>
         </Providers>
       </body>
