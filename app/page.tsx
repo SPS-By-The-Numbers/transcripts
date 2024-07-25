@@ -24,7 +24,7 @@ async function makeResults(category: CategoryId) {
 function MakeAccordions() {
   return Object.entries(Constants.CATEGORY_CHANNEL_MAP).map(async ([key, info]) => {
     return (
-      <Accordion key={key} defaultExpanded>
+      <Accordion key={key} defaultExpanded disableGutters>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls={`panel${key}-content`}
