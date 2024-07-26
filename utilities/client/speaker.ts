@@ -4,13 +4,16 @@ import { toSpeakerColorClass } from 'utilities/client/css';
 import type { CategoryId, VideoId } from 'common/params';
 
 export type SpeakerInfoData = {
-  [key: number] : {name: string, tags: Set<string>, color: string};
+  [key: number] : {name: string, tags: TagSet, color: string};
 };
+
+export type ExistingNames = {[name: string]: { recentTags?: Array<string> } };
+export type TagSet = Set<string>;
 
 export type SpeakerControlInfo = {
   speakerInfo: SpeakerInfoData,
-  existingNames: object,
-  existingTags: Set<string>,
+  existingNames: ExistingNames,
+  existingTags: TagSet,
 };
 
 export const UnknownSpeakerNum : number = 99;
@@ -40,7 +43,7 @@ export function getSpeakerAttributes(speakerNum : number, speakerInfo : SpeakerI
   const data = speakerInfo?.[speakerNum];
 
   const name = data?.name || toSpeakerKey(speakerNum);
-  const tags = data?.tags ? new Set<string>(data.tags) : new Set<string>();
+  const tags = data?.tags ?? new Set<string>();
 
   const colorClass = toSpeakerColorClass(speakerNum);
 

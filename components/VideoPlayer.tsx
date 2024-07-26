@@ -11,8 +11,9 @@ type VideoPlayerParams = {
   videoId: string;
 };
 
-export const YtEmbedWidth = 560;
-export const YtEmbedHeight = 315;
+// https://blog.youtube/news-and-events/new-default-size-for-embedded-videos/
+export const YtEmbedWidth = 640;
+export const YtEmbedHeight = 385;
 
 const youtubeOpts : Options = {
     width: YtEmbedWidth,
@@ -54,7 +55,7 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
 
     // Stop the periodic updates at end.
     return () => clearInterval(interval);
-  }, []);
+  });
 
   function scrollTranscriptTo(hhmmss) {
     const tsClassName = `ts-${hhmmss}`;

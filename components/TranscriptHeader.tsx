@@ -47,10 +47,10 @@ export default function TranscriptHeader({category, title, description, videoId,
           </Stack>
         </AccordionSummary>
 
-        <AccordionDetails sx={{bgcolor: 'primary.background'}} >
+        <AccordionDetails sx={{bgcolor: 'accordion.main'}} >
           <Box>
             <Typography variant="body1" gutterBottom>{ description }</Typography>
-            <Typography variant="caption" gutterTop>Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</Typography>
+            <Typography variant="caption">Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</Typography>
           </Box>
         </AccordionDetails>
       </Accordion>

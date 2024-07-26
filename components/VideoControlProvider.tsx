@@ -18,10 +18,13 @@ const emptyVideoControl = {
 };
 
 // Pattern from https://stackoverflow.com/a/74174425
-export const VideoControlContext = createContext<VideoControlContextType>();
+export const VideoControlContext = createContext<VideoControlContextType>({
+  videoControl: emptyVideoControl,
+  setVideoControl: () => {},
+});
  
 export default function VideoControlContextProvider({children}: VideoControlProviderParams) {
-  const [videoControl, setVideoControl] = useState<VideoControlContextType>(emptyVideoControl);
+  const [videoControl, setVideoControl] = useState<VideoPlayerControl>(emptyVideoControl);
 
   const value = useMemo(() => ({ videoControl, setVideoControl }), [videoControl]);
  
@@ -31,7 +34,7 @@ export default function VideoControlContextProvider({children}: VideoControlProv
         <>
           {children}
         </>
-      ), [])}
+      ), [children])}
     </VideoControlContext.Provider>
   )
 }

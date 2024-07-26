@@ -19,10 +19,8 @@ export default function Nav() {
                 variant="contained"
                 href={Constants.HOME_URL}
                 disableElevation={true}
-                alt="home"
                 startIcon={<Avatar src={'/logo.png'} variant='square' />}
-              >
-            </Button>
+             />
 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               <Stack

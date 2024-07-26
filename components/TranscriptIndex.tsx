@@ -46,7 +46,7 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
   const videoLinks: React.ReactNode[] = videos
     .sort((a, b) => compareDesc(a.publishDate, b.publishDate))
     .map(video => (
-      <SearchResult category={category} videoId={video.videoId} title={video.title} publishDate={video.publishDate} />
+      <SearchResult key={video.videoId} category={category} videoId={video.videoId} title={video.title} publishDate={video.publishDate} />
     ));
 
   const loadingSection = (
