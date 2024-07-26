@@ -39,7 +39,7 @@ export default function SpeakerInfoContextProvider({children, initialSpeakerInfo
         <>
           {children}
         </>
-      ), [])}
+      ), [children])}
     </SpeakerInfoContext.Provider>
   )
 }

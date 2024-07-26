@@ -2,7 +2,7 @@
 
 import * as Constants from 'config/constants';
 
-export function getEndpointUrl(endpoint : string, parameters : Record<string,string> | object | undefined) {
+export function getEndpointUrl(endpoint : string, parameters? : Record<string,string> | object) {
   const urlRoot = `${Constants.ENDPOINTS[endpoint]}`;
   if (parameters !== undefined) {
     return urlRoot + '?' + new URLSearchParams(<Record<string, string>>parameters).toString();

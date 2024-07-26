@@ -3,16 +3,30 @@
 import React from 'react';
 
 import * as Constants from 'config/constants'
-import CreatableSelect from 'react-select/creatable'
-import { SpeakerInfoContext } from 'components/SpeakerInfoContextProvider'
+import Autocomplete from '@mui/material/Autocomplete'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { SpeakerInfoContext } from 'components/SpeakerInfoProvider'
 import { fetchEndpoint } from 'utilities/client/endpoint'
 import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { getSpeakerAttributes, toSpeakerKey, SpeakerInfoData } from 'utilities/client/speaker'
+import { getSpeakerAttributes, toSpeakerKey } from 'utilities/client/speaker'
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
 import { isEqual } from 'lodash-es'
 import { toSpeakerNum } from "utilities/client/speaker"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+
+import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
 const useMount = (fun) => useEffect(fun);
 
@@ -32,12 +46,11 @@ type SpeakerInfoControlParams = {
   speakerNums : Set<number>;
   videoId : string;
   className: string;
-  initialExistingNames : object,
-  initialExistingTags : Set<string>,
+  initialExistingNames : ExistingNames,
+  initialExistingTags : TagSet,
 };
 
 type OptionType = {
-  value : string;
   label : string;
 };
 
@@ -64,38 +77,43 @@ function makeSubmitStatusSuffix(submitStatus: SpeakerInfoSubmitStatus): String {
 
 // speakerInfo has the name, tags, etc.
 // number is a list of speaker keys like [0, 1, 2, .. ]
-export default function SpeakerInfoControl({category, className, speakerNums, videoId, initialExistingNames, initialExistingTags} : SpeakerInfoControlParams) {
-  const [existingNames, setExistingNames] = useState<object>(initialExistingNames);
-  const [existingTags, setExistingTags] = useState<Set<string>>(initialExistingTags);
+export default function SpeakerInfoControl({
+    category,
+    className,
+    speakerNums,
+    videoId,
+    initialExistingNames,
+    initialExistingTags } : SpeakerInfoControlParams) {
+  const [existingNames, setExistingNames] = useState<ExistingNames>(initialExistingNames);
+  const [existingTags, setExistingTags] = useState<TagSet>(initialExistingTags);
   const [authState, setAuthState] = useState<object>({});
   const {speakerInfo, setSpeakerInfo} = useContext(SpeakerInfoContext);
   const [submitStatus, setSubmitStatus] = useState<SpeakerInfoSubmitStatus>(
       { has_submitted: false, in_progress: false, last_status: 0 });
 
-  function handleNameChange(speakerNum : number, selectedOption : OptionType) {
+  function handleNameChange(speakerNum : number, newValue, reason) {
     const newSpeakerInfo = {...speakerInfo};
-    const newName = selectedOption?.value;
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
+    const newName = typeof newValue === 'string' ? newValue : newValue?.label;
+
     if (newName && !existingNames.hasOwnProperty(newName)) {
-      const newExistingNames = Object.assign({}, existingNames);
-      const recentTags = info.tags || [];
-      newExistingNames[newName] = { recentTags };
+      const recentTags = info.tags ?? new Set<string>;
+      const newExistingNames = {...existingNames, [newName]: {recentTags} };
       // TODO: Extract all these isEquals() checks.
       if (!isEqual(existingNames, newExistingNames)) {
         setExistingNames(newExistingNames);
       }
     }
 
-    console.log('names', newName, info.name);
     if (newName !== info.name) {
       info.name = newName;
       // Autopopulate the recent tags if nothing else was there.
       if (!info.tags || info.tags.size === 0) {
         info.tags = new Set<string>(newExistingNames[newName]?.recentTags);
       }
+      console.log("setting speaker:", info);
       setSpeakerInfo(newSpeakerInfo);
     }
-
   }
 
   async function handleSignin() {
@@ -123,16 +141,22 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
     }
   }
 
-  function handleTagsChange(speakerNum : number, newTagOptions) {
+  function handleTagsChange(speakerNum : number, newTagOptions: Array<OptionType | string>) {
     const newSpeakerInfo = {...speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
 
-    const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     const newTags = new Set<string>();
     for (const option of newTagOptions) {
-      newTags.add(option.value);
-      newExistingTags.add(option.value);
+      if (typeof option === 'string') {
+        newTags.add(option);
+        newExistingTags.add(option);
+      } else {
+        newTags.add(option.label);
+        newExistingTags.add(option.label);
+      }
     }
+    const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
+    info.tags = newTags;
     setSpeakerInfo(newSpeakerInfo);
 
     if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
@@ -180,14 +204,13 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
 
   const nameOptions : OptionType[] = [];
   for (const name of Object.keys(newExistingNames).sort()) {
-    nameOptions.push({label: name, value: name});
+    nameOptions.push({label: name});
   }
 
   const tagOptions : OptionType[] = [];
   for (const tag of Array.from(existingTags).sort()) {
-    tagOptions.push({label: tag, value: tag});
+    tagOptions.push({label: tag});
   }
-  console.log(tagOptions);
 
   // Create the speaker table.
   const speakerLabelInputs : React.ReactElement[] = [];
@@ -210,58 +233,113 @@ export default function SpeakerInfoControl({category, className, speakerNums, vi
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
-        <li key={speakerNum} className={`py-1 flex ${colorClass}`}>
-          <div className="pl-2 pr-1 basis-1/2">
-            <CreatableSelect
+        <TableRow
+            key={speakerNum}
+            className={colorClass}
+            sx={{
+                py: 1,
+                '&:last-child td, &:last-child th': { border: 0 }
+            }}
+        >
+          <TableCell>
+            {speakerNum}
+          </TableCell>
+          <TableCell>
+            <Autocomplete
                 id={`cs-name-${name}`}
-                isClearable
+                autoComplete
+                blurOnSelect
+                freeSolo
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    padding: 0,
+                  }
+                }}
                 options={nameOptions}
                 value={curName}
-                placeholder={`Name for ${name}`}
-                onChange={(newValue: OptionType) => handleNameChange(speakerNum, newValue)} />
-          </div>
-          <div className="pl-1 pr-2 basis-1/2">
-            <CreatableSelect
+                renderInput={(params) => (
+                  <TextField
+                      {...params}
+                      sx={{input: {textAlign: "left", margin: "dense"}}}
+                      placeholder={`Name for ${name}`} />)}
+                onChange={(event, newValue, reason) =>
+                    handleNameChange(speakerNum, newValue, reason)} />
+          </TableCell>
+          <TableCell>
+            <Autocomplete
                 id={`cs-tag-${name}`}
-                isClearable
-                isMulti
-                value={curTags}
+                multiple
+                autoComplete
+                freeSolo
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    padding: 0,
+                  }
+                }}
                 options={tagOptions}
-                placeholder={`Tags for ${name}`}
-                onChange={newValue => handleTagsChange(speakerNum, newValue)} />
-          </div>
-        </li>
+                value={curTags}
+                renderInput={(params) => (
+                  <TextField
+                      {...params}
+                      sx={{input: {textAlign: "left", margin: "dense"}}}
+                      placeholder={`Tags for ${name}`} />)}
+                onChange={(event, newValue, reason) =>
+                    handleTagsChange(speakerNum, newValue)} />
+          </TableCell>
+        </TableRow>
       );
     }
 
     if (auth.currentUser) {
       submitButton = (
-        <button key="submit-button"
-          className="px-4 py-2 m-2 bg-red-500 rounded"
+        <Button key="submit-button"
+          variant="contained"
+          size="small"
           onClick={handleSubmit}>
             Submit Changes as {auth.currentUser.email}{makeSubmitStatusSuffix(submitStatus)}
-        </button>
+        </Button>
       );
     } else {
       submitButton = (
-        <button key="signin-button"
-          className="px-4 py-2 m-2 bg-red-500 rounded"
+        <Button key="signin-button"
+          variant="contained"
+          size="small"
           onClick={handleSignin}>
             Login To Submit
-        </button>
+        </Button>
       );
     }
   } else {
-    speakerLabelInputs.push(<div key="loading-div">Wait...Loading Speakers Labels</div>);
+  // TODO: This cause hydration error.
+//    speakerLabelInputs.push(<TableRow key="loading-div">Wait...Loading Speakers Labels</TableRow>);
   }
 
   return (
-    <div className={className}>
-      Speaker List
-      <ul className="list-style-none">
+    <TableContainer component={Paper} style={{height: '100%'}}>
+      <Stack direction="row" px={1} sx={{
+            position: "sticky",
+            top: "0px",
+            py: "5px",
+            backgroundColor:"primary.analogous1"
+          }}
+      >
+        <Typography variant="h6" sx={{flexGrow:1}}>Speaker List</Typography>
+        <div>
+        {submitButton}
+        </div>
+      </Stack>
+      <Table size="small" aria-label="Speaker names">
+        <TableHead>
+          <TableRow>
+            <TableCell style={{width: "5%", maxWidth: "5%"}}>#</TableCell>
+            <TableCell style={{width: "65%", maxWidth: "65%"}} size="medium">Name</TableCell>
+            <TableCell style={{width: "30%", maxWidth: "30%"}} size="small">Tags</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
         { speakerLabelInputs }
-      </ul>
-      {submitButton}
-    </div>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

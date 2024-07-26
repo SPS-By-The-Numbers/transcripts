@@ -12,13 +12,13 @@ import { fetchEndpoint } from 'utilities/client/endpoint';
 import type { CategoryId } from 'common/params';
 
 async function makeResults(category: CategoryId) {
-  const parameters : Record<string, string> = { category, limit: 3 };
+  const parameters : Record<string, string> = { category, limit: "3" };
   const response = await fetchEndpoint('metadata', 'GET', parameters);
   if (!response.ok || response.data.length == 0) {
     return (<Typography>Sadness. Nothing in this category. </Typography>);
   }
   return response.data.map(v => (
-    <SearchResult category={category} videoId={v.videoId} title={v.title} publishDate={v.publishDate} />));
+    <SearchResult key={v.videoId} category={category} videoId={v.videoId} title={v.title} publishDate={v.publishDate} />));
 }
 
 function MakeAccordions() {

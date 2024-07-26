@@ -1,24 +1,26 @@
-import BoardMeetingControl from 'components/BoardMeetingControl';
-import TranscriptControl from 'components/TranscriptControl';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
 import SpeakerBubble from 'components/SpeakerBubble';
+import SpeakerInfoControl from 'components/SpeakerInfoControl';
+import Stack from '@mui/material/Stack';
+import TranscriptControl from 'components/TranscriptControl';
 import TranscriptHeader from 'components/TranscriptHeader';
-import VideoPlayer, { YtEmbedWidth, YtEmbedHeight } from './VideoPlayer';
+import VideoPlayer, { YtEmbedWidth, YtEmbedHeight } from 'components/VideoPlayer';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
+import type { CategoryId } from 'common/params';
 import type { DiarizedTranscript } from 'common/transcript';
+import type { ExistingNames, SpeakerInfoData, TagSet } from 'utilities/client/speaker';
 import type { ReactNode } from 'react';
-import type { SpeakerInfoData } from 'utilities/client/speaker';
 
 type BoardMeetingParams = {
   metadata: any,
-  category: string,
-  initialExistingNames: object,
-  initialExistingTags: Set<string>,
+  category: CategoryId,
+  initialExistingNames: ExistingNames,
+  initialExistingTags: TagSet,
   diarizedTranscript: DiarizedTranscript,
   speakerInfo: SpeakerInfoData,
   languageOrder: string[],
@@ -88,13 +90,35 @@ export default function BoardMeeting({
             </TranscriptControl>
 
             <Stack>
-              <Card style={{
+              <Box style={{
                   position: "sticky",
                   top: "65px",
-                  width: YtEmbedWidth, height:
-                  YtEmbedHeight}} >
-                <VideoPlayer videoId={videoId} />
-              </Card>
+                  height: "calc(100vh - 65px)"}}
+              >
+                <Card style={{
+                      width: YtEmbedWidth,
+                      height: YtEmbedHeight,
+                      marginBottom: "1ex",
+                    }}
+                >
+                  <VideoPlayer videoId={videoId} />
+                </Card>
+                <Card style={{
+                      overflow: "scroll",
+                      width: "100%",
+                      height: `calc(100vh - 65px - 385px - 16px)`,
+                    }}
+                >
+                  <SpeakerInfoControl
+                      category={category}
+                      speakerNums={speakerNums}
+                      videoId={videoId}
+                      className=""
+                      initialExistingNames={initialExistingNames}
+                      initialExistingTags={initialExistingTags}
+                  />
+                </Card>
+              </Box>
             </Stack>
           </Stack>
         </Stack>
