@@ -24,12 +24,17 @@ type TranscriptHeaderParams = {
 export default function TranscriptHeader({category, title, description, videoId, curLang} : TranscriptHeaderParams) {
   return(
     <>
-      <Accordion defaultExpanded disableGutters variant="outlined" sx={{my:2}} >
+      <Accordion defaultExpanded disableGutters variant="outlined" sx={{mb:2, mt:0}} >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls={`panel-content`}
           id={`panel-header`}
-          sx={{bgcolor: 'primary.analogous'}}
+          sx={{
+            bgcolor: 'primary.analogous',
+            "& .MuiAccordionSummary-content": {
+              my: '6px',
+            }
+          }}
         >
           <Stack direction="row" sx={{mr:"3ex", width:'100%'}}>
             <Stack sx={{ flexGrow: 4 }}>
@@ -47,7 +52,13 @@ export default function TranscriptHeader({category, title, description, videoId,
           </Stack>
         </AccordionSummary>
 
-        <AccordionDetails sx={{bgcolor: 'primary.info'}} >
+        <AccordionDetails
+          sx={{
+            bgcolor: 'primary.info',
+            '& .MuiAccordionDetails-root': {
+              my: '6px',
+            }
+          }} >
           <Box>
             <Typography variant="body1" gutterBottom>{ description }</Typography>
             <Typography variant="caption">Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</Typography>

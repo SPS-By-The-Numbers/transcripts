@@ -320,7 +320,7 @@ export default function SpeakerInfoControl({
             position: "sticky",
             top: "0px",
             py: "5px",
-            backgroundColor:"primary.analogous1"
+            backgroundColor:"primary.analogous"
           }}
       >
         <Typography variant="h6" sx={{flexGrow:1}}>Speaker List</Typography>
@@ -330,9 +330,9 @@ export default function SpeakerInfoControl({
       </Stack>
       <Table size="small" aria-label="Speaker names">
         <TableHead>
-          <TableRow>
-            <TableCell style={{width: "5%", maxWidth: "5%"}}>#</TableCell>
-            <TableCell style={{width: "65%", maxWidth: "65%"}} size="medium">Name</TableCell>
+          <TableRow sx={{bgcolor: 'primary.info'}}>
+            <TableCell style={{width: "5%", maxWidth: "5%"}} size="small">#</TableCell>
+            <TableCell style={{width: "65%", maxWidth: "65%"}} size="small">Name</TableCell>
             <TableCell style={{width: "30%", maxWidth: "30%"}} size="small">Tags</TableCell>
           </TableRow>
         </TableHead>

@@ -5,12 +5,12 @@ import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
 declare module '@mui/material/styles' {
   interface PaletteColor {
     analogous?: string;
-    infoBackground?: string;
+    info?: string;
   }
 
   interface SimplePaletteColorOptions {
     analogous?: string;
-    infoBackground?: string;
+    info?: string;
   }
 }
 
@@ -30,27 +30,14 @@ const theme = extendTheme({
         primary: {
           main: '#0a43ad',
           analogous: '#0a95ad',
-          lighter: '#3e7ef4',
-          infoBackground: '#efefef',
+          info: '#efefef',
+          contrastText: '#ececec',
         },
         secondary: {
           main: '#0a43ad',
-        }
-      },
-    },
-    dark: {
-      palette: {
-        primary: {
-          main: '#0a41ad',
-          analogous: '#0a95ad',
-          lighter: '#3e7ef4',
-          info: '#efefef',
         },
-        secondary: {
-          main: '#c28426',
-        }
       },
-    },
+    }
   }
 });
 
