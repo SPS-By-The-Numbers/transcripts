@@ -80,7 +80,7 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
       onChange={(_event, newValue) => navigateToNewLang(newValue)}
       renderInput={(params) => <TextField {...params}  sx={{input: {textAlign: "center"}}} />}
       sx={{
-        backgroundColor: 'rgb(67,130,247)',
+        bgcolor: 'primary.lighter',
       }}
       />
     </>);
