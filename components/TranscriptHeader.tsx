@@ -29,7 +29,7 @@ export default function TranscriptHeader({category, title, description, videoId,
           expandIcon={<ExpandMoreIcon />}
           aria-controls={`panel-content`}
           id={`panel-header`}
-          sx={{bgcolor: 'primary.analogous1'}}
+          sx={{bgcolor: 'primary.analogous'}}
         >
           <Stack direction="row" sx={{mr:"3ex", width:'100%'}}>
             <Stack sx={{ flexGrow: 4 }}>
@@ -47,7 +47,7 @@ export default function TranscriptHeader({category, title, description, videoId,
           </Stack>
         </AccordionSummary>
 
-        <AccordionDetails sx={{bgcolor: 'accordion.main'}} >
+        <AccordionDetails sx={{bgcolor: 'primary.info'}} >
           <Box>
             <Typography variant="body1" gutterBottom>{ description }</Typography>
             <Typography variant="caption">Click on words in the transcription to jump to its portion of the audio. The URL can be copy/pasted to get back to the exact second.</Typography>
