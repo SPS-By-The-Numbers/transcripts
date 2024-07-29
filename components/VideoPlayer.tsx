@@ -55,7 +55,7 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
 
     // Stop the periodic updates at end.
     return () => clearInterval(interval);
-  });
+  }, [setVideoControl]);
 
   function scrollTranscriptTo(hhmmss) {
     const tsClassName = `ts-${hhmmss}`;
