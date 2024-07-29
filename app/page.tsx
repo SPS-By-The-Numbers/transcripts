@@ -29,7 +29,7 @@ function MakeAccordions() {
           expandIcon={<ExpandMoreIcon />}
           aria-controls={`panel${key}-content`}
           id={`panel${key}-header`}
-          sx={{bgcolor: 'primary.analogous1'}}
+          sx={{bgcolor: 'primary.analogous'}}
         >
           <Typography>{info.name} - Recent Transcripts</Typography>
         </AccordionSummary>
