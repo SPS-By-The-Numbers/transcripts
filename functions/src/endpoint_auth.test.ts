@@ -24,7 +24,7 @@ describe('auth_code endpoints', () => {
       expect(response.status).toStrictEqual(401);
       const responseJson = await response.json();
       expect(responseJson.ok).toStrictEqual(false);
-      expect(responseJson.message).toMatch(/missing user_id/);
+      expect(responseJson.message).toMatch(/must have required property 'user_id'/);
     });
 
     it(`${method} ${endpoint} needs auth_code`, async () => {
@@ -35,7 +35,7 @@ describe('auth_code endpoints', () => {
       expect(response.status).toStrictEqual(401);
       const responseJson = await response.json();
       expect(responseJson.ok).toStrictEqual(false);
-      expect(responseJson.message).toMatch(/invalid auth_code/);
+      expect(responseJson.message).toMatch(/must have required property 'auth_code'/);
     });
 
     it(`${method} ${endpoint} rejects invalid auth_code`, async () => {

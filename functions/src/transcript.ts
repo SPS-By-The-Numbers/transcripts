@@ -5,6 +5,7 @@ import { getAuthCode, jsonOnRequest } from './utils/firebase';
 import { setMetadata } from './utils/metadata';
 import { getStorageAccessor } from './utils/storage';
 import { makeResponseJson } from './utils/response';
+import { validateObj } from './utils/validation';
 
 import type { WhisperXTranscript } from 'common/whisperx';
 import type { Iso6393Code, VideoId } from 'common/params';
@@ -12,17 +13,14 @@ import type { Iso6393Code, VideoId } from 'common/params';
 const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 
 async function uploadTrancript(req, res) {
-  if (!req.body.user_id) {
-    console.log("No UserId");
-    res.status(401).send(makeResponseJson(false, "missing user_id"));
-    return;
+  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
   if (req.body.auth_code !== auth_code) {
-    console.log("invalid Auth code");
-    res.status(401).send(makeResponseJson(false, "invalid auth_code"));
-    return;
+    return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
   }
 
   // Check request to ensure it looks like valid JSON request.
@@ -31,19 +29,12 @@ async function uploadTrancript(req, res) {
     return;
   }
 
-  const category = req.body.category;
-  if (!category || category.length > 20) {
-    console.log("Missing category");
-    res.status(400).send(makeResponseJson(false, "Expects category"));
-    return;
+  const requestErrors = validateObj(req.body, 'reqCategory', 'reqVid');
+  if (requestErrors.length) {
+    return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
 
-  if (!req.body.vid) {
-    console.log("Missing vid");
-    res.status(400).send(makeResponseJson(false, "Missing vid"));
-    return;
-  }
-
+  // TODO: Fix the transcripts format validation.
   const transcripts = req.body.transcripts || {};
   for (const iso6391Lang of Object.keys(transcripts)) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
@@ -58,7 +49,7 @@ async function uploadTrancript(req, res) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
     console.log("Saved vid: ", req.body.vid, " language: ", lang);
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
-        category, req.body.vid, whisperXTranscript);
+        req.body.category, req.body.vid, whisperXTranscript);
     diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
@@ -73,19 +64,14 @@ async function uploadTrancript(req, res) {
 }
 
 async function downloadTranscript(req, res) {
-  const category = req.query.category;
-  if (!category || category.length > 20) {
-    res.status(400).send(makeResponseJson(false, "Expects category"));
-    return;
-  }
-
-  if (!req.query.vid) {
-    res.status(400).send(makeResponseJson(false, "Missing vid"));
-    return;
+  const requestErrors = validateObj(req.query, 'reqCategory', 'reqVid');
+  if (requestErrors.length) {
+    return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
   const videoId : VideoId = req.query.vid;
 
-  const diarizedTranscript = await DiarizedTranscript.fromStorage(getStorageAccessor(), category, videoId, ['eng']);
+  const diarizedTranscript = await DiarizedTranscript.fromStorage(
+      getStorageAccessor(), req.query.category, videoId, ['eng']);
   console.log(diarizedTranscript);
   const sentences = new Array<string>;
   for (const [_, segmentId] of diarizedTranscript.sentenceInfo) {

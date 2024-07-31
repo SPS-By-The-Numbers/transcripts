@@ -2,14 +2,16 @@ import * as Constants from 'config/constants';
 import { getCategoryPublicDb, getCategoryPrivateDb, getPubSubClient, jsonOnRequest, getAuthCode, getUser } from "./utils/firebase";
 
 import { getVideosForCategory } from "./youtube.js";
-import { sanitizeCategory } from "./utils/path";
 import { makeResponseJson } from "./utils/response";
+import { sanitizeCategory } from "./utils/path";
+import { validateObj } from './utils/validation';
 
 import type { UserRecord } from "./utils/firebase";
 
 async function getVideoQueue(req, res) {
-  if (!req.query.user_id) {
-    return res.status(401).send(makeResponseJson(false, "missing user_id"));
+  const authCodeErrors = validateObj(req.query, 'reqAuthCode');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
 
   const auth_code = (await getAuthCode(req.query.user_id));
@@ -66,25 +68,25 @@ async function findNewVideos(req, res) {
 }
 
 async function removeItem(req, res) {
-  // TODO: Extract this auth check.
-  if (!req.body.user_id) {
-    return res.status(401).send(makeResponseJson(false, "missing user_id"));
+  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
-
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
   }
 
-  const category = sanitizeCategory(req.body.category);
-  if (!category) {
-    return res.status(400).send(makeResponseJson(false, "Expects category"));
+  // TODO: validate video_ids.
+  const requestErrors = validateObj(req.body, 'reqCategory');
+  if (requestErrors.length) {
+    return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
 
   const removes = new Array<Promise<void>>;
   for (const vid of req.body.video_ids) {
-    removes.push(getCategoryPrivateDb(category).child("new_vids").child(vid).remove());
+    removes.push(getCategoryPrivateDb(req.body.category).child("new_vids").child(vid).remove());
   }
 
   await Promise.all(removes);
@@ -93,13 +95,12 @@ async function removeItem(req, res) {
 }
 
 async function removeVastInstance(req, res) {
-  // TODO: Extract this auth check.
-  if (!req.body.user_id) {
-    return res.status(401).send(makeResponseJson(false, "missing user_id"));
+  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
-
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
   }
@@ -147,13 +148,12 @@ async function addNewVideo(req, res) {
 }
 
 async function updateEntry(req, res) {
-  // TODO: Extract this auth check.
-  if (!req.body.user_id) {
-    return res.status(401).send(makeResponseJson(false, "missing user_id"));
+  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
 
   const auth_code = (await getAuthCode(req.body.user_id));
-
   if (req.body.auth_code !== auth_code) {
     return res.status(401).send(makeResponseJson(false, "invalid auth_code"));
   }
