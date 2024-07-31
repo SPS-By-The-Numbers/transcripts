@@ -44,11 +44,14 @@ export async function indexMetadata(category : CategoryId, metadata : StoredMeta
   getCategoryPublicDb(category, PUBLISHED_INDEX_PATH, makePublishedIndexKey(metadata)).set(metadata);
 }
 
-export async function setMetadata(category : CategoryId, metadata : StoredMetadata) {
-  if (!metadata || !metadata.video_id) {
-    console.error("Invalid metadata: ", metadata);
+export async function setMetadata(category : CategoryId, m: StoredMetadata) {
+  // TODO: Validate metdata.
+  if (!m|| !m.video_id) {
+    console.error("Invalid metadata: ", m);
     return false;
   }
+  const metadata = Object.assign({}, m);
+//  metadata._updated = (new Date()).toISOString();
 
   console.log("Setting metadata for ", metadata.video_id);
 
