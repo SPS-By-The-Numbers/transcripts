@@ -29,7 +29,7 @@ async function uploadTrancript(req, res) {
     return;
   }
 
-  const requestErrors = validateObj(req.body, 'reqCategory', 'reqVid');
+  const requestErrors = validateObj(req.body, 'uploadTranscriptRequest');
   if (requestErrors.length) {
     return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
@@ -47,13 +47,14 @@ async function uploadTrancript(req, res) {
 
   for (const [iso6391Lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
-    console.log("Saved vid: ", req.body.vid, " language: ", lang);
+    console.log("Saved video: ", req.body.video_id, " language: ", lang);
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
-        req.body.category, req.body.vid, whisperXTranscript);
+        req.body.category, req.body.video_id, whisperXTranscript);
     diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
+  // TODO: Get the metadata. hen save it.
   if (req.body.metadata && ! (await setMetadata(req.body.category, req.body.metadata))) {
     console.log("Failed setting metadata: ", req.body);
     res.status(500).send(makeResponseJson(false, "Internal error"));
