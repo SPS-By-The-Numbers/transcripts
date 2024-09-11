@@ -43,7 +43,7 @@ export function getSpeakerAttributes(speakerNum : number, speakerInfo : SpeakerI
   const data = speakerInfo?.[speakerNum];
 
   const name = data?.name || toSpeakerKey(speakerNum);
-  const tags = data?.tags ?? new Set<string>();
+  const tags = new Set<string>(data?.tags ?? []);
 
   const colorClass = toSpeakerColorClass(speakerNum);
 
