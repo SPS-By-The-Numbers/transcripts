@@ -49,6 +49,20 @@ export default function Nav() {
                     sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
                   SPS Board
                 </Typography>
+                <Typography
+                    noWrap
+                    component="a"
+                    href="/seattle-city-council/search"
+                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
+                   Text Search[Seattle City Council]
+                </Typography>
+                <Typography
+                    noWrap
+                    component="a"
+                    href="/sps-board/search"
+                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
+                  Text Search[SPS Board]
+                </Typography>
               </Stack>
             </Box>
             <Box sx={{flexGrow: 0}}>

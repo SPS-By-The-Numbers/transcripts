@@ -204,13 +204,14 @@ function extractCategory(param) {
 export default function TranscriptSearch({ searchParams }: { searchParams: SearchParams }) {
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
-  const [groupType, setGroupType] = useState<string>("video");
+  const [groupType, setGroupType] = useState<string>("speaker");
   const [results, setResults] = useState<SearchResults | undefined>();
 
   const category = extractCategory(searchParams.category);
 
   return (
       <div className="p-2">
+        <h1> Experimental Search of all Meetings for {category} </h1>
         <form
             className="flex items-center justify-center"
             onSubmit={(e) => {
@@ -219,8 +220,8 @@ export default function TranscriptSearch({ searchParams }: { searchParams: Searc
             }}>
           <label> Result Grouping: 
           <select onChange={(e) => setGroupType(e.target.value)} className="m-2 border-black border-2" value={groupType}>
-            <option value="video">By Video</option>
             <option value="speaker">By Speaker Turn</option>
+            <option value="video">By Video</option>
           </select>
           </label>
           <label> Result Sort: 
