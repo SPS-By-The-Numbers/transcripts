@@ -96,5 +96,5 @@ export async function getMatchingMetdata(category: CategoryId, matchOptions : Ma
   }
 
   // Put it in descending order.
-  return Object.values(result.reverse()).map(v => metadataToVideoMetadata(v));
+  return Object.values(result).reverse().map(v => metadataToVideoMetadata(v));
 }
