@@ -1,10 +1,6 @@
 #!python
 
-from pytube import YouTube
-
-# Hackk around age-restriction on videos: https://stackoverflow.com/a/78267693
-from pytube.innertube import _default_clients
-_default_clients["ANDROID_MUSIC"] = _default_clients["ANDROID_CREATOR"]
+from pytubefix import YouTube
 
 import argparse
 import json
@@ -92,19 +88,29 @@ def process_vids(vid_list, args):
             logging.info("Whisper took: %d seconds" % (end - start))
 
             # Upload json transcript.
+            metadata = {
+                'title': video.title,
+                'video_id': video.video_id,
+                'channel_id': video.channel_id,
+                'description': video.description,
+                'publish_date': video.publish_date.isoformat(),
+            }
+
             with open(args.workdir.joinpath(f"{video_id}.json")) as f:
                 transcript_obj = json.load(f)
-            logging.info(f"Uploading transcript json {len(transcript_json)} bytes")
+
+            logging.info(f"Uploading transcript")
             response = requests.put(
                 make_endpoint_url("transcript"),
                 json={
                     **AUTH_PARAMS,
                     'category': category,
-                    'transcripts': {transcript_obj.language: transcript_obj},
+                    'transcripts': {transcript_obj["language"]: transcript_obj},
+                    'metadata': metadata,
                     'video_id': video_id })
 
             if response.status_code != 200:
-                logging.error(f"Unable to upload transcript {response.json()}");
+                logging.error("Unable to upload transcript", response.json())
                 continue
 
             logging.info(f"Deleting video from queue")
@@ -112,7 +118,7 @@ def process_vids(vid_list, args):
                 make_endpoint_url("video-queue"),
                 json={**AUTH_PARAMS, 'category': category, 'video_ids': [video_id]})
             if response.status_code != 200:
-                logging.error(f"Unable to delete queue item {response.json()}");
+                logging.error("Unable to delete queue item", response.json())
                 continue
         except Exception:
             logging.exception("Transcribe failed for " + video_id)

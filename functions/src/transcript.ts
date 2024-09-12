@@ -31,10 +31,10 @@ async function uploadTrancript(req, res) {
 
   const requestErrors = validateObj(req.body, 'uploadTranscriptRequest');
   if (requestErrors.length) {
+    console.log("Failed validation: ", requestErrors);
     return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
 
-  // TODO: Fix the transcripts format validation.
   const transcripts = req.body.transcripts || {};
   for (const iso6391Lang of Object.keys(transcripts)) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
@@ -54,26 +54,26 @@ async function uploadTrancript(req, res) {
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
-  // TODO: Get the metadata. hen save it.
   if (req.body.metadata && ! (await setMetadata(req.body.category, req.body.metadata))) {
-    console.log("Failed setting metadata: ", req.body);
-    res.status(500).send(makeResponseJson(false, "Internal error"));
+    console.log("Failed setting metadata: ", req.body.metadata);
+    res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
     return;
+  } else {
+    console.warn("No metadata! May not be indexed!");
   }
 
   res.status(200).send(makeResponseJson(true, "update done"));
 }
 
 async function downloadTranscript(req, res) {
-  const requestErrors = validateObj(req.query, 'reqCategory', 'reqVid');
+  const requestErrors = validateObj(req.query, 'reqCategory', 'reqVideoId');
   if (requestErrors.length) {
     return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
-  const videoId : VideoId = req.query.vid;
+  const videoId : VideoId = req.query.video_id;
 
   const diarizedTranscript = await DiarizedTranscript.fromStorage(
       getStorageAccessor(), req.query.category, videoId, ['eng']);
-  console.log(diarizedTranscript);
   const sentences = new Array<string>;
   for (const [_, segmentId] of diarizedTranscript.sentenceInfo) {
     sentences.push(diarizedTranscript.languageToSentenceTable['eng'][segmentId]);

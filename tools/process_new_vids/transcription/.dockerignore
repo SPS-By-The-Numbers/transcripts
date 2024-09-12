@@ -1,7 +1,0 @@
-.git
-.gitignore
-.gcloudignore
-venv
-*~
-*.mp3
-*.m4a
