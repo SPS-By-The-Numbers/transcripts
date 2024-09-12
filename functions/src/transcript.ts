@@ -13,7 +13,7 @@ import type { Iso6393Code, VideoId } from 'common/params';
 const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 
 async function uploadTrancript(req, res) {
-  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  const authCodeErrors = validateObj(req.body, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }

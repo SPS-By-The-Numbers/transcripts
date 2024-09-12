@@ -9,7 +9,7 @@ import { validateObj } from './utils/validation';
 import type { UserRecord } from "./utils/firebase";
 
 async function getVideoQueue(req, res) {
-  const authCodeErrors = validateObj(req.query, 'reqAuthCode');
+  const authCodeErrors = validateObj(req.query, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
@@ -68,7 +68,7 @@ async function findNewVideos(req, res) {
 }
 
 async function removeItem(req, res) {
-  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  const authCodeErrors = validateObj(req.body, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
@@ -95,7 +95,7 @@ async function removeItem(req, res) {
 }
 
 async function removeVastInstance(req, res) {
-  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  const authCodeErrors = validateObj(req.body, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }
@@ -148,7 +148,7 @@ async function addNewVideo(req, res) {
 }
 
 async function updateEntry(req, res) {
-  const authCodeErrors = validateObj(req.body, 'reqAuthCode');
+  const authCodeErrors = validateObj(req.body, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
   }

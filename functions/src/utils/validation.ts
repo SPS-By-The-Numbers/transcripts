@@ -9,11 +9,6 @@ export const Schemas = {
   // Basic types.
   category: { enum: Constants.ALL_CATEGORIES },
 
-  base64Id: {
-    type: "string",
-    pattern: "^[a-zA-Z0-9_-]{1,64}$",
-  },
-
   videoId: {
     type: "string",
     pattern: "^[a-zA-Z0-9_-]{11}$",
@@ -66,10 +61,11 @@ export const Schemas = {
 
   metadata: {
     type: "object",
-    required: ["title", "video_id", "channel_id", "publish_date"],
+    required: ["title", "video_id", "description", "channel_id", "publish_date"],
     properties: {
       title: { type: "string"},
       video_id: { type: "string"},
+      description: { type: "string"},
       channel_id: { type: "string"},
       publish_date: { type: "string"},
     },
@@ -81,8 +77,8 @@ export const Schemas = {
   authCodeParam : {
     type: "object",
     properties: {
-      user_id: { "$ref": "base64Id" },
-      auth_code: { "$ref": "base64Id" },
+      user_id: { "type": "string" },
+      auth_code: { "type": "string" },
     },
     required: ["user_id", "auth_code"],
   },
@@ -106,21 +102,17 @@ export const Schemas = {
     },
   },
 
-  // TODO: Remove these.
-  reqAuthCode :{
+  uploadMetadataRequest : {
     type: "object",
+    required: ["category", "metadata" ],
+
     properties: {
-      user_id: {
-        type: "string",
-        pattern: "^[a-zA-Z0-9_-]{1,64}$",
-      },
-      auth_code: {
-        type: "string",
-        pattern: "^[a-zA-Z0-9_-]{1,64}$",
-      },
+      category: { "$ref": "category" },
+      metadata: { "$ref": "metadata" },
     },
-    required: ["user_id", "auth_code"],
   },
+
+  // TODO: Remove these.
   reqCategory: {
     type: "object",
     properties: {
