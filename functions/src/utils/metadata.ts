@@ -10,11 +10,11 @@ export type MatchOptions = {
 };
 
 export type StoredMetadata = {
-  title: string;
-  video_id: string;
-  channel_id: string;
-  description: string;
-  publish_date: string;
+  title : string;
+  video_id : string;
+  channel_id : string;
+  publish_date : string;
+  _updated? : string;
 };
 
 export const PUBLISHED_INDEX_PATH = 'index/published';
@@ -51,7 +51,7 @@ export async function setMetadata(category : CategoryId, m: StoredMetadata) {
     return false;
   }
   const metadata = Object.assign({}, m);
-//  metadata._updated = (new Date()).toISOString();
+  metadata._updated = (new Date()).toISOString();
 
   console.log("Setting metadata for ", metadata.video_id);
 

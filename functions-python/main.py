@@ -58,7 +58,7 @@ def start_transcribe(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
             # Create the instance
             create_result = json.loads(vast.create_instance(
                 ID=cheapest["ask_contract_id"],
-                image="awongdev/transcribe:0.4",
+                image="awongdev/transcribe:0.5",
                 label=INSTANCE_LABEL,
                 # Kill the server after 30 mins if it's still running.
                 onstart_cmd=f"env | grep _ >> /etc/environment; nohup /workspace/app/onstart_hook.sh {int(cheapest['cpu_cores_effective'])} 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 {lysine_timeout} 10 &",

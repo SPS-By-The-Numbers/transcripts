@@ -8,23 +8,32 @@ const Iso639_1Regex = '^[a-z]{2}$';
 export const Schemas = {
   // Basic types.
   category: { enum: Constants.ALL_CATEGORIES },
+
   base64Id: {
     type: "string",
     pattern: "^[a-zA-Z0-9_-]{1,64}$",
   },
+
   videoId: {
     type: "string",
     pattern: "^[a-zA-Z0-9_-]{11}$",
   },
+
   'iso639-1': {
     type: "string",
     pattern: Iso639_1Regex,
   },
+
   whisperXTranscript: {
     type: "object",
     properties: {
       language: { "$ref": "iso639-1" },
-      segments: { "$ref": "whisperXSegmentData" },
+      segments: { 
+        "type": "array",
+        "items" : {
+          "$ref": "whisperXSegmentData"
+        }
+      },
     },
   },
 
@@ -35,7 +44,12 @@ export const Schemas = {
       end: { type: "number"},
       text: { type: "string"},
       speaker: { type: "string"},
-      words: { "$ref": "whisperXWordData" },
+      words: { 
+        "type": "array",
+        "items": {
+          "$ref": "whisperXWordData" 
+        }
+      },
     },
   },
 
@@ -47,6 +61,17 @@ export const Schemas = {
       end: { type: "number"},
       score: { type: "number"},
       speaker: { type: "string"},
+    },
+  },
+
+  metadata: {
+    type: "object",
+    required: ["title", "video_id", "channel_id", "publish_date"],
+    properties: {
+      title: { type: "string"},
+      video_id: { type: "string"},
+      channel_id: { type: "string"},
+      publish_date: { type: "string"},
     },
   },
 
@@ -65,66 +90,54 @@ export const Schemas = {
   // Validations for individual request objects.
   uploadTranscriptRequest : {
     type: "object",
-    additionalProperties: false,
-    required: ["category", "video_id"],
+    required: ["category", "video_id", "transcripts"],
 
     properties: {
       category: { "$ref": "category" },
       video_id: { "$ref": "videoId" },
       transcripts: {
         type: "object",
-        additionalProperties: false,
         minProperties: 1,
         patternProperties: {
           [Iso639_1Regex]: { "$ref": "whisperXTranscript" }
         },
       },
+      metadata: { "$ref": "metadata" },
     },
   },
 
-// TODO: Remove these.
-reqAuthCode :{
-  type: "object",
-  properties: {
-    user_id: {
-      type: "string",
-      pattern: "^[a-zA-Z0-9_-]{1,64}$",
+  // TODO: Remove these.
+  reqAuthCode :{
+    type: "object",
+    properties: {
+      user_id: {
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]{1,64}$",
+      },
+      auth_code: {
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]{1,64}$",
+      },
     },
-    auth_code: {
-      type: "string",
-      pattern: "^[a-zA-Z0-9_-]{1,64}$",
+    required: ["user_id", "auth_code"],
+  },
+  reqCategory: {
+    type: "object",
+    properties: {
+      category: { enum: Constants.ALL_CATEGORIES }
     },
+    required: ["category"],
   },
-  required: ["user_id", "auth_code"],
-},
-reqCategory: {
-  type: "object",
-  properties: {
-    category: { enum: Constants.ALL_CATEGORIES }
-  },
-  required: ["category"],
-},
-reqVid: {
-  type: "object",
-  properties: {
-    vid: {
-      type: "string",
-      pattern: "^[a-zA-Z0-9_-]{11}$",
+  reqVideoId: {
+    type: "object",
+    properties: {
+      video_id: {
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]{11}$",
+      },
     },
-  },
-  // TODO: Rename video_id
-  required: ["vid"],
-},
-reqVideoId: {
-  type: "object",
-  properties: {
-    video_id: {
-      type: "string",
-      pattern: "^[a-zA-Z0-9_-]{11}$",
-    },
-  },
-  required: ["video_id"],
-}
+    required: ["video_id"],
+  }
 } as const;
 
 // Request uses user_id/auth_code combo for access.

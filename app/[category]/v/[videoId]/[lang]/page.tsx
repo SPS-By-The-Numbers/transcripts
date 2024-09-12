@@ -54,7 +54,6 @@ export async function generateMetadata(
 
 export default async function Index({params}: {params: VideoParams}) {
   // Handle the legacy URL redirect.
-    console.log("videoId", params.videoId);
   if (Constants.LEGACY_PREFIX_REDIRECT && params.videoId.length === 2) {
     // If this is a legacy url with a prefix like /v/AB/ABCD123 then 
     // it might be a videId incorrect interpreted as lang.

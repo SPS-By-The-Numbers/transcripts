@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import * as fs from 'node:fs';
 import * as FirebaseUtils from 'utils/firebase';
 import sourceMapSupport from 'source-map-support'
 
@@ -10,6 +11,20 @@ export const EMULATOR_ENDPOINT_ROOT = 'http://127.0.0.1:5001/sps-by-the-numbers/
 
 export const FAKE_USER_ID = 'fakeuser';
 export const FAKE_AUTH_CODE = 'fake_auth';
+
+// One whisperX transcript. Note the stored file has a .xz extension but it is actually plaintext to avoid
+// needing to load the xz codec!
+export const DATA_WHISPERX_TRANSCRIPT = JSON.parse(fs.readFileSync(
+    "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz",
+    "utf-8"));
+
+  // Fake metadata to use in test.
+export const DATA_METADATA = {
+  channel_id: "UC07MVxpRKdDJmqwWDGYqotA",
+  publish_date: "2015-11-04T00:00:00",
+  title: "School Board Meeting Date: November 4th, 2015 Pt.2",
+  video_id: "-95KMDHf4vQ",
+}
 
 let processInitialized = false;
 
@@ -32,10 +47,11 @@ export async function beforeAll() {
   await FirebaseUtils.setAuthCode(FAKE_USER_ID, FAKE_AUTH_CODE);
 }
 
-export function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string>) {
+export function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string | object>) {
   const fullUrl = `${EMULATOR_ENDPOINT_ROOT}/${endpoint}`;
   if (method === 'GET') {
-    return fetch(fullUrl + '?' + new URLSearchParams(parameters).toString());
+    const narrowedParams = parameters as Record<string, string>;
+    return fetch(fullUrl + '?' + new URLSearchParams(narrowedParams).toString());
   }
 
   return fetch(fullUrl, {
