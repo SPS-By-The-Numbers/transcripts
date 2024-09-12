@@ -13,6 +13,7 @@ export type StoredMetadata = {
   title : string;
   video_id : string;
   channel_id : string;
+  description : string;
   publish_date : string;
   _updated? : string;
 };
@@ -23,9 +24,9 @@ function metadataToVideoMetadata(entry: StoredMetadata): VideoMetadata {
     return {
         videoId: entry.video_id,
         title: entry.title,
-        description: entry.description,
+        description: entry.description ?? '',
         publishDate: parseISO(entry.publish_date),
-        channelId: entry.channel_id
+        channelId: entry.channel_id,
     };
 }
 
