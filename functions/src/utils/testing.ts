@@ -23,6 +23,7 @@ export const DATA_METADATA = {
   channel_id: "UC07MVxpRKdDJmqwWDGYqotA",
   publish_date: "2015-11-04T00:00:00",
   title: "School Board Meeting Date: November 4th, 2015 Pt.2",
+  description: "Blah",
   video_id: "-95KMDHf4vQ",
 }
 
