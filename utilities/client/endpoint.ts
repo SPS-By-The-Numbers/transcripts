@@ -14,7 +14,7 @@ export function getEndpointUrl(endpoint : string, parameters? : Record<string,st
 export async function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string> | object) {
   if (method === 'GET') {
     const fullUrl = getEndpointUrl(endpoint, <Record<string, string>>parameters);
-    return await (await fetch(fullUrl)).json();
+    return await (await fetch(fullUrl, { next: { revalidate: 300 } } )).json();
   }
 
   return await (await fetch(getEndpointUrl(endpoint), {

@@ -6,7 +6,7 @@
   "scripts": {
     "bootstrap": "firebase experiments:enable webframeworks",
     "build": "next build",
-    "deploy": "firebase deploy --only hosting:transcripts",
+    "deploy": "firebase deploy --only hosting:transcripts-spsbtn",
     "dev": "next dev",
     "lint": "next lint",
     "syncData": "bash syncdata.sh",
