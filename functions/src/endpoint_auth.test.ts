@@ -51,6 +51,22 @@ describe('auth_code endpoints', () => {
       expect(responseJson.ok).toStrictEqual(false);
       expect(responseJson.message).toMatch(/invalid auth_code/);
     });
+
+     it(`${method} ${endpoint} accepts valid auth_code`, async () => {
+      const response = await TestingUtils.fetchEndpoint(
+          endpoint,
+          method,
+          {
+            { user_id: TestingUtils.FAKE_USER_ID,
+              auth_code: TestingUtils.FAKE_AUTH_CODE,
+              category: 'sps-board',
+              video_id: 'MT2zjpRbQJA'
+            });
+        expect(response.status).not.toEqual(401);
+        const responseJson = await response.json();
+      });
+
+    
   }
 });
 
