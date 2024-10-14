@@ -3,10 +3,9 @@ import json
 import secrets
 
 from firebase_admin import initialize_app, db
-from firebase_functions import pubsub_fn
+from firebase_functions import pubsub_fn, logger
 from google.cloud import secretmanager
 from vast_python import VastAI
-
 
 app = initialize_app()
 
@@ -14,9 +13,10 @@ DISK_GB = 25
 INSTANCE_LABEL = 'auto_transcribe'
 MINS_PER_VID = 10
 VIDS_PER_MACHINE = 20
+INSTANCE_STALE_S = 60 * 60 * 2  # 2hrs is a long time for these jobs.
 
 
-def access_secret_version(project_id, secret_id, version_id="latest"):
+def _access_secret_version(project_id, secret_id, version_id="latest"):
     client = secretmanager.SecretManagerServiceClient()
 
     # Build the resource name of the secret version
@@ -29,11 +29,6 @@ def access_secret_version(project_id, secret_id, version_id="latest"):
     payload = response.payload.data.decode("UTF-8")
 
     return payload
-
-# Example usage
-# project_id = "your-project-id"
-# secret_id = "your-secret-name"
-# secret_value = access_secret_version(project_id, secret_id)
 
 
 @pubsub_fn.on_message_published(topic="start_transcribe", region="us-west1")
@@ -58,9 +53,8 @@ def start_transcribe(
         lysine_timeout = num_new_videos * MINS_PER_VID
 
         # Search for all offers.
-        # TODO: Retry loop.
         vast = VastAI(
-            access_secret_version('sps-by-the-numbers', 'vast_api_key'),
+            _access_secret_version('sps-by-the-numbers', 'vast_api_key'),
             raw=True)
 
         target_num_instances = max(1, int(num_new_videos / VIDS_PER_MACHINE))
@@ -118,3 +112,49 @@ def start_transcribe(
                              })
             else:
                 print(f"frailed {json.dumps(create_result)}")
+
+
+@pubsub_fn.on_message_published(topic="stop_transcribe_instance",
+                                region="us-west1")
+def stop_transcribe_instance(
+        event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
+    """Stops a vast.ai instance.
+
+    Event either contains an instance_ids entry with vast.ai IDs to stop. If
+    one of the ids is 0, this will also stop all instances that are stale. An
+    instance is by default considered stale if it has run more than 2 hours
+    but this can be overrided with the stale_s parameter in the message.
+    """
+    params = event.data.message.json
+    logger.info("params", params)
+    instances_to_remove = {i for i in params["instance_ids"]}
+
+    vast = VastAI(
+        _access_secret_version('sps-by-the-numbers', 'vast_api_key'),
+        raw=True)
+
+    current_instances = {
+        x["id"]: {
+            "duration": x["duration"],
+            "actual_status": x["actual_status"],
+            "label": x["label"],
+        }
+        for x in json.loads(vast.show_instances())}
+    logger.info("current", current_instances)
+
+    to_destroy = []
+    for instance_id, info in current_instances.items():
+        if instance_id in instances_to_remove:
+            to_destroy.append(instance_id)
+
+        if (params.get('remove_stale', False) and
+                info['label'] == INSTANCE_LABEL and
+                info['duration'] > INSTANCE_STALE_S):
+            to_destroy.append(instance_id)
+
+    if len(to_destroy) == 0:
+        logger.info("Nothing to destory")
+        return
+
+    logger.info("destroying", to_destroy)
+    logger.info(vast.destroy_instances(ids=to_destroy))
