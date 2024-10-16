@@ -34,8 +34,8 @@ type Props = {
 export default function TranscriptIndex({ category, videos, range }: Props) {
   const [isNavigating, startNavigation] = useTransition();
 
-  const pathName: string = usePathname();
   const { push } = useRouter();
+  const pathName = usePathname();
 
   const handleFilterChange = (newFilters: TranscriptIndexFilterSelection) => {
     startNavigation(() => {
@@ -80,18 +80,22 @@ export default function TranscriptIndex({ category, videos, range }: Props) {
 }
 
 function buildUrl(basePath: string, filterParams: TranscriptIndexFilterSelection): string {
-  const parameters: string[] = [
-    filterParams.category && `category=${filterParams.category}`,
-    filterParams.dateRange.start && `start=${encodeDate(filterParams.dateRange.start)}`,
-    filterParams.dateRange.end && `end=${encodeDate(filterParams.dateRange.end)}`
-  ].filter(param => param !== null) as string[];
+  const pathParts = basePath.split('/');
+  pathParts.pop();
+  pathParts.push(filterParams.category);
 
-  let urlString = basePath;
-
-  const paramString = parameters.join('&');
-  if (paramString !== null && paramString !== '') {
-    urlString += `?${paramString}`;
+  const parameters = new Array<string>();
+  if (filterParams.dateRange.start) {
+    parameters.push(`start=${encodeDate(filterParams.dateRange.start)}`);
   }
 
-  return urlString;
+  if (filterParams.dateRange.end) {
+    parameters.push(`end=${encodeDate(filterParams.dateRange.end)}`);
+  }
+
+  if (parameters.length > 0) {
+    return `${pathParts.join('/')}?${parameters.join('&')}`;
+  }
+
+  return pathParts.join('/');
 }

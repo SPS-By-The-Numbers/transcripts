@@ -12,6 +12,8 @@ import subprocess
 import logging
 import time
 
+logger = logging.getLogger(__name__)
+
 WORKING_DIR = '/tmp/workspace/app/transcribe'
 AUTH_PARAMS = {
     'user_id': os.environ['CONTAINER_ID'],
@@ -46,7 +48,7 @@ def get_vid_list():
 def process_vids(vid_list, args):
     for category, video_id in vid_list:
         try:
-            logging.info(f"Processing {category} {video_id}")
+            logger.info(f"Processing {category} {video_id}")
 
             # Mark us as starting work on this video. Failure okay as
             # transcription is semantically idempotent and this is just an
@@ -57,12 +59,12 @@ def process_vids(vid_list, args):
                       'video_ids': [video_id]})
 
             if response.status_code != 200:
-                logging.error(f"{response.status_code} {response.text}: "
-                              "Server did not allow start. Someone else might "
-                              "have gotten to it first. Skip.")
+                logger.error(f"{response.status_code} {response.text}: "
+                             "Server did not allow start. Someone else might "
+                             "have gotten to it first. Skip.")
                 continue
 
-            logging.info(f"Leased {category} {video_id}. Downloading audio")
+            logger.info(f"Leased {category} {video_id}. Downloading audio")
 
             # Download the audio file.
             outfile_name = f"{video_id}.mp4"
@@ -77,8 +79,8 @@ def process_vids(vid_list, args):
 
             # Run whisper for transcription
             start = time.time()
-            logging.info(f"Starting Whisper at {start} on {outfile_name} "
-                         f"writing to {args.workdir}")
+            logger.info(f"Starting Whisper at {start} on {outfile_name} "
+                        f"writing to {args.workdir}")
             subprocess.run([
                 "whisperx",
                 f"--model={args.model}",
@@ -92,7 +94,7 @@ def process_vids(vid_list, args):
                 "--",
                 str(args.workdir.joinpath(outfile_name))])
             end = time.time()
-            logging.info("Whisper took: %d seconds" % (end - start))
+            logger.info("Whisper took: %d seconds" % (end - start))
 
             # Upload json transcript.
             metadata = {
@@ -106,7 +108,7 @@ def process_vids(vid_list, args):
             with open(args.workdir.joinpath(f"{video_id}.json")) as f:
                 transcript_obj = json.load(f)
 
-            logging.info("Uploading transcript")
+            logger.info("Uploading transcript")
             response = requests.put(
                 make_endpoint_url("transcript"),
                 json={
@@ -119,19 +121,19 @@ def process_vids(vid_list, args):
                 })
 
             if response.status_code != 200:
-                logging.error("Unable to upload transcript", response.json())
+                logger.error("Unable to upload transcript", response.json())
                 continue
 
-            logging.info("Deleting video from queue")
+            logger.info("Deleting video from queue")
             response = requests.delete(
                 make_endpoint_url("video-queue"),
                 json={**AUTH_PARAMS, 'category': category,
                       'video_ids': [video_id]})
             if response.status_code != 200:
-                logging.error("Unable to delete queue item", response.json())
+                logger.error("Unable to delete queue item", response.json())
                 continue
         except Exception:
-            logging.exception("Transcribe failed for " + video_id)
+            logger.exception("Transcribe failed for " + video_id)
 
 
 def main():
@@ -175,8 +177,8 @@ def main():
     # Poorman race reduction between workers.
     if args.shuffle:
         random.shuffle(vid_list)
-    logging.info(f"Found {len(vid_list)} videos")
-    logging.debug(vid_list)
+    logger.info(f"Found {len(vid_list)} videos")
+    logger.debug(vid_list)
 
     process_vids(vid_list, args)
 

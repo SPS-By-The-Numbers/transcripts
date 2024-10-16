@@ -1,0 +1,24 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['-c', 'docker login --username=$$USERNAME --password=$$PASSWORD']
+  secretEnv: ['USERNAME', 'PASSWORD']
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['-c', 'docker build -t $$USERNAME/${_REPOSITORY}:${_TAG} .']
+  secretEnv: ['USERNAME']
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['-c', 'docker push $$USERNAME/${_REPOSITORY}:${_TAG}']
+  secretEnv: ['USERNAME']
+options:
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _REPOSITORY: transcribe
+  _TAG: latest
+availableSecrets:
+  secretManager:
+  - versionName: projects/sps-by-the-numbers/secrets/docker_password/versions/latest
+    env: 'PASSWORD'
+  - versionName: projects/sps-by-the-numbers/secrets/docker_username/versions/latest
+    env: 'USERNAME'

@@ -3,14 +3,11 @@ FROM pytorch/pytorch
 WORKDIR /workspace/app
 COPY prime_model.mp4 /workspace/app/
 
-RUN <<EOF bash
-  apt-get -y update
-  apt-get -y install git ffmpeg
-
-  pip install git+https://github.com/m-bain/whisperx.git
-  # Use int8 compute type just to make whisperx always complete at this step.
+# Use int8 compute type just to make whisperx always complete at this step.
+RUN apt-get -y update && \
+  apt-get -y install git ffmpeg && \
+  pip install git+https://github.com/m-bain/whisperx.git && \
   whisperx --model=large-v3 --language=en --thread=4 --hf_token=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 --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
-EOF
 
 RUN pip install vastai
 
@@ -18,4 +15,5 @@ COPY requirements.txt /workspace/app/
 RUN  pip install -r requirements.txt
 
 
-COPY --chmod=755 transcribe_worker.py lysine_protocol.sh onstart_hook.sh /workspace/app
+COPY transcribe_worker.py lysine_protocol.sh onstart_hook.sh /workspace/app/
+RUN chmod 755 /workspace/app/transcribe_worker.py /workspace/app/lysine_protocol.sh /workspace/app/onstart_hook.sh
