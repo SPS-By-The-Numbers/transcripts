@@ -12,9 +12,13 @@ type SearchParams = {
   [key: string]: string | string[] | undefined;
 };
 
-export default async function Index({ searchParams } : { searchParams?: SearchParams }) {
+type Params = {
+  category: string,
+}
 
-  const category = (searchParams?.category && typeof searchParams.category === 'string') ? searchParams.category : Constants.DEFAULT_CATEGORY;
+export default async function Index({ params, searchParams } : { params: Params, searchParams?: SearchParams }) {
+
+  const category = params.category;
   const parameters : Record<string, string> = { category };
   const range : DateRange = { start: null, end: null };
 
