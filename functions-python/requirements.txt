@@ -1,2 +1,3 @@
 firebase-functions
 firebase-admin
+google-cloud-secret-manager

@@ -108,6 +108,9 @@ async function removeVastInstance(req, res) {
   const vast_ref = getCategoryPrivateDb("_admin").child("vast").child(req.body.user_id);
   await vast_ref.remove();
 
+  await getPubSubClient().topic("stop_transcribe_instance").publishMessage(
+    {data: JSON.stringify({instance_ids: [req.body.user_id], remove_stale: true})});
+
   return res.status(200).send(makeResponseJson(true, "Instance removed"));
 }
 
