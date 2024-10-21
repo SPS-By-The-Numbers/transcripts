@@ -73,6 +73,7 @@ export default function BoardMeeting({
       );
   });
 
+  // TODO replace nested stacks with a Grid https://mui.com/material-ui/react-stack/#responsive-values
   return (
       <>
         <Stack>
@@ -89,37 +90,35 @@ export default function BoardMeeting({
               </main>
             </TranscriptControl>
 
-            <Stack>
-              <Box style={{
-                  position: "sticky",
-                  top: "65px",
-                  height: "calc(100vh - 65px)"}}
+            <Box style={{
+                position: "sticky",
+                top: "65px",
+                height: "calc(100vh - 65px)"}}
+            >
+              <Card style={{
+                    width: YtEmbedWidth,
+                    height: YtEmbedHeight,
+                    marginBottom: "1ex",
+                  }}
               >
-                <Card style={{
-                      width: YtEmbedWidth,
-                      height: YtEmbedHeight,
-                      marginBottom: "1ex",
-                    }}
-                >
-                  <VideoPlayer videoId={videoId} />
-                </Card>
-                <Card style={{
-                      overflow: "scroll",
-                      width: "100%",
-                      height: `calc(100vh - 65px - 385px - 16px)`,
-                    }}
-                >
-                  <SpeakerInfoControl
-                      category={category}
-                      speakerNums={speakerNums}
-                      videoId={videoId}
-                      className=""
-                      initialExistingNames={initialExistingNames}
-                      initialExistingTags={initialExistingTags}
-                  />
-                </Card>
-              </Box>
-            </Stack>
+                <VideoPlayer videoId={videoId} />
+              </Card>
+              <Card style={{
+                    overflow: "scroll",
+                    width: "100%",
+                    height: `calc(100vh - 65px - 385px - 16px)`,
+                  }}
+              >
+                <SpeakerInfoControl
+                    category={category}
+                    speakerNums={speakerNums}
+                    videoId={videoId}
+                    className=""
+                    initialExistingNames={initialExistingNames}
+                    initialExistingTags={initialExistingTags}
+                />
+              </Card>
+            </Box>
           </Stack>
         </Stack>
       </>

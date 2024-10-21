@@ -12,14 +12,33 @@ type VideoPlayerParams = {
 };
 
 // https://blog.youtube/news-and-events/new-default-size-for-embedded-videos/
-export const YtEmbedWidth = 640;
-export const YtEmbedHeight = 385;
+function getWindowDimensions() {
+  const { innerWidth: width, innerHeight: height } = window;
+  return {
+    width,
+    height,
+  };
+}
+
+var shrinkVideo = false;
+// edit layout on mobile: this is a quick improvement of shrinking the video on small screens
+
+// The SPS videos seem to be at 560*315, a ratio of 1.7777. 
+// For same ratio on mobile we want 400 * 225
+// shrinking the frame is also the way to get a lower res video
+const windowWidth = getWindowDimensions().width;
+if (windowWidth < 700) {
+  shrinkVideo = true;
+}
+export const YtEmbedWidth = shrinkVideo ? 400 : 560;
+export const YtEmbedHeight = shrinkVideo ? 225 : 315;
 
 const youtubeOpts : Options = {
     width: YtEmbedWidth,
     height: YtEmbedHeight,
     playerVars: {
-        playsinline: 1
+        playsinline: 1,
+        rel: 0
     }
 };
 
