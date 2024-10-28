@@ -23,6 +23,12 @@
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }
+    },
+    {
+      "name": "Jest: debug",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run test"
     }
   ]
 }

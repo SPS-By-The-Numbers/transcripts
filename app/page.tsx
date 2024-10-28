@@ -31,7 +31,7 @@ function MakeAccordions() {
           id={`panel${key}-header`}
           sx={{bgcolor: 'primary.analogous'}}
         >
-          <Typography>{info.name} - Recent Transcripts</Typography>
+          <header><Typography>{info.name} - Recent Transcripts</Typography></header>
         </AccordionSummary>
         <AccordionDetails sx={{bgcolor: 'primary.background'}} >
           <Stack spacing={"0.5ex"}>
