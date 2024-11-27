@@ -1,6 +1,8 @@
 import * as TestingUtils from './utils/testing';
 
 describe('transcript', () => {
+  beforeAll(TestingUtils.beforeAll);
+
   it('GET retrieves transcript', async () => {
     const response = await TestingUtils.fetchEndpoint(
         'transcript',
