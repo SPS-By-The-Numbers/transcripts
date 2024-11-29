@@ -11,6 +11,8 @@ import { fetchEndpoint } from 'utilities/client/endpoint';
 
 import type { CategoryId } from 'common/params';
 
+export const dynamic = 'force-dynamic';
+
 async function makeResults(category: CategoryId) {
   const parameters : Record<string, string> = { category, limit: "3" };
   const response = await fetchEndpoint('metadata', 'GET', parameters);

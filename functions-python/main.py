@@ -87,7 +87,7 @@ def start_transcribe(
             # Create the instance
             create_result = json.loads(vast.create_instance(
                 ID=cheapest["ask_contract_id"],
-                image="awongdev/transcribe:0.5",
+                image="awongdev/transcribe:latest",
                 label=INSTANCE_LABEL,
                 # Kill the server after 30 mins if it's still running.
                 onstart_cmd=("env | grep _ >> /etc/environment; "

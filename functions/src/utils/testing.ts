@@ -36,7 +36,8 @@ export function initializeFirebaseTesting() {
     process.env.FIREBASE_DATABASE_EMULATOR_HOST="127.0.0.1:9000"
     FirebaseUtils.initializeFirebase({
         projectId : TEST_PROJECT_ID,
-        databaseURL: "http://127.0.0.1:9000/?ns=sps-by-the-numbers-default-rtdb"
+        databaseURL: `http://127.0.0.1:9000/?ns=${TEST_PROJECT_ID}-default-rtdb`,
+        storageBucket: `${TEST_PROJECT_ID}.appspot.com`,
     });
     processInitialized = true;
   }

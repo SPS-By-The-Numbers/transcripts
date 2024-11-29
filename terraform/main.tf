@@ -5,6 +5,11 @@ resource "google_project" "sps_by_the_numbers" {
   deletion_policy = "PREVENT"
 }
 
+resource "google_firebase_project" "default" {
+  provider = google-beta
+  project  = google_project.default.project_id
+}
+
 resource "google_storage_bucket" "cloudbuild" {
   name = "${var.storage_bucket_prefix}_cloudbuild"
   location = "us"

@@ -1,11 +1,9 @@
 import * as TestingUtils from './utils/testing';
 
-describe('transcript', () => {
-  beforeAll(TestingUtils.beforeAll);
-
-  it('GET retrieves transcript', async () => {
+describe('metadata', () => {
+  it('GET retrieves metadata', async () => {
     const response = await TestingUtils.fetchEndpoint(
-        'transcript',
+        'metadata',
         'GET',
         { category: 'sps-board',
           video_id: 'MT2zjpRbQJA' });
@@ -13,16 +11,14 @@ describe('transcript', () => {
     const responseJson = await response.json();
     expect(responseJson.ok).toStrictEqual(true);
   });
-  it('PUT sets transcript', async () => {
-    const transcript = TestingUtils.DATA_WHISPERX_TRANSCRIPT;
+
+  it('POST sets metadata', async () => {
     const response = await TestingUtils.fetchEndpoint(
-        'transcript',
-        'PUT',
+        'metadata',
+        'POST',
         { user_id: TestingUtils.FAKE_USER_ID,
           auth_code: TestingUtils.FAKE_AUTH_CODE,
           category: 'sps-board',
-          video_id: 'MT2zjpRbQJA',
-          transcripts: {[transcript.language]: transcript},
           metadata: TestingUtils.DATA_METADATA,
         });
     expect(response.status).toStrictEqual(200);
@@ -30,3 +26,4 @@ describe('transcript', () => {
     expect(responseJson.ok).toStrictEqual(true);
   });
 });
+
