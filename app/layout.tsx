@@ -25,7 +25,7 @@ function getDevBanner() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
         <Providers>
           <CssBaseline />
-          <InitColorSchemeScript />
+          <InitColorSchemeScript attribute="class"/>
           { getDevBanner() }
           <Nav />
           <Box mx="4rex" mt="1ex" >
