@@ -20,12 +20,22 @@ export default function SearchResults({category, videoId, title, publishDate} : 
   const isoDate = parseISO(publishDate);
   const publishDateOnly = new Date(isoDate.valueOf() + isoDate.getTimezoneOffset() * 60 * 1000);
   return (
-    <Paper sx={{ p:1, display: 'inline-flex' }}>
+    <Paper sx={{ p:1, display: 'inline-flex', alignItems: "center" }}>
       <Box
           component="img"
           alt={`Screenshot of ${title}`}
           src={`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`}
-          sx={{ mx:2, maxWidth: 200 }}
+          sx={{
+            mx:2,
+            width: {
+              xs: 100,
+              sm: 200,
+              md: 300,
+              lg: 400,
+              xl: 500,
+           },
+           height: '100%',
+          }}
           />
       <Typography
           href={`${getVideoPath(category, videoId)}`}
