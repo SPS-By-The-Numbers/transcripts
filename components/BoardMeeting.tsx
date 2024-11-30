@@ -52,76 +52,77 @@ export default function BoardMeeting({
     initialExistingNames,
     initialExistingTags } : BoardMeetingParams) {
   const videoId = metadata.video_id;
-
   const speakerNums = new Set<number>();
 
   // Merge all segments from the same speaker to produce speaking divs.
   const speakerBubbles = diarizedTranscript.groupSentenceInfoBySpeaker().map((bubble, i) => {
-      speakerNums.add(bubble.speaker);
+    speakerNums.add(bubble.speaker);
 
-      return (
-        <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
-          {
-            bubble.sentenceInfo.map(([segmentId, speakerId, start]) => (
-                <p key={ `${i}-${segmentId}` }
-                  className={ toTimeClassName(start) }>
-                  { textLines( segmentId, languageOrder, diarizedTranscript) }
-                </p>
-            ))
-          }
-        </SpeakerBubble>
-      );
+    return (
+      <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
+        {
+          bubble.sentenceInfo.map(([segmentId, speakerId, start]) => (
+            <p key={ `${i}-${segmentId}` }
+              className={ toTimeClassName(start) }>
+              { textLines( segmentId, languageOrder, diarizedTranscript) }
+            </p>
+          ))
+        }
+      </SpeakerBubble>
+    );
   });
 
   return (
-      <>
-        <Stack>
-          <TranscriptHeader
-            category={category}
-            title={metadata.title}
-            description={metadata.description}
-            videoId={metadata.video_id}
-            curLang={languageOrder[0]}/>
-          <Stack direction="row" spacing={1}>
-            <TranscriptControl>
-              <main>
-                {speakerBubbles}
-              </main>
-            </TranscriptControl>
+    <Stack>
+      <TranscriptHeader
+        category={category}
+        title={metadata.title}
+        description={metadata.description}
+        videoId={metadata.video_id}
+        curLang={languageOrder[0]}/>
+      <Stack direction="row" spacing={1}>
+        <TranscriptControl>
+          <main
+            style={{
+              maxWidth: "80ex"
+            }}
+          >
+            {speakerBubbles}
+          </main>
+        </TranscriptControl>
 
-            <Stack>
-              <Box style={{
-                  position: "sticky",
-                  top: "65px",
-                  height: "calc(100vh - 65px)"}}
-              >
-                <Card style={{
-                      width: YtEmbedWidth,
-                      height: YtEmbedHeight,
-                      marginBottom: "1ex",
-                    }}
-                >
-                  <VideoPlayer videoId={videoId} />
-                </Card>
-                <Card style={{
-                      overflow: "scroll",
-                      width: "100%",
-                      height: `calc(100vh - 65px - 385px - 16px)`,
-                    }}
-                >
-                  <SpeakerInfoControl
-                      category={category}
-                      speakerNums={speakerNums}
-                      videoId={videoId}
-                      className=""
-                      initialExistingNames={initialExistingNames}
-                      initialExistingTags={initialExistingTags}
-                  />
-                </Card>
-              </Box>
-            </Stack>
-          </Stack>
+        <Stack>
+          <Box style={{
+            position: "sticky",
+            top: "65px",
+            height: "calc(100vh - 65px)"}}
+          >
+            <Card style={{
+              width: YtEmbedWidth,
+              height: YtEmbedHeight,
+              marginBottom: "1ex",
+              }}
+            >
+              <VideoPlayer videoId={videoId} />
+            </Card>
+            <Card style={{
+              overflow: "scroll",
+              width: "100%",
+              height: `calc(100vh - 65px - 385px - 16px)`,
+              }}
+            >
+              <SpeakerInfoControl
+                category={category}
+                speakerNums={speakerNums}
+                videoId={videoId}
+                className=""
+                initialExistingNames={initialExistingNames}
+                initialExistingTags={initialExistingTags}
+              />
+            </Card>
+          </Box>
         </Stack>
-      </>
+      </Stack>
+    </Stack>
   );
 }
