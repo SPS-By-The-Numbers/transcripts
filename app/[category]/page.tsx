@@ -16,7 +16,9 @@ type Params = {
   category: string,
 }
 
-export default async function Index({ params, searchParams } : { params: Params, searchParams?: SearchParams }) {
+export default async function Index(props: { params: Promise<Params>, searchParams?: Promise<SearchParams> }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const category = params.category;
   const parameters : Record<string, string> = { category };

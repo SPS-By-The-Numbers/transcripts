@@ -24,12 +24,11 @@ export type VideoParams = {
 
 type Props = {
   params: VideoParams
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 };
 
-export async function generateMetadata(
-    { params, searchParams }: Props,
-    parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params;
 
   try {
     const videoMetadata = await getMetadata(params.category, params.videoId);
@@ -52,7 +51,8 @@ export async function generateMetadata(
   }
 }
 
-export default async function Index({params}: {params: VideoParams}) {
+export default async function Index(props: {params: Promise<VideoParams>}) {
+  const params = await props.params;
   // Handle the legacy URL redirect.
   if (Constants.LEGACY_PREFIX_REDIRECT && params.videoId.length === 2) {
     // If this is a legacy url with a prefix like /v/AB/ABCD123 then 

@@ -10,7 +10,7 @@ import { getVideoPath } from 'common/paths';
 import { parseISO } from 'date-fns';
 import { styled } from '@mui/material/styles';
 import { toHhmmss } from 'utilities/client/css';
-import { useState } from 'react';
+import { useState, use } from 'react';
 
 import type { ReactNode } from 'react';
 
@@ -201,7 +201,8 @@ function extractCategory(param) {
   return param;
 }
 
-export default function TranscriptSearch({ searchParams }: { searchParams: SearchParams }) {
+export default function TranscriptSearch(props: { searchParams: Promise<SearchParams> }) {
+  const searchParams = use(props.searchParams);
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
   const [groupType, setGroupType] = useState<string>("speaker");
