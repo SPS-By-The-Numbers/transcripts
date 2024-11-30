@@ -84,7 +84,8 @@ export default function BoardMeeting({
         <TranscriptControl>
           <main
             style={{
-              maxWidth: "80ex"
+              minWidth: "35ch",
+              maxWidth: "75ch"
             }}
           >
             {speakerBubbles}

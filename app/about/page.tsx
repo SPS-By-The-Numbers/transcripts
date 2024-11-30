@@ -10,7 +10,7 @@ export default function Page() {
             </div>
 
             <div className={styles.card}>
-                This site was originally created in response to SPS's attempt to change the
+                This site was originally created in response to SPS&amp;s attempt to change the
                 bell-times because of a supposed inability to staff bus routes. A number
                 of parents threw together a survey and gathered over a thousand responses
                 showing an overwhelming preference to keep the existing bell-time structure,
