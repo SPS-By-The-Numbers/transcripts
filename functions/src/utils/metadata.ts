@@ -75,8 +75,6 @@ function toDateString(date: Date) {
 }
 
 export async function getMatchingMetdata(category: CategoryId, matchOptions : MatchOptions) : Promise<VideoMetadata[]> {
-  console.log("Finding matches for ", matchOptions);
-
   // Two modes of operation: With dates or without.
   // If there are no dates, the most recent LIMIT_RESULTS is returned.
   // If there are are dates, there is no limit assumed unless one is passed in.
