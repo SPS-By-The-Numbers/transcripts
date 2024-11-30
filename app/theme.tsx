@@ -1,6 +1,6 @@
 'use client';
 import { Roboto } from 'next/font/google';
-import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
+import { experimental_extendTheme as extendTheme, responsiveFontSizes } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
   interface PaletteColor {
@@ -41,4 +41,4 @@ const theme = extendTheme({
   }
 });
 
-export default theme;
+export default responsiveFontSizes(theme);
