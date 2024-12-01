@@ -73,7 +73,7 @@ export default function BoardMeeting({
   });
 
   return (
-    <Stack>
+    <Stack className='transcript-stack'>
       <TranscriptHeader
         category={category}
         title={metadata.title}
@@ -82,25 +82,11 @@ export default function BoardMeeting({
         curLang={languageOrder[0]}/>
       <Stack direction="row" spacing={1}>
         <Stack>
-          <Box style={{
-            position: "sticky",
-            top: "65px",
-            height: "calc(100vh - 65px)"}}
-          >
-            <Card style={{
-              width: YtEmbedWidth,
-              height: YtEmbedHeight,
-              marginBottom: "1ex",
-              }}
-            >
+          <Box className="transcript-controls">
+            <Card className="transcript-video">
               <VideoPlayer videoId={videoId} />
             </Card>
-            <Card style={{
-              overflow: "scroll",
-              width: "100%",
-              height: `calc(100vh - 65px - 385px - 16px)`,
-              }}
-            >
+            <Card className="transcript-speakers">
               <SpeakerInfoControl
                 category={category}
                 speakerNums={speakerNums}
@@ -114,12 +100,7 @@ export default function BoardMeeting({
         </Stack>
 
         <TranscriptControl>
-          <main
-            style={{
-              minWidth: "35ch",
-              maxWidth: "75ch"
-            }}
-          >
+          <main className="transcript-main">
             {speakerBubbles}
           </main>
         </TranscriptControl>

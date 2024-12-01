@@ -109,3 +109,32 @@
     background-color: #977f6d;
   }
 }
+
+
+////// Transcription layout.
+.transcript-stack {
+}
+
+.transcript-video {
+  // TODO: This needs to coordinate with the javascript + react.
+  width: 640px;
+  height: 386px;
+  margin-bottom: 1ex;
+}
+
+.transcript-speakers {
+  overflow: "scroll";
+  width: 100%;
+  height: calc(100vh - 65px - 385px - 16px);
+}
+
+.transcript-main {
+  min-width: 35ch;
+  max-width: 75ch;
+}
+
+.transcript-controls {
+  position: "sticky";
+  top: 65px;
+  height: calc(100vh - 65px);
+}
