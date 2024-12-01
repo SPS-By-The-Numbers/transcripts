@@ -81,17 +81,6 @@ export default function BoardMeeting({
         videoId={metadata.video_id}
         curLang={languageOrder[0]}/>
       <Stack direction="row" spacing={1}>
-        <TranscriptControl>
-          <main
-            style={{
-              minWidth: "35ch",
-              maxWidth: "75ch"
-            }}
-          >
-            {speakerBubbles}
-          </main>
-        </TranscriptControl>
-
         <Stack>
           <Box style={{
             position: "sticky",
@@ -123,6 +112,18 @@ export default function BoardMeeting({
             </Card>
           </Box>
         </Stack>
+
+        <TranscriptControl>
+          <main
+            style={{
+              minWidth: "35ch",
+              maxWidth: "75ch"
+            }}
+          >
+            {speakerBubbles}
+          </main>
+        </TranscriptControl>
+
       </Stack>
     </Stack>
   );

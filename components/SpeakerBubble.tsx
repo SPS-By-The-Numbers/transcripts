@@ -1,7 +1,6 @@
 import Paper from '@mui/material/Paper';
 import SpeakerBubbleTitle from 'components/SpeakerBubbleTitle';
 import { toSpeakerColorClass } from 'utilities/client/css';
-import styles from '../styles/SpeakerBubble.module.scss';
 
 type SpeakerBubbleParams = {
   speakerNum : number;
