@@ -15,7 +15,12 @@ const TEST_CATEGORY = 'testcategory';
 // This is for simplicity. It might be a bad idea. Who knows.
 class TestStorageAccessor implements StorageAccessor {
   readBytes(path: string) : Promise<ArrayBuffer> {
-    return fs.readFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
+    const thunk = async () => {
+      const b = await fs.readFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'));
+      return new Uint8Array(b).buffer;
+    };
+
+    return thunk();
   }
   writeBytes(path: string, data: string) : Promise<unknown> {
     return fs.writeFile([global.TESTDATA_PATH, TEST_BUCKET, path].join('/'), data);
