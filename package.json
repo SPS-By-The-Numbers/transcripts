@@ -30,6 +30,7 @@
     "@types/node": "^22.10.1",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "@typescript-eslint/typescript-estree": "^8.16.0",
     "@visx/visx": "^3.10.3",
