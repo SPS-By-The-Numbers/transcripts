@@ -23,8 +23,8 @@ export type VideoParams = {
 };
 
 type Props = {
-  params: VideoParams
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+    params: Promise<VideoParams>,
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>,
 };
 
 export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
