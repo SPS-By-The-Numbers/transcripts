@@ -16,7 +16,7 @@ import type { DiarizedTranscript } from 'common/transcript';
 import type { ExistingNames, SpeakerInfoData, TagSet } from 'utilities/client/speaker';
 import type { ReactNode } from 'react';
 
-type BoardMeetingParams = {
+type TranscriptParams = {
   metadata: any,
   category: CategoryId,
   initialExistingNames: ExistingNames,
@@ -43,14 +43,14 @@ function textLines(segmentId, languageOrder, diarizedTranscript) {
   return lines;
 }
 
-export default function BoardMeeting({
+export default function Transcript({
     metadata,
     category,
     diarizedTranscript,
     languageOrder,
     speakerInfo,
     initialExistingNames,
-    initialExistingTags } : BoardMeetingParams) {
+    initialExistingTags } : TranscriptParams) {
   const videoId = metadata.video_id;
   const speakerNums = new Set<number>();
 
