@@ -7,7 +7,7 @@ import SpeakerInfoControl from 'components/SpeakerInfoControl';
 import Stack from '@mui/material/Stack';
 import TranscriptControl from 'components/TranscriptControl';
 import TranscriptHeader from 'components/TranscriptHeader';
-import VideoPlayer, { YtEmbedWidth, YtEmbedHeight } from 'components/VideoPlayer';
+import VideoPlayer from 'components/VideoPlayer';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 

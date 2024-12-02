@@ -1,3 +1,13 @@
+@use "sass:list";
+@use "sass:map";
+
+$video-sizes: (
+  "xs": (352, 198),
+  "sm": (426, 240),
+  "md": (640, 385),
+  "lg": (640, 385)
+);
+
 // Speak bubble
 .b {
   margin: 0 0 1ex 0;
@@ -116,8 +126,7 @@
 }
 
 .transcript-video {
-  // TODO: This needs to coordinate with the javascript + react.
-  width: 640px;
+  width: list.nth(map.get($video-sizes, "md"), 1);
   height: 386px;
   margin-bottom: 1ex;
 }
