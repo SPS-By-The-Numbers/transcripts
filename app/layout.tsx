@@ -1,5 +1,4 @@
 import * as Constants from 'config/constants'
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
@@ -13,14 +12,6 @@ import '../styles/globals.scss';
 export const metadata: Metadata = {
   title: 'SPS By The Numbers - Transcriptions',
   description: 'Public meeting transcriptions from SPS By The Numbers',
-}
-
-function getDevBanner() {
-  if (Constants.isProduction) {
-    return undefined;
-  }
-
-  return (<Alert variant="filled" severity="warning">Is Dev Mode</Alert>);
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -48,9 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <CssBaseline />
           <InitColorSchemeScript attribute="class"/>
-          { getDevBanner() }
           <Nav />
-          <Box mx="4rex" mt="1ex" >
+          <Box sx={{marginTop: "0.5ex"}}>
             {children}
           </Box>
         </Providers>

@@ -1,4 +1,5 @@
 import * as Constants from 'config/constants';
+import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
@@ -9,6 +10,14 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+
+function getDevBanner() {
+  if (Constants.isProduction) {
+    return undefined;
+  }
+
+  return (<Alert variant="filled" severity="warning">Is Dev Mode</Alert>);
+}
 
 export default function Nav() {
   return (
@@ -76,6 +85,7 @@ export default function Nav() {
             </Box>
           </Toolbar>
         </Container>
+        { getDevBanner() }
       </AppBar>
   );
 }
