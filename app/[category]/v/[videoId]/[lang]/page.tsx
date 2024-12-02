@@ -1,6 +1,6 @@
 import * as Constants from 'config/constants'
-import BoardMeeting from 'components/BoardMeeting'
 import SpeakerInfoProvider from 'components/SpeakerInfoProvider'
+import Transcript from 'components/Transcript'
 import VideoControlContextProvider from 'components/VideoControlProvider'
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
@@ -93,7 +93,7 @@ export default async function Index(props: {params: Promise<VideoParams>}) {
   return (
     <SpeakerInfoProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
       <VideoControlContextProvider>
-        <BoardMeeting
+        <Transcript
             metadata={ metadata }
             category={ params.category }
             diarizedTranscript={ diarizedTranscript }
