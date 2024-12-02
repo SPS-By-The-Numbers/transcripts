@@ -11,13 +11,25 @@ type VideoPlayerParams = {
   videoId: string;
 };
 
-// https://blog.youtube/news-and-events/new-default-size-for-embedded-videos/
-export const YtEmbedWidth = 640;
-export const YtEmbedHeight = 385;
+// Keep this in sync with $video-sizes in styles/global.scss
+const VideoSizes = {
+  xs: {
+    width: 352,
+    height: 198,
+  },
+  sm: {
+    width: 426,
+    height: 240,
+  },
+  md: {
+    width: 640,
+    height: 385,
+  }
+};
 
 const youtubeOpts : Options = {
-    width: YtEmbedWidth,
-    height: YtEmbedHeight,
+    width: VideoSizes.xs.width,
+    height: VideoSizes.xs.height,
     playerVars: {
         playsinline: 1
     }
