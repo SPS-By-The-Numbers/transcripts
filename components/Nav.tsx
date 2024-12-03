@@ -1,27 +1,26 @@
 import * as Constants from 'config/constants';
-import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import Container from '@mui/material/Container';
-import Toolbar from '@mui/material/Toolbar';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-
-function getDevBanner() {
-  if (Constants.isProduction) {
-    return undefined;
-  }
-
-  return (<Alert variant="filled" severity="warning">Is Dev Mode</Alert>);
-}
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 
 export default function Nav() {
   return (
       <AppBar position="sticky">
+        <Box sx={{
+            display: Constants.isProduction ? "none" : "flex",
+            backgroundColor: "red",
+            justifyContent: "center",
+            width: "100%"}}>
+          Dev Mode. Emulators used.
+        </Box>
         <Container maxWidth="xl">
           <Toolbar disableGutters variant="dense">
             <Button
@@ -85,7 +84,6 @@ export default function Nav() {
             </Box>
           </Toolbar>
         </Container>
-        { getDevBanner() }
       </AppBar>
   );
 }

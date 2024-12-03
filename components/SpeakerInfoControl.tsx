@@ -218,7 +218,7 @@ export default function SpeakerInfoControl({
   if (isMounted) {
     // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
     // key is the counterpart to the secret key you set in the Firebase console.
-    if (!appCheck) {
+    if (Constants.isProduction && !appCheck) {
       appCheck = initializeAppCheck(firebaseApp, {
         provider: new ReCaptchaV3Provider(Constants.RECAPTCHA_KEY),
 
@@ -328,7 +328,9 @@ export default function SpeakerInfoControl({
         {submitButton}
         </div>
       </Stack>
-      <Table size="small" aria-label="Speaker names">
+      <Table size="small" aria-label="Speaker names"
+        sx={{ overscrollY:"scroll" }}
+      >
         <TableHead>
           <TableRow sx={{bgcolor: 'primary.info'}}>
             <TableCell style={{width: "5%", maxWidth: "5%"}} size="small">#</TableCell>

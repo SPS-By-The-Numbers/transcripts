@@ -5,7 +5,7 @@ import Divider from '@mui/material/Divider';
 import SpeakerBubble from 'components/SpeakerBubble';
 import SpeakerInfoControl from 'components/SpeakerInfoControl';
 import Stack from '@mui/material/Stack';
-import TranscriptControl from 'components/TranscriptControl';
+import TranscriptClickHandler from 'components/TranscriptClickHandler';
 import TranscriptHeader from 'components/TranscriptHeader';
 import VideoPlayer from 'components/VideoPlayer';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
@@ -26,6 +26,7 @@ type TranscriptParams = {
   languageOrder: string[],
 };
 
+// Produces spans of lines in each given language for the segment.
 function textLines(segmentId, languageOrder, diarizedTranscript) {
   const lines = new Array<ReactNode>;
   for (const [langNum, language] of languageOrder.entries()) {
@@ -72,40 +73,74 @@ export default function Transcript({
     );
   });
 
+  // TODO: Height of this needs to be minus header, or header has to scroll off.
   return (
-    <Stack className='transcript-stack'>
-      <TranscriptHeader
-        category={category}
-        title={metadata.title}
-        description={metadata.description}
-        videoId={metadata.video_id}
-        curLang={languageOrder[0]}/>
-      <Stack direction="row" spacing={1}>
-        <Stack>
-          <Box className="transcript-controls">
-            <Card className="transcript-video">
-              <VideoPlayer videoId={videoId} />
-            </Card>
-            <Card className="transcript-speakers">
-              <SpeakerInfoControl
-                category={category}
-                speakerNums={speakerNums}
-                videoId={videoId}
-                className=""
-                initialExistingNames={initialExistingNames}
-                initialExistingTags={initialExistingTags}
-              />
-            </Card>
-          </Box>
-        </Stack>
+    <Box sx={{
+        display: "grid",
+        height: "100vh",
+        width: "100vw",
+        gridTemplateColumns: {
+          xs: "1fr",
+          lg: "1fr 2fr",
+        },
+        gridTemplateRows: {
+          xs:  "auto auto auto 3fr",
+          lg:  "auto minmax(0, 1fr) minmax(0, 1fr)",
+        },
+        gridTemplateAreas: {
+          xs: `"header"
+               "video"
+               "controls"
+               "main"`,
+          lg: `"header header"
+               "video main"
+               "controls main"`
+        },
+      }}>
 
-        <TranscriptControl>
-          <main className="transcript-main">
-            {speakerBubbles}
-          </main>
-        </TranscriptControl>
+      <Box sx={{gridArea: "header"}}>
+        <TranscriptHeader
+          category={category}
+          title={metadata.title}
+          description={metadata.description}
+          videoId={metadata.video_id}
+          curLang={languageOrder[0]}/>
+      </Box>
 
-      </Stack>
-    </Stack>
+      <Card sx={{
+          gridArea: "video",
+          alignSelf: "start",
+        }}
+        >
+        <VideoPlayer videoId={videoId} />
+      </Card>
+
+      <Card
+        sx={{
+          gridArea: "controls",
+          alignSelf: "start",
+          height: "100%",
+        }}
+      >
+        <SpeakerInfoControl
+          category={category}
+          speakerNums={speakerNums}
+          videoId={videoId}
+          initialExistingNames={initialExistingNames}
+          initialExistingTags={initialExistingTags}
+        />
+      </Card>
+
+      <Box sx={{
+          gridArea: "main",
+          overflow: "scroll",
+          maxWidth: "75ch" }}>
+          <TranscriptClickHandler>
+            <main>
+              {speakerBubbles}
+            </main>
+          </TranscriptClickHandler>
+      </Box>
+    </Box>
   );
 }
