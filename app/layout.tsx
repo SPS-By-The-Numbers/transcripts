@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CssBaseline />
           <InitColorSchemeScript attribute="class"/>
           <Nav />
-          <Box sx={{marginTop: "0.5ex"}}>
+          <Box sx={{marginTop: "0.5ex", height: "100%"}}>
             {children}
           </Box>
         </Providers>

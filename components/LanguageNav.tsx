@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { SupportedLanguages } from 'common/languages';
 
 import type { Iso6393Code } from 'common/params';
+import type { SxProps, Theme } from '@mui/material';
 
 function makeLangOptions() {
   const options = Object.entries(SupportedLanguages).map(
@@ -50,9 +51,10 @@ const LangOptions = makeLangOptions();
 type LanguageNavParams = {
   name : string;
   curLang : Iso6393Code;
+  sx?: SxProps<Theme>;
 };
 
-export default function LanguageNav({ name, curLang } : LanguageNavParams) {
+export default function LanguageNav({ name, curLang, sx = [] } : LanguageNavParams) {
   const [newLang, setNewLang] = useState<string | undefined>(undefined);
 
   const navigateToNewLang = (newOption) => {
@@ -70,7 +72,7 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
   };
 
   
-  return (<>
+  return (
     <Autocomplete
       disableClearable
       size="small"
@@ -79,12 +81,10 @@ export default function LanguageNav({ name, curLang } : LanguageNavParams) {
       options={ LangOptions }
       onChange={(_event, newValue) => navigateToNewLang(newValue)}
       renderInput={(params) => <TextField {...params}  sx={{input: {textAlign: "center"}}} />}
-      sx={{
-        bgcolor: 'primary.main',
-        "& .MuiOutlinedInput-root": {
-          color: 'primary.contrastText',
-        }
-      }}
-      />
-    </>);
+      sx={[
+        {
+        },
+        ...(Array.isArray(sx) ? sx : [sx])
+      ]}
+      />);
 }

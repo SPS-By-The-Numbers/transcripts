@@ -1,12 +1,15 @@
 @use "sass:list";
 @use "sass:map";
 
-$video-sizes: (
-  "xs": (352, 198),
-  "sm": (426, 240),
-  "md": (640, 385),
-  "lg": (640, 385)
-);
+html, body {
+  height: 100%;
+}
+
+.youtube-div {
+  padding-bottom: 0px;
+  overflow: hidden;
+  margin: 0;
+}
 
 // Speak bubble
 .b {
