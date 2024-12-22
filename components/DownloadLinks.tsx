@@ -22,7 +22,6 @@ export default function DownloadLinks({category, videoId, className} : DownloadL
       <Stack
           direction="row"
           spacing={1}
-          divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
       >
         <Box sx={{mx:1}}>
           <Link href={getDownloadURL(category, videoId, 'json')}>json</Link>

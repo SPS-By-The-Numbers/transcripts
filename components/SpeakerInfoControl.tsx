@@ -45,7 +45,6 @@ type SpeakerInfoControlParams = {
   category : string;
   speakerNums : Set<number>;
   videoId : string;
-  className: string;
   initialExistingNames : ExistingNames,
   initialExistingTags : TagSet,
 };
@@ -79,7 +78,6 @@ function makeSubmitStatusSuffix(submitStatus: SpeakerInfoSubmitStatus): String {
 // number is a list of speaker keys like [0, 1, 2, .. ]
 export default function SpeakerInfoControl({
     category,
-    className,
     speakerNums,
     videoId,
     initialExistingNames,

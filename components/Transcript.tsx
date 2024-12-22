@@ -1,13 +1,9 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
 import SpeakerBubble from 'components/SpeakerBubble';
 import SpeakerInfoControl from 'components/SpeakerInfoControl';
-import Stack from '@mui/material/Stack';
 import TranscriptClickHandler from 'components/TranscriptClickHandler';
-import TranscriptHeader from 'components/TranscriptHeader';
-import VideoPlayer from 'components/VideoPlayer';
+import TranscriptVideo from 'components/TranscriptVideo';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
@@ -15,15 +11,17 @@ import type { CategoryId } from 'common/params';
 import type { DiarizedTranscript } from 'common/transcript';
 import type { ExistingNames, SpeakerInfoData, TagSet } from 'utilities/client/speaker';
 import type { ReactNode } from 'react';
+import type { SxProps, Theme } from '@mui/material';
 
 type TranscriptParams = {
-  metadata: any,
-  category: CategoryId,
-  initialExistingNames: ExistingNames,
-  initialExistingTags: TagSet,
-  diarizedTranscript: DiarizedTranscript,
-  speakerInfo: SpeakerInfoData,
-  languageOrder: string[],
+  metadata: any;
+  category: CategoryId;
+  initialExistingNames: ExistingNames;
+  initialExistingTags: TagSet;
+  diarizedTranscript: DiarizedTranscript;
+  speakerInfo: SpeakerInfoData;
+  languageOrder: Array<string>;
+  sx?: SxProps<Theme>;
 };
 
 // Produces spans of lines in each given language for the segment.
@@ -51,7 +49,8 @@ export default function Transcript({
     languageOrder,
     speakerInfo,
     initialExistingNames,
-    initialExistingTags } : TranscriptParams) {
+    initialExistingTags,
+    sx = []} : TranscriptParams) {
   const videoId = metadata.video_id;
   const speakerNums = new Set<number>();
 
@@ -73,53 +72,43 @@ export default function Transcript({
     );
   });
 
-  // TODO: Height of this needs to be minus header, or header has to scroll off.
   return (
-    <Box sx={{
-        display: "grid",
-        height: "100vh",
-        width: "100vw",
-        gridTemplateColumns: {
-          xs: "1fr",
-          lg: "1fr 2fr",
-        },
-        gridTemplateRows: {
-          xs:  "auto auto auto 3fr",
-          lg:  "auto minmax(0, 1fr) minmax(0, 1fr)",
-        },
-        gridTemplateAreas: {
-          xs: `"header"
-               "video"
-               "controls"
-               "main"`,
-          lg: `"header header"
-               "video main"
-               "controls main"`
-        },
-      }}>
+    <Box sx={[
+      {
+          display: "grid",
+          height: `calc(100% - 100px)`,
+          columnGap: "1ex",
+          rowGap: "0.5ex",
+          padding: "1ex",
+          justifyItems: "normal",
+          maxWidth: {xs: "75ch", lg: "100%"},
+          marginX: "auto",
 
-      <Box sx={{gridArea: "header"}}>
-        <TranscriptHeader
-          category={category}
-          title={metadata.title}
-          description={metadata.description}
-          videoId={metadata.video_id}
-          curLang={languageOrder[0]}/>
-      </Box>
-
-      <Card sx={{
-          gridArea: "video",
-          alignSelf: "start",
-        }}
-        >
-        <VideoPlayer videoId={videoId} />
-      </Card>
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "auto 1fr",
+          },
+          gridTemplateRows: "auto 3fr",
+          gridTemplateAreas: {
+            xs: `"transcriptVideo"
+                 "transcript"`,
+            lg: `"transcript transcriptVideo"
+                 "transcript infoeditpanel"`
+          },
+      },
+      ...(Array.isArray(sx) ? sx : [sx])]}>
+      <TranscriptVideo
+        title={metadata.title}
+        curLang={languageOrder[0]}
+        videoId={videoId}
+        sx={{ gridArea: "transcriptVideo" }}
+      />
 
       <Card
         sx={{
-          gridArea: "controls",
-          alignSelf: "start",
-          height: "100%",
+          gridArea: "infoeditpanel",
+          overflowY: "scroll",
+          display: {xs: "none", lg: "block" }
         }}
       >
         <SpeakerInfoControl
@@ -132,8 +121,9 @@ export default function Transcript({
       </Card>
 
       <Box sx={{
-          gridArea: "main",
-          overflow: "scroll",
+          gridArea: "transcript",
+          marginX: "auto",
+          overflowY: "scroll",
           maxWidth: "75ch" }}>
           <TranscriptClickHandler>
             <main>

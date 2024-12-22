@@ -1,8 +1,10 @@
 'use client'
  
-import { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useState, useMemo } from 'react';
 
-import type { VideoPlayerControl } from 'components/VideoPlayer';
+type VideoPlayerControl = {
+  jumpToTime: (hhmmss: string) => void;
+};
 
 type VideoControlContextType = {
   videoControl : VideoPlayerControl;

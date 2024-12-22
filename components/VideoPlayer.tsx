@@ -1,60 +1,48 @@
 'use client'
 
+import Box from '@mui/material/Box';
 import YouTube from 'react-youtube'
 import { Options } from 'youtube-player/dist/types';
 import { VideoControlContext } from 'components/VideoControlProvider';
-import { forwardRef, MutableRefObject, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { fromHhmmss, toHhmmss } from 'utilities/client/css'
 import { useContext } from 'react'
 
+import type { SxProps, Theme } from '@mui/material';
+
+
+const ResizeIntervalMs = 100;
+
 type VideoPlayerParams = {
   videoId: string;
+  sx?: SxProps<Theme>;
 };
 
-// Keep this in sync with $video-sizes in styles/global.scss
-const VideoSizes = {
-  xs: {
-    width: 352,
-    height: 198,
-  },
-  sm: {
-    width: 426,
-    height: 240,
-  },
-  md: {
-    width: 640,
-    height: 385,
-  }
-};
-
-const youtubeOpts : Options = {
-    width: VideoSizes.xs.width,
-    height: VideoSizes.xs.height,
-    playerVars: {
-        playsinline: 1
-    }
-};
-
-export interface VideoPlayerControl {
-  jumpToTime(hhmmss: string): void;
-}
+const VideoSizes = [
+  [640, 385],
+  [426, 240],
+  [352, 198],
+];
 
 let markedElementClassName = '';
 
-export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, ref: MutableRefObject<VideoPlayerControl>) {
+export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
   const ytElement = useRef<any>(null);
   const { setVideoControl } = useContext(VideoControlContext);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width:0, height: 0});
 
   useEffect(() => {
     setVideoControl({
         jumpToTime: (hhmmss: string) => {
-            console.log('Boo:',hhmmss);
           if (hhmmss) {
             jumpToTimeInternal(fromHhmmss(hhmmss));
           }
         }
       });
-    // Start the periodic update.
+
+    // Start the periodic update of timestamp.
     const interval = setInterval(() => {
         if (ytElement.current) {
           // Scroll if playing.
@@ -65,9 +53,29 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
         }
     }, 1000);
 
+    function updateDimensions() {
+      if (containerRef.current) {
+        console.log("Updated");
+        setDimensions(
+          {
+            width: containerRef.current.offsetWidth,
+            height: containerRef.current.offsetHeight,
+          }
+        );
+      }
+    }
+
+    let pending_resize : number | undefined = undefined; 
+    window.addEventListener('resize', () => {
+      // Debounce the resize to avoid bunches of relayouts on a drag.
+      window.clearTimeout(pending_resize);
+      pending_resize = window.setTimeout(updateDimensions, ResizeIntervalMs);
+    });
+    updateDimensions();
+
     // Stop the periodic updates at end.
     return () => clearInterval(interval);
-  }, [setVideoControl]);
+  }, [setVideoControl, setDimensions]);
 
   function scrollTranscriptTo(hhmmss) {
     const tsClassName = `ts-${hhmmss}`;
@@ -91,7 +99,6 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
   }
 
   function jumpToTimeInternal(timeSec: number) {
-        console.log(timeSec);
     if (ytElement.current) {
       ytElement.current.seekTo(timeSec, true);
       ytElement.current.playVideo();
@@ -109,7 +116,30 @@ export default forwardRef(function VideoPlayer({ videoId } : VideoPlayerParams, 
     }
   }
 
+  const curSize = VideoSizes.reduce(
+    (acc, cur) => {
+      if (dimensions.width <= cur[0]) {
+        return cur;
+      }
+      return acc;
+    },
+    VideoSizes[0]);
+
   return (
-    <YouTube videoId={videoId} opts={youtubeOpts} onReady={handleReady} />
+    <Box sx={{margin:"auto"}}>
+      <Box ref={containerRef} sx={[{}, ...(Array.isArray(sx) ? sx : [sx])]}>
+        <YouTube
+          className="youtube-div"
+          videoId={videoId}
+          opts={{
+            width: curSize[0],
+            height: curSize[1],
+            playerVars: {
+                playsinline: 1
+            },
+          }}
+        onReady={handleReady} />
+      </Box>
+    </Box>
   );
-});
+};
