@@ -35,10 +35,6 @@ export default function TranscriptVideo({
       />
       <TranscriptControlBar
         curLang={curLang}
-        sx={{
-          borderColor: "blue",
-          borderStyle: "solid",
-        }}
       />
     </Paper>
   );

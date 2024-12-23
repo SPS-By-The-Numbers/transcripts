@@ -3,8 +3,8 @@
 import * as Constants from 'config/constants';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { useState } from 'react'
 import { SupportedLanguages } from 'common/languages';
+import { useState } from 'react'
 
 import type { Iso6393Code } from 'common/params';
 import type { SxProps, Theme } from '@mui/material';
@@ -80,9 +80,22 @@ export default function LanguageNav({ name, curLang, sx = [] } : LanguageNavPara
       value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
       options={ LangOptions }
       onChange={(_event, newValue) => navigateToNewLang(newValue)}
-      renderInput={(params) => <TextField {...params}  sx={{input: {textAlign: "center"}}} />}
+      renderInput={
+        (params) => (
+        <>
+          <TextField
+            size="small"
+            sx={{input: {textAlign: "center"}}}
+            {...params}
+          />
+        </>)
+      }
       sx={[
         {
+          bgcolor: 'primary.main',
+          "& .MuiOutlinedInput-root": {
+            color: 'primary.contrastText',
+          },
         },
         ...(Array.isArray(sx) ? sx : [sx])
       ]}
