@@ -1,5 +1,6 @@
 'use client'
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import SpeakerInfoControl from 'components/SpeakerInfoControl';
@@ -42,7 +43,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`infoedit-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 1 }}>{children}</Box>}
     </div>
   );
 }
@@ -55,13 +56,15 @@ export default function InfoEditPanel({
     initialExistingTags,
     sx=[]} : InfoEditPanelParams) {
 
-  const [value, setValue] = React.useState(1);
+  const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(parseInt(newValue));
   };
 
   return (
-    <Box sx={[{paddingY: 0}, ...(Array.isArray(sx) ? sx : [sx])]}>
+    <Paper 
+        elevation={3}
+        sx={[{paddingY: 0}, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Tabs
         value={value}
         onChange={handleChange}
@@ -85,6 +88,6 @@ export default function InfoEditPanel({
       <CustomTabPanel value={value} index={2}>
         Tab 2
       </CustomTabPanel>
-    </Box>
+    </Paper>
   );
 }
