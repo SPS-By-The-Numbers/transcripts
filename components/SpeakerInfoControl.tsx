@@ -28,8 +28,6 @@ import { useEffect, useState, useContext } from 'react'
 
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
-const useMount = (fun) => useEffect(fun);
-
 type SpeakerInfoSubmitStatus = {
   has_submitted: boolean;
   last_status: number;
@@ -307,16 +305,11 @@ export default function SpeakerInfoControl({
         </Button>
       );
     }
-  } else {
-  // TODO: This cause hydration error.
-//    speakerLabelInputs.push(<TableRow key="loading-div">Wait...Loading Speakers Labels</TableRow>);
   }
 
   return (
     <TableContainer component={Paper} style={{height: '100%'}}>
       <Stack direction="row" px={1} sx={{
-            position: "sticky",
-            top: "0px",
             py: "5px",
             backgroundColor:"primary.analogous"
           }}

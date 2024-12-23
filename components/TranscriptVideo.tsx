@@ -20,6 +20,13 @@ export default function TranscriptVideo({
   return (
     <Card variant="outlined" sx={[{paddingY: 0}, ...(Array.isArray(sx) ? sx : [sx])]}>
       <CardContent sx={{paddingX: 0, paddingY: 0}}>
+        <TranscriptControlBar
+          curLang={curLang}
+          sx={{
+            borderColor: "blue",
+            borderStyle: "solid",
+          }}
+        />
         <Typography variant="h6" component="div" sx={{paddingX: 0}}>
           {title}
         </Typography>
@@ -31,13 +38,6 @@ export default function TranscriptVideo({
                 xs: "352px",
                 md: "426px",
             },
-          }}
-        />
-        <TranscriptControlBar
-          curLang={curLang}
-          sx={{
-            borderColor: "blue",
-            borderStyle: "solid",
           }}
         />
       </CardContent>

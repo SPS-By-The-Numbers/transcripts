@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import SpeakerBubble from 'components/SpeakerBubble';
-import SpeakerInfoControl from 'components/SpeakerInfoControl';
+import InfoEditPanel from 'components/InfoEditPanel';
 import TranscriptClickHandler from 'components/TranscriptClickHandler';
 import TranscriptVideo from 'components/TranscriptVideo';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
@@ -104,21 +103,18 @@ export default function Transcript({
         sx={{ gridArea: "transcriptVideo" }}
       />
 
-      <Card
+      <InfoEditPanel
+        category={category}
+        speakerNums={speakerNums}
+        initialExistingNames={initialExistingNames}
+        initialExistingTags={initialExistingTags}
+        videoId={videoId}
         sx={{
           gridArea: "infoeditpanel",
           overflowY: "scroll",
           display: {xs: "none", lg: "block" }
         }}
-      >
-        <SpeakerInfoControl
-          category={category}
-          speakerNums={speakerNums}
-          videoId={videoId}
-          initialExistingNames={initialExistingNames}
-          initialExistingTags={initialExistingTags}
-        />
-      </Card>
+      />
 
       <Box sx={{
           gridArea: "transcript",
