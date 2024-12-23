@@ -1,5 +1,4 @@
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 
 import VideoPlayer from 'components/VideoPlayer';
@@ -18,29 +17,29 @@ type TranscriptVideoParams = {
 export default function TranscriptVideo({
   title, videoId, curLang, sx=[]} : TranscriptVideoParams) {
   return (
-    <Card variant="outlined" sx={[{paddingY: 0}, ...(Array.isArray(sx) ? sx : [sx])]}>
-      <CardContent sx={{paddingX: 0, paddingY: 0}}>
-        <TranscriptControlBar
-          curLang={curLang}
-          sx={{
-            borderColor: "blue",
-            borderStyle: "solid",
-          }}
-        />
-        <Typography variant="h6" component="div" sx={{paddingX: 0}}>
-          {title}
-        </Typography>
-        <VideoPlayer
-          videoId={videoId}
-          sx={{
-            marginX: "auto",
-            width: {
-                xs: "352px",
-                md: "426px",
-            },
-          }}
-        />
-      </CardContent>
-    </Card>
+    <Paper
+        elevation={3}
+        sx={[{padding: "0.5ex"}, ...(Array.isArray(sx) ? sx : [sx])]}>
+      <Typography variant="h6" component="div" sx={{paddingX: 0}}>
+        {title}
+      </Typography>
+      <VideoPlayer
+        videoId={videoId}
+        sx={{
+          marginX: "auto",
+          width: {
+              xs: "352px",
+              md: "426px",
+          },
+        }}
+      />
+      <TranscriptControlBar
+        curLang={curLang}
+        sx={{
+          borderColor: "blue",
+          borderStyle: "solid",
+        }}
+      />
+    </Paper>
   );
 }

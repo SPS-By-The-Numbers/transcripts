@@ -27,6 +27,9 @@ const theme = extendTheme({
   colorSchemes: {
     light: {
       palette: {
+        background: {
+          default: "#cdcdcd"
+        },
         primary: {
           main: '#0a43ad',
           analogous: '#0a95ad',
@@ -37,6 +40,15 @@ const theme = extendTheme({
           main: '#0a43ad',
         },
       },
+      components: {
+        MuiPaper: {
+          styleOverrides: {
+            root: {
+              backgroundColor: '#efefef',
+            }
+          },
+        },
+      }
     }
   }
 });
