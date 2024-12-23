@@ -1,8 +1,10 @@
 import Box from '@mui/material/Box';
-import SpeakerBubble from 'components/SpeakerBubble';
 import InfoEditPanel from 'components/InfoEditPanel';
+import Paper from '@mui/material/Paper';
+import SpeakerBubble from 'components/SpeakerBubble';
 import TranscriptClickHandler from 'components/TranscriptClickHandler';
 import TranscriptVideo from 'components/TranscriptVideo';
+import Typography from '@mui/material/Typography';
 import { UnknownSpeakerNum } from 'utilities/client/speaker';
 import { toTimeClassName } from 'utilities/client/css'
 
@@ -79,20 +81,19 @@ export default function Transcript({
           columnGap: "1ex",
           rowGap: "0.5ex",
           padding: "1ex",
-          justifyItems: "normal",
-          maxWidth: {xs: "75ch", lg: "100%"},
+          maxWidth: "max-content",
           marginX: "auto",
 
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "auto 1fr",
+            lg: "max-content max-content",
           },
           gridTemplateRows: "auto 3fr",
           gridTemplateAreas: {
             xs: `"transcriptVideo"
                  "transcript"`,
-            lg: `"transcript transcriptVideo"
-                 "transcript infoeditpanel"`
+            lg: `"transcriptVideo transcript"
+                 "infoeditpanel transcript"`
           },
       },
       ...(Array.isArray(sx) ? sx : [sx])]}>
@@ -116,9 +117,10 @@ export default function Transcript({
         }}
       />
 
-      <Box sx={{
+      <Paper sx={{
           gridArea: "transcript",
           marginX: "auto",
+          padding: "0.5ex",
           overflowY: "scroll",
           maxWidth: "75ch" }}>
           <TranscriptClickHandler>
@@ -126,7 +128,7 @@ export default function Transcript({
               {speakerBubbles}
             </main>
           </TranscriptClickHandler>
-      </Box>
+      </Paper>
     </Box>
   );
 }

@@ -1,8 +1,8 @@
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import LanguageNav from 'components/LanguageNav';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import LanguageNav from 'components/LanguageNav';
 import { ExpandMore, Language } from '@mui/icons-material';
 import { SupportedLanguages } from 'common/languages';
 import { useState } from 'react';
@@ -19,29 +19,18 @@ export default function TranscriptControlBar({ curLang, sx = [] }: TranscriptCon
   return (
     <Stack
       direction="row"
+      spacing={1}
       sx={[{
           justifyContent: "space-around",
-          bgcolor: 'primary.main',
-          "& .MuiOutlinedInput-root": {
-            color: 'primary.contrastText',
-          },
         },
         ...(Array.isArray(sx) ? sx : [sx])
       ]}
     >
-      <Button sx={{width: "100%"}} >
-        <Box sx={{
-            color: 'primary.contrastText',
-          }}>
-          Download
-        </Box>
+      <Button variant="contained" size="small" sx={{width: "100%"}} >
+        Download
       </Button>
-      <Button sx={{width: "100%"}} >
-        <Box sx={{
-            color: 'primary.contrastText',
-          }}>
-          Autoscroll
-        </Box>
+      <Button variant="contained" size="small" sx={{width: "100%"}} >
+        Autoscroll
       </Button>
       <LanguageNav
         name='lang-nav'
