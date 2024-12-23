@@ -18,6 +18,12 @@ type InfoEditPanelParams = {
   sx?: SxProps<Theme>;
 };
 
+type TabPanelProps = {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+};
+
 function a11yProps(index: number) {
   return {
     id: `infoedit-tab-${index}`,
@@ -32,8 +38,8 @@ function CustomTabPanel(props: TabPanelProps) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
+      id={`infoedit-tabpanel-${index}`}
+      aria-labelledby={`infoedit-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
@@ -49,14 +55,17 @@ export default function InfoEditPanel({
     initialExistingTags,
     sx=[]} : InfoEditPanelParams) {
 
-  const [value, setValue] = React.useState('1');
+  const [value, setValue] = React.useState(1);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
+    setValue(parseInt(newValue));
   };
 
   return (
     <Box sx={[{paddingY: 0}, ...(Array.isArray(sx) ? sx : [sx])]}>
-      <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        aria-label="Information ane Property Edit Panel">
          <Tab label="Speakers" {...a11yProps(0)} />
          <Tab label="Info" {...a11yProps(1)} />
          <Tab label="Links" {...a11yProps(2)} />
