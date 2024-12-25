@@ -82,13 +82,10 @@ export default function LanguageNav({ name, curLang, sx = [] } : LanguageNavPara
       onChange={(_event, newValue) => navigateToNewLang(newValue)}
       renderInput={
         (params) => (
-        <>
           <TextField
-            size="small"
             sx={{input: {textAlign: "center"}}}
             {...params}
-          />
-        </>)
+          />)
       }
       sx={[
         {
