@@ -40,16 +40,16 @@ const theme = extendTheme({
           main: '#0a43ad',
         },
       },
-      components: {
-        MuiPaper: {
-          styleOverrides: {
-            root: {
-              backgroundColor: '#efefef',
-            }
-          },
-        },
-      }
     }
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#efefef',
+        }
+      },
+    },
   }
 });
 
