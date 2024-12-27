@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -13,7 +13,7 @@ import { styled } from '@mui/material/styles';
 
 export default function Nav() {
   return (
-      <AppBar position="sticky">
+      <AppBar position="sticky" color="primary" enableColorOnDark={true}>
         <Box sx={{
             display: Constants.isProduction ? "none" : "flex",
             backgroundColor: "red",
@@ -21,14 +21,13 @@ export default function Nav() {
             width: "100%"}}>
           Dev Mode. Emulators used.
         </Box>
-        <Container maxWidth="xl">
+        <Box maxWidth="xl">
           <Toolbar disableGutters variant="dense">
-            <Button
-                variant="contained"
-                href={Constants.HOME_URL}
-                disableElevation={true}
-                startIcon={<Avatar src={'/logo.png'} variant='square' />}
-             />
+            <Link href={Constants.HOME_URL}>
+              <Box component="div" sx={{ paddingX: "1ex", alignItem: "Center"}} >
+                <img alt="Home" src={'/logo.png'} height={35} />
+              </Box>
+            </Link>
 
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               <Stack
@@ -83,7 +82,7 @@ export default function Nav() {
               </Typography>
             </Box>
           </Toolbar>
-        </Container>
+        </Box>
       </AppBar>
   );
 }

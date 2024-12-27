@@ -31,7 +31,23 @@ const theme = extendTheme({
           default: "#cdcdcd"
         },
         primary: {
+          main: 'rgb(10, 67, 173)',
+          analogous: '#0a95ad',
+          info: '#efefef',
+          contrastText: '#ececec',
+        },
+        secondary: {
           main: '#0a43ad',
+        },
+      },
+    },
+    dark: {
+      palette: {
+        background: {
+          default: "#cdcdcd"
+        },
+        primary: {
+          main: 'rgb(13, 46, 142)',
           analogous: '#0a95ad',
           info: '#efefef',
           contrastText: '#ececec',
@@ -46,7 +62,7 @@ const theme = extendTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: '#efefef',
+          backgroundColor: 'primary.info',
         }
       },
     },

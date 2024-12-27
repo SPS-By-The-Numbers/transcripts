@@ -74,7 +74,7 @@ export default function Transcript({
   });
 
   return (
-    <Box sx={[
+    <Paper sx={[
       {
           display: "grid",
           height: `calc(100% - 100px)`,
@@ -88,17 +88,25 @@ export default function Transcript({
             xs: "1fr",
             lg: "max-content max-content",
           },
-          gridTemplateRows: "auto 3fr",
+          gridTemplateRows: "auto auto 3fr",
           gridTemplateAreas: {
-            xs: `"transcriptVideo"
+            xs: `"title"
+                 "transcriptVideo"
                  "transcript"`,
-            lg: `"transcriptVideo transcript"
+            lg: `"title title"
+                 "transcriptVideo transcript"
                  "infoeditpanel transcript"`
           },
       },
       ...(Array.isArray(sx) ? sx : [sx])]}>
+      <Box sx={{ gridArea: "title",
+                 justifyItems: "center" }}>
+        <Typography variant="h5" component="h1" >
+          {metadata.title}
+        </Typography>
+      </Box>
+
       <TranscriptVideo
-        title={metadata.title}
         curLang={languageOrder[0]}
         videoId={videoId}
         sx={{ gridArea: "transcriptVideo" }}
@@ -109,15 +117,15 @@ export default function Transcript({
         speakerNums={speakerNums}
         initialExistingNames={initialExistingNames}
         initialExistingTags={initialExistingTags}
-        videoId={videoId}
+        metadata={metadata}
         sx={{
           gridArea: "infoeditpanel",
-          overflowY: "scroll",
-          display: {xs: "none", lg: "block" }
+          display: {xs: "none", lg: "block" },
+          overflowY: "hidden"
         }}
       />
 
-      <Paper sx={{
+      <Box sx={{
           gridArea: "transcript",
           marginX: "auto",
           padding: "0.5ex",
@@ -128,7 +136,7 @@ export default function Transcript({
               {speakerBubbles}
             </main>
           </TranscriptClickHandler>
-      </Paper>
-    </Box>
+      </Box>
+    </Paper>
   );
 }
