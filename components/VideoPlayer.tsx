@@ -50,9 +50,9 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
     const interval = setInterval(() => {
         if (ytElement.current) {
           // Scroll if playing.
-          if (autoscroll && ytElement.current.getPlayerState() === 1) {
+          if (ytElement.current.getPlayerState() === 1) {
             const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
-            scrollTranscriptTo(hhmmss);
+            updateTranscriptHighlight(hhmmss, autoscroll);
           }
         }
     }, 1000);
@@ -81,7 +81,7 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
     return () => clearInterval(interval);
   }, [setVideoControl, setDimensions]);
 
-  function scrollTranscriptTo(hhmmss) {
+  function updateTranscriptHighlight(hhmmss, scrollTranscript) {
     const tsClassName = `ts-${hhmmss}`;
     const spans : HTMLCollectionOf<Element> = document.getElementsByClassName(tsClassName);
 
@@ -97,7 +97,9 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
       markedElementClassName = tsClassName;
       for (const el of Array.from(spans)) {
         el.classList.add('m');
-        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        if (scrollTranscript) {
+          el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        }
       }
     }
   }
@@ -114,7 +116,7 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
       ytElement.current = event.target;
       if (window.location.hash) {
         const hhmmss = window.location.hash.substr(1);
-        scrollTranscriptTo(hhmmss);
+        updateTranscriptHighlight(hhmmss, true);
         jumpToTimeInternal(fromHhmmss(hhmmss));
       }
     }
