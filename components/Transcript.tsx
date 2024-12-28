@@ -17,8 +17,6 @@ import type { SxProps, Theme } from '@mui/material';
 type TranscriptParams = {
   metadata: any;
   category: CategoryId;
-  initialExistingNames: ExistingNames;
-  initialExistingTags: TagSet;
   diarizedTranscript: DiarizedTranscript;
   speakerInfo: SpeakerInfoData;
   languageOrder: Array<string>;
@@ -49,8 +47,6 @@ export default function Transcript({
     diarizedTranscript,
     languageOrder,
     speakerInfo,
-    initialExistingNames,
-    initialExistingTags,
     sx = []} : TranscriptParams) {
   const videoId = metadata.video_id;
   const speakerNums = new Set<number>();
@@ -115,8 +111,6 @@ export default function Transcript({
       <InfoEditPanel
         category={category}
         speakerNums={speakerNums}
-        initialExistingNames={initialExistingNames}
-        initialExistingTags={initialExistingTags}
         metadata={metadata}
         sx={{
           gridArea: "infoeditpanel",
@@ -131,11 +125,11 @@ export default function Transcript({
           padding: "0.5ex",
           overflowY: "scroll",
           maxWidth: "75ch" }}>
-          <TranscriptClickHandler>
-            <main>
-              {speakerBubbles}
-            </main>
-          </TranscriptClickHandler>
+        <TranscriptClickHandler>
+          <main>
+            {speakerBubbles}
+          </main>
+        </TranscriptClickHandler>
       </Box>
     </Paper>
   );

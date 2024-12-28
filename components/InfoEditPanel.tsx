@@ -13,8 +13,6 @@ import type { ExistingNames, TagSet } from 'utilities/client/speaker';
 type InfoEditPanelParams = {
   category: CategoryId;
   metadata: any;
-  initialExistingNames: ExistingNames;
-  initialExistingTags: TagSet;
   speakerNums : Set<number>;
   sx?: SxProps<Theme>;
 };
@@ -53,8 +51,6 @@ export default function InfoEditPanel({
     category,
     metadata,
     speakerNums,
-    initialExistingNames,
-    initialExistingTags,
     sx=[]} : InfoEditPanelParams) {
 
   const [value, setValue] = React.useState(0);
@@ -86,8 +82,6 @@ export default function InfoEditPanel({
           category={category}
           speakerNums={speakerNums}
           videoId={metadata.video_id}
-          initialExistingNames={initialExistingNames}
-          initialExistingTags={initialExistingTags}
         />
       </CustomTabPanel>
     </Box>

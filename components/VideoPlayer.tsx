@@ -28,17 +28,21 @@ let markedElementClassName = '';
 
 export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
   const ytElement = useRef<any>(null);
-  const { setVideoControl } = useContext(VideoControlContext);
+  const {setVideoControl} = useContext(VideoControlContext);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width:0, height: 0});
 
   useEffect(() => {
+    let autoscroll = true;
     setVideoControl({
         jumpToTime: (hhmmss: string) => {
           if (hhmmss) {
             jumpToTimeInternal(fromHhmmss(hhmmss));
           }
+        },
+        setAutoscroll: (follow: bool) => {
+          autoscroll = follow;
         }
       });
 
@@ -46,7 +50,7 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
     const interval = setInterval(() => {
         if (ytElement.current) {
           // Scroll if playing.
-          if (ytElement.current.getPlayerState() === 1) {
+          if (autoscroll && ytElement.current.getPlayerState() === 1) {
             const hhmmss = toHhmmss(ytElement.current.getCurrentTime());
             scrollTranscriptTo(hhmmss);
           }

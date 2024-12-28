@@ -47,13 +47,13 @@ const theme = extendTheme({
           default: "#cdcdcd"
         },
         primary: {
-          main: 'rgb(13, 46, 142)',
+          main: '#0d2e8e',
           analogous: '#0a95ad',
           info: '#efefef',
           contrastText: '#ececec',
         },
         secondary: {
-          main: '#0a43ad',
+          main: '#8e6d0e',
         },
       },
     }

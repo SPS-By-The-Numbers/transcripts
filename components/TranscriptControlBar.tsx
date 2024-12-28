@@ -1,11 +1,13 @@
+'use client'
+import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import LanguageNav from 'components/LanguageNav';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { ExpandMore, Language } from '@mui/icons-material';
-import { SupportedLanguages } from 'common/languages';
-import { useState } from 'react';
+import Switch from '@mui/material/Switch';
+import { VideoControlContext } from 'components/VideoControlProvider';
+import { ChangeEvent, useContext, useState } from 'react';
 
 import type { Iso6393Code } from 'common/params';
 import type { SxProps, Theme } from '@mui/material';
@@ -15,7 +17,19 @@ type TranscriptControlBarProps = {
   sx?: SxProps<Theme>;
 };
 
-export default function TranscriptControlBar({ curLang, sx = [] }: TranscriptControlBarProps) {
+export default function TranscriptControlBar(
+    { curLang, sx = [] }: TranscriptControlBarProps) {
+  const { videoControl } = useContext(VideoControlContext);
+  const [ autoscroll, setAutoscroll ] = useState<bool>(true);
+
+  const handleAutoscrollChange = (event: ChangeEvent<HTMLInputElement>) => {
+    // Use local state because publishing to the videoControl steps outside
+    // the React system so it does not know to rerender.
+    const new_value = event.target.checked;
+    setAutoscroll(new_value);
+    videoControl.setAutoscroll(new_value);
+  };
+
   return (
     <Stack
       direction="row"
@@ -26,12 +40,26 @@ export default function TranscriptControlBar({ curLang, sx = [] }: TranscriptCon
         ...(Array.isArray(sx) ? sx : [sx])
       ]}
     >
-      <Button variant="contained" size="small" sx={{width: "100%"}} >
-        Download
-      </Button>
-      <Button variant="contained" size="small" sx={{width: "100%"}} >
-        Autoscroll
-      </Button>
+      <Paper
+        variant="outlined"
+        sx={{
+            backgroundColor: (autoscroll ? "primary.main" : undefined),
+            paddingX: "0.5ex",
+            justifyItems: "center",
+            width: "100%",
+          }}>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={autoscroll}
+                color="warning"
+                onChange={handleAutoscrollChange}
+                />
+            }
+            label="Autoscroll"/>
+        </FormGroup>
+      </Paper>
       <LanguageNav
         name='lang-nav'
         curLang={curLang}

@@ -1,4 +1,6 @@
 import * as Constants from 'config/constants'
+import ActionDialog from 'components/ActionDialog';
+import ActionDialogControlProvider from 'components/ActionDialogControlProvider';
 import SpeakerInfoProvider from 'components/SpeakerInfoProvider'
 import Transcript from 'components/Transcript'
 import VideoControlContextProvider from 'components/VideoControlProvider'
@@ -91,16 +93,21 @@ export default async function Index(props: {params: Promise<VideoParams>}) {
     ]);
 
   return (
-    <SpeakerInfoProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
+    <SpeakerInfoProvider
+        initialSpeakerInfo={speakerControlInfo.speakerInfo}
+        initialExistingNames={speakerControlInfo.existingNames}
+        initialExistingTags={speakerControlInfo.existingTags}
+      >
       <VideoControlContextProvider>
-        <Transcript
+        <ActionDialogControlProvider>
+          <ActionDialog />
+          <Transcript
             metadata={ metadata }
             category={ params.category }
             diarizedTranscript={ diarizedTranscript }
             languageOrder={ languageOrder }
-            speakerInfo={ speakerControlInfo.speakerInfo }
-            initialExistingNames={ speakerControlInfo.existingNames }
-            initialExistingTags={ speakerControlInfo.existingTags } />
+            speakerInfo={ speakerControlInfo.speakerInfo }/>
+        </ActionDialogControlProvider>
       </VideoControlContextProvider>
     </SpeakerInfoProvider>
   );
