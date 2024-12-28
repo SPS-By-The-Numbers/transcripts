@@ -45,7 +45,7 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
       info.name = newName;
       // Autopopulate the recent tags if nothing else was there.
       if (!info.tags || info.tags.size === 0) {
-        info.tags = new Set<string>(newExistingNames[newName]?.recentTags);
+        info.tags = new Set<string>(existingNames[newName]?.recentTags);
       }
       console.log("setting speaker:", info);
       setSpeakerInfo(newSpeakerInfo);
