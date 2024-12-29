@@ -2,17 +2,20 @@
 
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
-import DialogTitle from '@mui/material/DialogTitle';
+import CloseIcon from '@mui/icons-material/Close';
+import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useContext } from 'react';
 import { ActionDialogControlContext } from 'components/ActionDialogControlProvider';
 import { SpeakerInfoContext } from 'components/SpeakerInfoProvider'
 import { getSpeakerAttributes, toSpeakerKey } from 'utilities/client/speaker'
+import { isEqual } from 'lodash-es'
+import { useContext } from 'react';
 
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
@@ -27,7 +30,7 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
     existingNames, setExistingNames,
     existingTags, setExistingTags} = useContext(SpeakerInfoContext);
 
-  function handleNameChange(speakerNum : number, newValue, reason) {
+  function handleNameChange(speakerNum : number, newValue) {
     const newSpeakerInfo = {...speakerInfo};
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     const newName = typeof newValue === 'string' ? newValue : newValue?.label;
@@ -47,8 +50,30 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
       if (!info.tags || info.tags.size === 0) {
         info.tags = new Set<string>(existingNames[newName]?.recentTags);
       }
-      console.log("setting speaker:", info);
       setSpeakerInfo(newSpeakerInfo);
+    }
+  }
+
+  function handleTagsChange(speakerNum : number, newTagOptions: Array<OptionType | string>) {
+    const newSpeakerInfo = {...speakerInfo};
+    const newExistingTags = new Set<string>(existingTags);
+
+    const newTags = new Set<string>();
+    for (const option of newTagOptions) {
+      if (typeof option === 'string') {
+        newTags.add(option);
+        newExistingTags.add(option);
+      } else {
+        newTags.add(option.label);
+        newExistingTags.add(option.label);
+      }
+    }
+    const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
+    info.tags = newTags;
+    setSpeakerInfo(newSpeakerInfo);
+
+    if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
+      setExistingTags(newExistingTags);
     }
   }
 
@@ -62,7 +87,7 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
   }
 
   const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
-  const curName = nameOptions.filter(v => v.label === name)?.[0];
+  const curName = nameOptions.filter(v => v.label === name)?.[0] ?? null;
   const curTags = tagOptions.filter(v => tags.has(v.label));
 
   return (
@@ -73,7 +98,7 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
         blurOnSelect
         freeSolo
         sx={{
-          minWidth: "50ch",
+          minWidth: "40ch",
           "& .MuiOutlinedInput-root": {
             padding: 0,
         }
@@ -86,8 +111,8 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
             variant="standard"
             {...params}
             placeholder={`Name for ${name}`} />)}
-        onChange={(event, newValue, reason) =>
-          handleNameChange(speakerNum, newValue, reason)} />
+        onChange={(event, newValue) =>
+          handleNameChange(speakerNum, newValue)} />
 
       <Autocomplete
           id={`cs-tag-${name}`}
@@ -106,10 +131,14 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
               label="Tags"
               variant="standard"
               {...params}
-              sx={{input: {textAlign: "left", margin: "dense"}}}
               placeholder={`Tags for ${name}`} />)}
-          onChange={(event, newValue, reason) =>
+          onChange={(event, newValue) =>
               handleTagsChange(speakerNum, newValue)} />
+      <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
+        <Button variant="contained">
+          Login to Upload
+        </Button>
+      </Stack>
     </Stack>
   );
 }
@@ -117,23 +146,22 @@ function SpeakerNameSelect({speakerNum}: SpeakerNameSelectProps) {
 function makeContents(dialogControl) {
   let chainedHandleClose = doNothing;
   let dialogContents = [];
+  let dialogTitle = ""
   if (dialogControl?.mode === "speaker") {
     const speakerNum = dialogControl.params.speakerNum;
-    dialogContents.push(
-      <DialogTitle key='title'>Speaker {speakerNum} Info</DialogTitle>
-    );
+    dialogTitle = `Edit Speaker ${speakerNum}`;
     dialogContents.push(
       <DialogContent key="content">
         <SpeakerNameSelect speakerNum={speakerNum} />
       </DialogContent>
     );
   }
-  return {chainedHandleClose, dialogContents};
+  return {chainedHandleClose, dialogContents, dialogTitle};
 }
 
 export default function ActionDialog() {
   const {actionDialogControl, setActionDialogControl} = useContext(ActionDialogControlContext);
-  const {dialogContents, chainedHandleClose} = makeContents(actionDialogControl);
+  const {dialogContents, dialogTitle, chainedHandleClose} = makeContents(actionDialogControl);
 
   const handleClose = (value: string) => {
     chainedHandleClose();
@@ -142,6 +170,14 @@ export default function ActionDialog() {
 
   return (
     <Dialog onClose={handleClose} open={actionDialogControl !== undefined}>
+      <DialogTitle key='title'>
+        <Stack direction="row" sx={{justifyContent:"space-between", alignItems:"center"}}>
+          {dialogTitle}
+          <IconButton onClick={handleClose}>
+            <CloseIcon size="inherit"/>
+          </IconButton>
+        </Stack>
+      </DialogTitle>
       {dialogContents}
     </Dialog>
   );
