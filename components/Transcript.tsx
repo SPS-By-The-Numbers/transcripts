@@ -73,7 +73,7 @@ export default function Transcript({
     <Paper sx={[
       {
           display: "grid",
-          height: `calc(100% - 100px)`,
+          height: `calc(100% - 80px)`,
           columnGap: "1ex",
           rowGap: "0.5ex",
           padding: "1ex",
