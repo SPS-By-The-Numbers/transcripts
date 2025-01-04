@@ -1,9 +1,11 @@
 'use client'
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import LanguageNav from 'components/LanguageNav';
+import PublishIcon from '@mui/icons-material/Publish';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import { VideoControlContext } from 'components/VideoControlProvider';
@@ -65,6 +67,13 @@ export default function TranscriptControlBar(
         curLang={curLang}
         sx={{width: "100%"}}
       />
+      <Button
+        variant="contained"
+        aria-label="publish-changes"
+        color="secondary"
+        disabled={true}>
+        <PublishIcon />
+      </Button>
     </Stack>
   );
 }

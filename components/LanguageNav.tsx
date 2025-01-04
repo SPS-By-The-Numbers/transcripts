@@ -2,6 +2,8 @@
 
 import * as Constants from 'config/constants';
 import Autocomplete from '@mui/material/Autocomplete';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import { SupportedLanguages } from 'common/languages';
 import { useState } from 'react'
@@ -56,6 +58,7 @@ type LanguageNavParams = {
 
 export default function LanguageNav({ name, curLang, sx = [] } : LanguageNavParams) {
   const [newLang, setNewLang] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
 
   const navigateToNewLang = (newOption) => {
     setNewLang(newOption.value);
@@ -68,33 +71,43 @@ export default function LanguageNav({ name, curLang, sx = [] } : LanguageNavPara
       pathParts.push(newOption.value);
     }
 
+    setLoading(true);
     window.location.pathname = pathParts.join('/');
   };
 
   
   return (
-    <Autocomplete
-      disableClearable
-      size="small"
-      id={name}
-      value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
-      options={ LangOptions }
-      onChange={(_event, newValue) => navigateToNewLang(newValue)}
-      renderInput={
-        (params) => (
-          <TextField
-            sx={{input: {textAlign: "center"}}}
-            {...params}
-          />)
-      }
-      sx={[
-        {
-          bgcolor: 'primary.main',
-          "& .MuiOutlinedInput-root": {
-            color: 'primary.contrastText',
+    <>
+      <Autocomplete
+        disableClearable
+        size="small"
+        id={name}
+        value={ LangOptions.find(element => element.value === (newLang ?? curLang)) }
+        options={ LangOptions }
+        onChange={(_event, newValue) => navigateToNewLang(newValue)}
+        renderInput={
+          (params) => (
+            <TextField
+              sx={{input: {textAlign: "center"}}}
+              {...params}
+            />)
+        }
+        sx={[
+          {
+            bgcolor: 'primary.main',
+            "& .MuiOutlinedInput-root": {
+              color: 'primary.contrastText',
+            },
           },
-        },
-        ...(Array.isArray(sx) ? sx : [sx])
-      ]}
-      />);
+          ...(Array.isArray(sx) ? sx : [sx])
+        ]}
+      />
+      <Backdrop
+        sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </>
+  );
 }

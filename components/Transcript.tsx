@@ -118,7 +118,6 @@ export default function Transcript({
           overflowY: "hidden"
         }}
       />
-
       <Box sx={{
           gridArea: "transcript",
           marginX: "auto",

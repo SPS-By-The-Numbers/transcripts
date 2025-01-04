@@ -106,7 +106,8 @@ export default async function Index(props: {params: Promise<VideoParams>}) {
             category={ params.category }
             diarizedTranscript={ diarizedTranscript }
             languageOrder={ languageOrder }
-            speakerInfo={ speakerControlInfo.speakerInfo }/>
+            speakerInfo={ speakerControlInfo.speakerInfo }
+          />
         </ActionDialogControlProvider>
       </VideoControlContextProvider>
     </SpeakerInfoProvider>
