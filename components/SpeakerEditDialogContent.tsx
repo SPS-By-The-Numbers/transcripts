@@ -5,9 +5,10 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
-import { useAnnotations } from 'components/AnnotationsProvider'
+import { ActionDialogControlContext } from 'components/ActionDialogControlProvider';
 import { getSpeakerAttributes } from 'utilities/client/speaker'
 import { isEqual } from 'lodash-es'
+import { useAnnotations } from 'components/AnnotationsProvider'
 import { useContext } from 'react';
 
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
@@ -24,8 +25,10 @@ export function makeDialogContents(speakerNum: int) {
   return {dialogContents, dialogTitle};
 }
 
-export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialogContentProps) {
+export default function SpeakerEditDialogContent(
+    {speakerNum}: SpeakerEditDialogContentProps) {
   const annotationsContext = useAnnotations();
+  const { setActionDialogControl } = useContext(ActionDialogControlContext);
 
   function handleNameChange(speakerNum : number, newValue) {
     const newSpeakerInfo = {...annotationsContext.speakerInfo};
@@ -136,7 +139,7 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
           onChange={(event, newValue) =>
               handleTagsChange(speakerNum, newValue)} />
       <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
-        <Button variant="contained">
+        <Button variant="contained" onClick={() => setActionDialogControl({mode: 'login'})}>
           Login to Upload
         </Button>
       </Stack>

@@ -57,7 +57,7 @@ export async function getSpeakerControlInfo(category: CategoryId, videoId: Video
   }
 
   const speakerInfo: SpeakerInfoData = {};
-  for (const [key, value] of Object.entries(response.data.speakerInfo)) {
+  for (const [key, value] of Object.entries(response.data.speakerInfo ?? {})) {
     speakerInfo[key] = {...value, tags: new Set<string>(value.tags)};
   }
 

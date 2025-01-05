@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { ActionDialogControlContext } from 'components/ActionDialogControlProvider';
+import { makeDialogContents as makeLoginContents } from 'components/LoginDialogContent';
 import { makeDialogContents as makeSpeakerEditContents } from 'components/SpeakerEditDialogContent';
 import { useContext } from 'react';
 
@@ -16,6 +17,14 @@ function makeContents(dialogControl) {
   if (dialogControl?.mode === "speaker") {
     const speakerNum = dialogControl.params.speakerNum;
     let {dialogTitle,  dialogContents} = makeSpeakerEditContents(speakerNum);
+    dialogContents = (<DialogContent key="contents">{dialogContents}</DialogContent>)
+    return ({
+      chainedHandleClose: doNothing,
+      dialogContents,
+      dialogTitle
+    });
+  } else if (dialogControl?.mode === "login") {
+    let {dialogTitle,  dialogContents} = makeLoginContents();
     dialogContents = (<DialogContent key="contents">{dialogContents}</DialogContent>)
     return ({
       chainedHandleClose: doNothing,
