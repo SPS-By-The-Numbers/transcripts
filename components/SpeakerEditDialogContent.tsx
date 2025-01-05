@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
-import { SpeakerInfoContext } from 'components/SpeakerInfoProvider'
+import { useAnnotations } from 'components/AnnotationsProvider'
 import { getSpeakerAttributes } from 'utilities/client/speaker'
 import { isEqual } from 'lodash-es'
 import { useContext } from 'react';
@@ -25,21 +25,19 @@ export function makeDialogContents(speakerNum: int) {
 }
 
 export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialogContentProps) {
-  const {speakerInfo, setSpeakerInfo,
-    existingNames, setExistingNames,
-    existingTags, setExistingTags} = useContext(SpeakerInfoContext);
+  const annotationsContext = useAnnotations();
 
   function handleNameChange(speakerNum : number, newValue) {
-    const newSpeakerInfo = {...speakerInfo};
+    const newSpeakerInfo = {...annotationsContext.speakerInfo};
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     const newName = typeof newValue === 'string' ? newValue : newValue?.label;
 
-    if (newName && !existingNames.hasOwnProperty(newName)) {
+    if (newName && !annotationsContext.existingNames.hasOwnProperty(newName)) {
       const recentTags = info.tags ?? new Set<string>;
-      const newExistingNames = {...existingNames, [newName]: {recentTags} };
+      const newExistingNames = {...annotationsContext.existingNames, [newName]: {recentTags} };
       // TODO: Extract all these isEquals() checks.
-      if (!isEqual(existingNames, newExistingNames)) {
-        setExistingNames(newExistingNames);
+      if (!isEqual(annotationsContext.existingNames, newExistingNames)) {
+        annotationsContext.setExistingNames(newExistingNames);
       }
     }
 
@@ -47,15 +45,16 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
       info.name = newName;
       // Autopopulate the recent tags if nothing else was there.
       if (!info.tags || info.tags.size === 0) {
-        info.tags = new Set<string>(existingNames[newName]?.recentTags);
+        info.tags = new Set<string>(annotationsContext.existingNames[newName]?.recentTags);
       }
-      setSpeakerInfo(newSpeakerInfo);
+      annotationsContext.setSpeakerInfo(newSpeakerInfo);
     }
   }
 
-  function handleTagsChange(speakerNum : number, newTagOptions: Array<OptionType | string>) {
-    const newSpeakerInfo = {...speakerInfo};
-    const newExistingTags = new Set<string>(existingTags);
+  function handleTagsChange(speakerNum : number,
+                            newTagOptions: Array<OptionType | string>) {
+    const newSpeakerInfo = {...annotationsContext.speakerInfo};
+    const newExistingTags = new Set<string>(annotationsContext.existingTags);
 
     const newTags = new Set<string>();
     for (const option of newTagOptions) {
@@ -69,23 +68,24 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
     }
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     info.tags = newTags;
-    setSpeakerInfo(newSpeakerInfo);
+    annotationsContext.setSpeakerInfo(newSpeakerInfo);
 
-    if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
-      setExistingTags(newExistingTags);
+    if (!isEqual(new Set<string>(annotationsContext.existingTags), newExistingTags)) {
+      annotationsContext.setExistingTags(newExistingTags);
     }
   }
 
   const nameOptions = new Array<OptionType>();
-  for (const name of Object.keys(existingNames).sort()) {
+  for (const name of Object.keys(annotationsContext.existingNames).sort()) {
     nameOptions.push({label: name});
   }
   const tagOptions : OptionType[] = [];
-  for (const tag of Array.from(existingTags).sort()) {
+  for (const tag of Array.from(annotationsContext.existingTags).sort()) {
     tagOptions.push({label: tag});
   }
 
-  const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
+  const { name, tags } = getSpeakerAttributes(speakerNum,
+                                              annotationsContext.speakerInfo);
   const curName = nameOptions.filter(v => v.label === name)?.[0] ?? null;
   const curTags = tagOptions.filter(v => tags.has(v.label));
 

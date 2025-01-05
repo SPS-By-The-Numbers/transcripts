@@ -2,7 +2,6 @@
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import SpeakerInfoControl from 'components/SpeakerInfoControl';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 
@@ -76,13 +75,6 @@ export default function InfoEditPanel({
         <section>
           Description: {metadata.description}
         </section>
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        <SpeakerInfoControl
-          category={category}
-          speakerNums={speakerNums}
-          videoId={metadata.video_id}
-        />
       </CustomTabPanel>
     </Box>
   );

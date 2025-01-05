@@ -1,4 +1,5 @@
 'use client'
+
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -8,6 +9,7 @@ import LanguageNav from 'components/LanguageNav';
 import PublishIcon from '@mui/icons-material/Publish';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
+import { useAnnotations } from 'components/AnnotationsProvider'
 import { VideoControlContext } from 'components/VideoControlProvider';
 import { ChangeEvent, useContext, useState } from 'react';
 
@@ -21,8 +23,11 @@ type TranscriptControlBarProps = {
 
 export default function TranscriptControlBar(
     { curLang, sx = [] }: TranscriptControlBarProps) {
-  const { videoControl } = useContext(VideoControlContext);
   const [ autoscroll, setAutoscroll ] = useState<bool>(true);
+
+  const annotationsContext = useAnnotations();
+  const { serverState } = useContext(VideoControlContext);
+  const { videoControl } = useContext(VideoControlContext);
 
   const handleAutoscrollChange = (event: ChangeEvent<HTMLInputElement>) => {
     // Use local state because publishing to the videoControl steps outside

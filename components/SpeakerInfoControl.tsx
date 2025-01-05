@@ -16,7 +16,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { SpeakerInfoContext } from 'components/SpeakerInfoProvider'
+import { AnnotationsContext } from 'components/AnnotationsContext'
 import { fetchEndpoint } from 'utilities/client/endpoint'
 import { firebaseApp } from 'utilities/client/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
@@ -83,12 +83,12 @@ export default function SpeakerInfoControl({
   const [existingNames, setExistingNames] = useState<ExistingNames>(initialExistingNames);
   const [existingTags, setExistingTags] = useState<TagSet>(initialExistingTags);
   const [authState, setAuthState] = useState<object>({});
-  const {speakerInfo, setSpeakerInfo} = useContext(SpeakerInfoContext);
+  const annotationsContext = useContext(AnnotationsContext);
   const [submitStatus, setSubmitStatus] = useState<SpeakerInfoSubmitStatus>(
       { has_submitted: false, in_progress: false, last_status: 0 });
 
   function handleNameChange(speakerNum : number, newValue, reason) {
-    const newSpeakerInfo = {...speakerInfo};
+    const newSpeakerInfo = {...annotationsContext.speakerInfo};
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     const newName = typeof newValue === 'string' ? newValue : newValue?.label;
 
@@ -108,7 +108,7 @@ export default function SpeakerInfoControl({
         info.tags = new Set<string>(newExistingNames[newName]?.recentTags);
       }
       console.log("setting speaker:", info);
-      setSpeakerInfo(newSpeakerInfo);
+      annotationsContext.setSpeakerInfo(newSpeakerInfo);
     }
   }
 
@@ -138,7 +138,7 @@ export default function SpeakerInfoControl({
   }
 
   function handleTagsChange(speakerNum : number, newTagOptions: Array<OptionType | string>) {
-    const newSpeakerInfo = {...speakerInfo};
+    const newSpeakerInfo = {...annotationsContext.speakerInfo};
     const newExistingTags = new Set<string>(existingTags);
 
     const newTags = new Set<string>();
@@ -153,7 +153,7 @@ export default function SpeakerInfoControl({
     }
     const info = newSpeakerInfo[speakerNum] = newSpeakerInfo[speakerNum] || {};
     info.tags = newTags;
-    setSpeakerInfo(newSpeakerInfo);
+    annotationsContext.setSpeakerInfo(newSpeakerInfo);
 
     if (!isEqual(new Set<string>(existingTags), newExistingTags)) {
       setExistingTags(newExistingTags);
@@ -166,7 +166,7 @@ export default function SpeakerInfoControl({
       category,
       videoId,
       speakerInfo: Object.fromEntries(
-          Object.entries(speakerInfo).map(
+          Object.entries(annotationsContext.speakerInfo).map(
             ([k,v], i) => [
               k,
               { name: v.name, tags: (v.tags ? Array.from(v.tags) : []) }
@@ -189,7 +189,8 @@ export default function SpeakerInfoControl({
   const allSpeakers : number[] = Array.from(speakerNums).sort((a,b) => a-b);
   const newExistingNames = Object.assign({}, existingNames);
   for (const speakerNum of allSpeakers) {
-    const { name, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
+    const { name, tags } = getSpeakerAttributes(speakerNum,
+                                                annotationsContext.speakerInfo);
     if (name !== toSpeakerKey(speakerNum)) {
       newExistingNames[name] = {recentTags: Array.from(tags)};
     }
@@ -225,7 +226,8 @@ export default function SpeakerInfoControl({
     }
 
     for (const speakerNum of allSpeakers) {
-      const { name, colorClass, tags } = getSpeakerAttributes(speakerNum, speakerInfo);
+      const { name, colorClass, tags } = getSpeakerAttributes(speakerNum,
+                                                              annotationsContext.speakerInfo);
       const curName = nameOptions.filter(v => v.label === name)?.[0];
       const curTags = tagOptions.filter(v => tags.has(v.label));
       speakerLabelInputs.push(
