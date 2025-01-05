@@ -33,7 +33,7 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
     const newName = typeof newValue === 'string' ? newValue : newValue?.label;
 
     if (newName && !annotationsContext.existingNames.hasOwnProperty(newName)) {
-      const recentTags = info.tags ?? new Set<string>;
+      const recentTags = info.tags ?? new Set<string>();
       const newExistingNames = {...annotationsContext.existingNames, [newName]: {recentTags} };
       // TODO: Extract all these isEquals() checks.
       if (!isEqual(annotationsContext.existingNames, newExistingNames)) {
@@ -75,6 +75,7 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
     }
   }
 
+  // Create select options. Put them in sorted order.
   const nameOptions = new Array<OptionType>();
   for (const name of Object.keys(annotationsContext.existingNames).sort()) {
     nameOptions.push({label: name});
@@ -84,6 +85,7 @@ export default function SpeakerEditDialogContent({speakerNum}: SpeakerEditDialog
     tagOptions.push({label: tag});
   }
 
+  // Translate speaker numbers to names.
   const { name, tags } = getSpeakerAttributes(speakerNum,
                                               annotationsContext.speakerInfo);
   const curName = nameOptions.filter(v => v.label === name)?.[0] ?? null;

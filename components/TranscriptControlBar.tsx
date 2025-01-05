@@ -76,7 +76,7 @@ export default function TranscriptControlBar(
         variant="contained"
         aria-label="publish-changes"
         color="secondary"
-        disabled={true}>
+        disabled={!annotationsContext.needsPublish()}>
         <PublishIcon />
       </Button>
     </Stack>

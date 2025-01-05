@@ -1,8 +1,14 @@
 'use client'
  
+import { isEqual, cloneDeep } from 'lodash-es'
+
 import { createContext, useContext, useState, useMemo } from 'react'
 
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
+
+type LastPublishedState = {
+  speakerInfo: SpeakerInfoData;
+};
 
 type AnnotationsContextParams = {
   children: React.ReactNode;
@@ -21,14 +27,8 @@ class AnnotationsContextState {
   readonly existingTags: TagSet;
   readonly setExistingTags: (x: TagSet) => void;
 
-  readonly lastSpeakerInfo: SpeakerInfoData;
-  readonly setLastSpeakerInfo:(x: SpeakerInfoData) => void;
-
-  readonly lastExistingNames: ExistingNames;
-  readonly setLastExistingNames: (x: ExistingNames) => void;
-
-  readonly lastExistingTags: TagSet;
-  readonly setLastExistingTags: (x: TagSet) => void;
+  readonly publishedState: LastPublishedState;
+  readonly setLastPublishedState: (x: LastPublishedState) => void;
 
   constructor(
       speakerInfo: SpeakerInfoData,
@@ -38,7 +38,10 @@ class AnnotationsContextState {
       setExistingNames: (x: ExistingNames) => void,
 
       existingTags: TagSet,
-      setExistingTags: (x: TagSet) => void) {
+      setExistingTags: (x: TagSet) => void,
+
+      lastPublishedState: LastPublishedState,
+      setLastPublishedState: (x: LastPublishedState) => void) {
     this.speakerInfo = speakerInfo;
     this.setSpeakerInfo = setSpeakerInfo;
 
@@ -47,6 +50,15 @@ class AnnotationsContextState {
 
     this.existingTags = existingTags;
     this.setExistingTags = setExistingTags;
+
+    this.lastPublishedState = lastPublishedState;
+    this.setLastPublishedState = setLastPublishedState;
+  }
+
+  needsPublish() : bool {
+    console.log(this.lastPublishedState.speakerInfo)
+    console.log(this.speakerInfo)
+    return !isEqual(this.lastPublishedState.speakerInfo, this.speakerInfo);
   }
 }
 
@@ -71,6 +83,12 @@ export default function AnnotationsProvider({
   const [existingNames, setExistingNames] = useState<ExistingNames>(initialExistingNames);
   const [existingTags, setExistingTags] = useState<TagSet>(initialExistingTags);
 
+  const [lastPublishedState, setLastPublishedState] = useState<LastPublishedState>(
+    {
+      speakerInfo: cloneDeep(initialSpeakerInfo),
+    }
+  );
+
   const value = useMemo(() => (new AnnotationsContextState(
       speakerInfo,
       setSpeakerInfo,
@@ -78,8 +96,10 @@ export default function AnnotationsProvider({
       setExistingNames,
       existingTags,
       setExistingTags,
+      lastPublishedState,
+      setLastPublishedState,
     )),
-    [speakerInfo, existingNames, existingTags]
+    [speakerInfo, existingNames, existingTags, lastPublishedState]
   );
  
   return (
