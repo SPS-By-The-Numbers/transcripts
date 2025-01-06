@@ -9,12 +9,15 @@ import LanguageNav from 'components/LanguageNav';
 import PublishIcon from '@mui/icons-material/Publish';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
-import { useAnnotations } from 'components/AnnotationsProvider'
+import { useContext, useState } from 'react';
 import { VideoControlContext } from 'components/VideoControlProvider';
-import { ChangeEvent, useContext, useState } from 'react';
+import { dialogMode as uploadChangesMode } from 'components/UploadChangesDialogContent';
+import { useActionDialog } from 'components/ActionDialogProvider'
+import { useAnnotations } from 'components/AnnotationsProvider'
 
 import type { Iso6393Code } from 'common/params';
 import type { SxProps, Theme } from '@mui/material';
+import type { ChangeEvent } from 'react';
 
 type TranscriptControlBarProps = {
   curLang: Iso6393Code;
@@ -26,6 +29,7 @@ export default function TranscriptControlBar(
   const [ autoscroll, setAutoscroll ] = useState<bool>(true);
 
   const annotationsContext = useAnnotations();
+  const { setActionDialogMode } = useActionDialog();
   const { serverState } = useContext(VideoControlContext);
   const { videoControl } = useContext(VideoControlContext);
 
@@ -76,7 +80,9 @@ export default function TranscriptControlBar(
         variant="contained"
         aria-label="publish-changes"
         color="secondary"
-        disabled={!annotationsContext.needsPublish()}>
+        disabled={!annotationsContext.needsPublish()}
+        onClick={() => setActionDialogMode({mode: uploadChangesMode})}
+      >
         <PublishIcon />
       </Button>
     </Stack>

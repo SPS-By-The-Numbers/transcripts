@@ -1,11 +1,11 @@
 'use client'
 
 import { VideoControlContext } from 'components/VideoControlProvider';
-import { ActionDialogControlContext } from 'components/ActionDialogControlProvider';
+import { dialogMode as speakerMode } from 'components/SpeakerEditDialogContent';
+import { useActionDialog } from 'components/ActionDialogProvider';
 import { useContext } from 'react'
 
 export const speakerClassPrefix = 'editSpeaker';
-
 
 type TranscriptControlParams = {
   children : React.ReactNode,
@@ -13,7 +13,7 @@ type TranscriptControlParams = {
 
 export default function TranscriptControl({children} : TranscriptControlParams) {
   const { videoControl } = useContext(VideoControlContext);
-  const { setActionDialogControl } = useContext(ActionDialogControlContext);
+  const { setActionDialogMode } = useActionDialog();
 
   function handleTimestampJump(command, element): void {
     // Command is ts-NNNNN
@@ -29,8 +29,8 @@ export default function TranscriptControl({children} : TranscriptControlParams) 
   function handleEditSpeaker(command, element): void {
     // Command is ts-NNNNN
     const speakerNum = parseInt(command.split('-')[1]);
-    setActionDialogControl({
-      mode: 'speaker',
+    setActionDialogMode({
+      mode: speakerMode,
       params: { speakerNum },
     });
   }

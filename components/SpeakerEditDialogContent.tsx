@@ -5,9 +5,10 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
-import { ActionDialogControlContext } from 'components/ActionDialogControlProvider';
-import { getSpeakerAttributes } from 'utilities/client/speaker'
-import { isEqual } from 'lodash-es'
+import { dialogMode as uploadChangesMode } from 'components/UploadChangesDialogContent';
+import { getSpeakerAttributes } from 'utilities/client/speaker';
+import { isEqual } from 'lodash-es';
+import { useActionDialog } from 'components/ActionDialogProvider';
 import { useAnnotations } from 'components/AnnotationsProvider'
 import { useContext } from 'react';
 
@@ -16,6 +17,8 @@ import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/sp
 type SpeakerEditDialogContentProps = {
   speakerNum : int;
 };
+
+export const dialogMode = 'speaker';
 
 export function makeDialogContents(speakerNum: int) {
   const dialogTitle = `Edit Speaker ${speakerNum}`;
@@ -28,7 +31,7 @@ export function makeDialogContents(speakerNum: int) {
 export default function SpeakerEditDialogContent(
     {speakerNum}: SpeakerEditDialogContentProps) {
   const annotationsContext = useAnnotations();
-  const { setActionDialogControl } = useContext(ActionDialogControlContext);
+  const { setActionDialogMode } = useActionDialog();
 
   function handleNameChange(speakerNum : number, newValue) {
     const newSpeakerInfo = {...annotationsContext.speakerInfo};
@@ -139,7 +142,9 @@ export default function SpeakerEditDialogContent(
           onChange={(event, newValue) =>
               handleTagsChange(speakerNum, newValue)} />
       <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
-        <Button variant="contained" onClick={() => setActionDialogControl({mode: 'login'})}>
+        <Button
+            variant="contained"
+            onClick={() => setActionDialogMode({mode: uploadChangesMode})}>
           Login to Upload
         </Button>
       </Stack>
