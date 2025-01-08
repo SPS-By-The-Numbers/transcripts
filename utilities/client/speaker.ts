@@ -55,5 +55,21 @@ export async function getSpeakerControlInfo(category: CategoryId, videoId: Video
   if (!response.ok) {
     throw response;
   }
-  return response.data;
+
+  const speakerInfo: SpeakerInfoData = {};
+  if (response.data.speakerInfo) {
+    // TODO: this type is very wrong. We need to figure out how to transfer + validate types from db to cloud func to here.
+    for (const [key, value] of Object.entries(response.data.speakerInfo) as Array<[string, {tags: Array<string>}]>) {
+      speakerInfo[key] = {...value, tags: new Set<string>(value.tags)};
+    }
+  }
+
+  const existingNames = response.data.existingNames;
+  const existingTags = new Set<string>(response.data.existingTags);
+
+  return {
+    speakerInfo,
+    existingNames,
+    existingTags
+  }
 }

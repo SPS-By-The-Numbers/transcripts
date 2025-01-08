@@ -25,31 +25,32 @@ const theme = extendTheme({
     fontFamily: roboto.style.fontFamily,
   },
   colorSchemes: {
-    light: {
+    dark: {
       palette: {
         background: {
           default: "#cdcdcd"
         },
         primary: {
-          main: '#0a43ad',
-          analogous: '#0a95ad',
-          info: '#efefef',
-          contrastText: '#ececec',
+          main: '#0a43ad'
         },
         secondary: {
-          main: '#0a43ad',
+          main: '#8e6d0e',
+        },
+      },
+    },
+    light: {
+      palette: {
+        background: {
+          default: "#333333"
+        },
+        primary: {
+          main: '#0a43ad'
+        },
+        secondary: {
+          main: '#8e6d0e',
         },
       },
     }
-  },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#efefef',
-        }
-      },
-    },
   }
 });
 

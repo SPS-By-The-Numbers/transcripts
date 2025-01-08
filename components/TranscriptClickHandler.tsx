@@ -1,7 +1,11 @@
 'use client'
 
+import ActionDialogConstants from 'components/ActionDialogConstants';
 import { VideoControlContext } from 'components/VideoControlProvider';
+import { useActionDialog } from 'components/ActionDialogProvider';
 import { useContext } from 'react'
+
+export const speakerClassPrefix = 'editSpeaker';
 
 type TranscriptControlParams = {
   children : React.ReactNode,
@@ -9,13 +13,11 @@ type TranscriptControlParams = {
 
 export default function TranscriptControl({children} : TranscriptControlParams) {
   const { videoControl } = useContext(VideoControlContext);
+  const { setActionDialogMode } = useActionDialog();
 
-  function handleClick(e): void {
-    const clickedTimestamp: string | null = findSelectedTimestamp(e.target);
-
-    if (clickedTimestamp === null) {
-      return;
-    }
+  function handleTimestampJump(command, element): void {
+    // Command is ts-NNNNN
+    const clickedTimestamp = command.slice(3);
 
     history.pushState(null, '', `#${clickedTimestamp}`);
     // Video player may not be loaded yet.
@@ -24,26 +26,39 @@ export default function TranscriptControl({children} : TranscriptControlParams) 
     }
   }
 
+  function handleEditSpeaker(command, element): void {
+    // Command is ts-NNNNN
+    const speakerNum = parseInt(command.split('-')[1]);
+    setActionDialogMode({
+      mode: ActionDialogConstants.speakerMode,
+      params: speakerNum,
+    });
+  }
+
+  function handleAction(clickedElement: HTMLElement) {
+    let curElement: HTMLElement | null = clickedElement;
+
+    // Search up the document until there is a classname that starts with
+    // `ts-`. This indicates a timestamp encoded in the classname.
+    while (curElement !== null) {
+      for (const name of curElement.classList) {
+        if (name.startsWith('ts-')) {
+          handleTimestampJump(name, curElement);
+        } else if (name.startsWith(speakerClassPrefix)) {
+          handleEditSpeaker(name, curElement);
+        }
+      }
+      curElement = curElement.parentElement;
+    }
+  }
+
+  function handleClick(e) {
+    handleAction(e.target);
+  }
+
   return (
     <div id="clickhandler" onClick={handleClick}>
       { children }
     </div>
   );
-}
-
-function findSelectedTimestamp(clickedElement: HTMLElement): string | null {
-  let curElement: HTMLElement | null = clickedElement;
-
-  while (curElement !== null) {
-    const classList = Array.from<string>(curElement.classList);
-    const tsClassName: string | undefined = classList.find((name: string) => name.startsWith('ts-'));
-
-    if (tsClassName !== undefined) {
-      return tsClassName.slice(3);
-    }
-
-    curElement = curElement.parentElement;
-  }
-
-  return null;
 }

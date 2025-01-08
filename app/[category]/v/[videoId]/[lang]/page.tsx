@@ -1,5 +1,8 @@
 import * as Constants from 'config/constants'
-import SpeakerInfoProvider from 'components/SpeakerInfoProvider'
+import ActionDialog from 'components/ActionDialog';
+import ActionDialogProvider from 'components/ActionDialogProvider';
+import AnnotationsProvider from 'components/AnnotationsProvider';
+import AuthProvider from 'components/AuthProvider';
 import Transcript from 'components/Transcript'
 import VideoControlContextProvider from 'components/VideoControlProvider'
 import { DiarizedTranscript } from "common/transcript"
@@ -91,17 +94,27 @@ export default async function Index(props: {params: Promise<VideoParams>}) {
     ]);
 
   return (
-    <SpeakerInfoProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
-      <VideoControlContextProvider>
-        <Transcript
-            metadata={ metadata }
-            category={ params.category }
-            diarizedTranscript={ diarizedTranscript }
-            languageOrder={ languageOrder }
-            speakerInfo={ speakerControlInfo.speakerInfo }
-            initialExistingNames={ speakerControlInfo.existingNames }
-            initialExistingTags={ speakerControlInfo.existingTags } />
-      </VideoControlContextProvider>
-    </SpeakerInfoProvider>
+    <AuthProvider>
+      <AnnotationsProvider
+          category={params.category}
+          videoId={params.videoId}
+          initialSpeakerInfo={speakerControlInfo.speakerInfo}
+          initialExistingNames={speakerControlInfo.existingNames}
+          initialExistingTags={speakerControlInfo.existingTags}
+        >
+        <VideoControlContextProvider>
+          <ActionDialogProvider>
+            <ActionDialog />
+            <Transcript
+              metadata={ metadata }
+              category={ params.category }
+              diarizedTranscript={ diarizedTranscript }
+              languageOrder={ languageOrder }
+              speakerInfo={ speakerControlInfo.speakerInfo }
+            />
+          </ActionDialogProvider>
+        </VideoControlContextProvider>
+      </AnnotationsProvider>
+    </AuthProvider>
   );
 }
