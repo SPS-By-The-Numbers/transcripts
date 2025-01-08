@@ -59,7 +59,6 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
 
     function updateDimensions() {
       if (containerRef.current) {
-        console.log("Updated");
         setDimensions(
           {
             width: containerRef.current.offsetWidth,

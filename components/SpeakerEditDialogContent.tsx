@@ -1,11 +1,12 @@
 'use client'
 
+import ActionDialogConstants from 'components/ActionDialogConstants';
+import ActionDialogContent from 'components/ActionDialogContent';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
-import { dialogMode as uploadChangesMode } from 'components/UploadChangesDialogContent';
 import { getSpeakerAttributes } from 'utilities/client/speaker';
 import { isEqual } from 'lodash-es';
 import { useActionDialog } from 'components/ActionDialogProvider';
@@ -16,20 +17,11 @@ import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/sp
 
 type SpeakerEditDialogContentProps = {
   speakerNum : int;
+  onClose: (value: string) => void;
 };
 
-export const dialogMode = 'speaker';
-
-export function makeDialogContents(speakerNum: int) {
-  const dialogTitle = `Edit Speaker ${speakerNum}`;
-  const dialogContents = (
-    <SpeakerEditDialogContent speakerNum={speakerNum} />
-  );
-  return {dialogContents, dialogTitle};
-}
-
 export default function SpeakerEditDialogContent(
-    {speakerNum}: SpeakerEditDialogContentProps) {
+    {speakerNum, onClose}: SpeakerEditDialogContentProps) {
   const annotationsContext = useAnnotations();
   const { setActionDialogMode } = useActionDialog();
 
@@ -98,56 +90,58 @@ export default function SpeakerEditDialogContent(
   const curTags = tagOptions.filter(v => tags.has(v.label));
 
   return (
-    <Stack spacing={2} sx={{marginY: "1ex"}}>
-      <Autocomplete
-        id={`cs-name-${name}`}
-        autoComplete
-        blurOnSelect
-        freeSolo
-        sx={{
-          minWidth: "40ch",
-          "& .MuiOutlinedInput-root": {
-            padding: 0,
-        }
-        }}
-        options={nameOptions}
-        value={curName}
-        renderInput={(params) => (
-          <TextField
-            label="Name"
-            variant="standard"
-            {...params}
-            placeholder={`Name for ${name}`} />)}
-        onChange={(event, newValue) =>
-          handleNameChange(speakerNum, newValue)} />
-
-      <Autocomplete
-          id={`cs-tag-${name}`}
-          multiple
+    <ActionDialogContent title={`Edit Speaker ${speakerNum}`} onClose={onClose}>
+      <Stack spacing={2} sx={{marginY: "1ex"}}>
+        <Autocomplete
+          id={`cs-name-${name}`}
           autoComplete
+          blurOnSelect
           freeSolo
           sx={{
+            minWidth: "40ch",
             "& .MuiOutlinedInput-root": {
               padding: 0,
-            }
+          }
           }}
-          options={tagOptions}
-          value={curTags}
+          options={nameOptions}
+          value={curName}
           renderInput={(params) => (
             <TextField
-              label="Tags"
+              label="Name"
               variant="standard"
               {...params}
-              placeholder={`Tags for ${name}`} />)}
+              placeholder={`Name for ${name}`} />)}
           onChange={(event, newValue) =>
-              handleTagsChange(speakerNum, newValue)} />
-      <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
-        <Button
-            variant="contained"
-            onClick={() => setActionDialogMode({mode: uploadChangesMode})}>
-          Login to Upload
-        </Button>
+            handleNameChange(speakerNum, newValue)} />
+
+        <Autocomplete
+            id={`cs-tag-${name}`}
+            multiple
+            autoComplete
+            freeSolo
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                padding: 0,
+              }
+            }}
+            options={tagOptions}
+            value={curTags}
+            renderInput={(params) => (
+              <TextField
+                label="Tags"
+                variant="standard"
+                {...params}
+                placeholder={`Tags for ${name}`} />)}
+            onChange={(event, newValue) =>
+                handleTagsChange(speakerNum, newValue)} />
+        <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
+          <Button
+              variant="contained"
+              onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}>
+            Publish Changes
+          </Button>
+        </Stack>
       </Stack>
-    </Stack>
+    </ActionDialogContent>
   );
 }

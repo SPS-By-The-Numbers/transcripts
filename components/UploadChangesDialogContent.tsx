@@ -1,58 +1,177 @@
 'use client'
 
+import ActionDialogContent from 'components/ActionDialogContent';
+import Alert from '@mui/material/Alert';
+import Backdrop from '@mui/material/Backdrop';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { fetchEndpoint } from 'utilities/client/endpoint'
+import { useAnnotations } from 'components/AnnotationsProvider'
 import { useAuth } from 'components/AuthProvider'
+import { useState } from 'react'
 
-export const dialogMode = 'upload_changes';
+type UploadChangesDialogContentProps = {
+  speakerNum : int;
+  onClose: (value: string) => void;
+};
 
-export function makeDialogContents() {
-  const dialogTitle = 'Upload Changes';
-  const dialogContents = (
-    <LoginDialogContent />
+type ErrorMessage ={
+  message: string;
+  severity: string;
+};
+
+function SignedOutContent({authContext}) {
+  return (
+    <Stack spacing={2} sx={{marginY: "1ex"}}>
+      <Paper
+          elevation={0}
+          sx={{
+            backgroundColor: "primary.info",
+            padding: "0ex 2ex 0ex 2ex"
+          }}>
+        <p>
+          In order to upload changes to speaker labels
+          for others to see, you must authenticate with a Google
+          Account so we can associate the change with an email address.
+          This is to prevent abuse.
+        </p>
+        <p>
+          Any Google account will work. There is no need to register.
+        </p>
+      </Paper>
+      <Tooltip title="Sign in to upload changes">
+        <Button variant="contained" onClick={()=>authContext.signIn()}>
+          Sign In With Google
+        </Button>
+      </Tooltip>
+    </Stack>
   );
-  return {dialogContents, dialogTitle};
-}
+}  
 
-/*
-async publish(category: CategoryId, videoId: VideoId,
-              onSubmit: (object) => void,
-                onDone: (object) => void) {
-  const data = {
-    auth: auth.currentUser ? await auth.currentUser.getIdToken(true) : "SpsSoSekure",
-    category,
-    videoId,
-    speakerInfo: Object.fromEntries(
-        Object.entries(this.speakerInfo).map(
-          ([k,v], i) => [
-            k,
-            { name: v.name, tags: (v.tags ? Array.from(v.tags) : []) }
-          ]))
-  };
+function SignedInContent({authContext}) {
+  const annotationsContext = useAnnotations();
+  const [isPublishing, setIsPublishing] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>(
+    {message: '', severity: ''});
 
-  onSubmit(data);
-  if (data.status === 200) {
-    this.setLastPublishedState({...this.lastPublishedState, speakerInfo: this.speakerInfo});
-  }
+  async function publishChanges() {
+    const data = {
+      auth: authContext.user() ? await authContext.user().getIdToken(true) : "SpsSoSekure",
+      category: annotationsContext.category,
+      videoId: annotationsContext.videoId,
+      speakerInfo: Object.fromEntries(
+          Object.entries(annotationsContext.speakerInfo).map(
+            ([k,v], i) => [
+              k,
+              { name: v.name, tags: (v.tags ? Array.from(v.tags) : []) }
+            ]))
+    };
 
-  onDone(await fetchEndpoint('speakerinfo', 'POST', data));
-}
-*/
-
-export default function LoginDialogContent() {
-  const authContext = useAuth();
-
-  let text;
-  console.log(authContext);
-  if (authContext.user()) {
-    text = `Logged in as ${authContext.user().email}`;
-  } else {
-    text = <Button onClick={()=>authContext.signIn()}>Sign In</Button>
+    let response;
+    try {
+      setIsPublishing(true);
+      response = await fetchEndpoint('speakerinfo', 'POST', data);
+    } finally {
+      if (!response) {
+        setErrorMessage({
+          message: 'unknown exception',
+          severity: 'error',
+        });
+      } else {
+        if (response.ok) {
+          annotationsContext.setLastPublishedState(
+            {...annotationsContext.lastPublishedState,
+              speakerInfo: annotationsContext.speakerInfo});
+          setErrorMessage({
+            message: 'Update Published',
+            severity: 'success',
+          });
+        } else {
+          setErrorMessage({
+            message: `Server Error: ${response.message}`,
+            severity: 'error',
+          });
+        }
+      }
+      setIsPublishing(false);
+    }
   }
 
   return (
     <Stack spacing={2} sx={{marginY: "1ex"}}>
-      {text}
+      <Alert
+          sx={{ display: errorMessage.message !== '' ? 'flex': 'none' }}
+          severity={errorMessage.severity}
+          onClose={()=>setErrorMessage({message: '', severity: ''})}>
+        {errorMessage.message}
+      </Alert>
+      <Backdrop
+        sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+        open={isPublishing}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Alert severity="info" sx={{alignItems: "center"}}>
+        <Box>
+          Signed in: {authContext.user().email}
+          <Tooltip title="Signout">
+            <IconButton
+              size="small"
+              color="secondary"
+              variant="contained"
+              sx={{paddingLeft: "1ex"}}
+              onClick={()=>authContext.signOut()}>
+              <LogoutIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Alert>
+
+      <Paper
+          elevation={0}
+          sx={{
+            padding: "0ex 2ex 0ex 2ex"
+          }}>
+        <p>
+          This will publish changes to speaker info for others to see. Uploads will record your email for abuse prevention.
+        </p>
+      </Paper>
+
+      <Tooltip title="Submit changes">
+        <span>
+          <Button
+              variant="contained"
+              disabled={!annotationsContext.needsPublish()}
+              onClick={publishChanges}>
+            Submit
+          </Button>
+        </span>
+      </Tooltip>
     </Stack>
+  );
+}
+
+function SignedInOrOutContent() {
+  const authContext = useAuth();
+
+  if (authContext.user()) {
+    return (<SignedInContent authContext={authContext} />);
+  } else {
+    return (<SignedOutContent authContext={authContext} />);
+  }
+}
+
+export default function UploadChangesDialogContent({onClose}: UploadChangesDialogContentProps) {
+  return (
+    <ActionDialogContent title='Upload Changes' onClose={onClose}>
+      <SignedInOrOutContent />
+    </ActionDialogContent>
   );
 }

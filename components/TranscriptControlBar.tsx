@@ -1,17 +1,17 @@
 'use client'
 
-import Paper from '@mui/material/Paper';
+import ActionDialogConstants from 'components/ActionDialogConstants';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
+import IconButton from '@mui/material/IconButton';
 import LanguageNav from 'components/LanguageNav';
+import Paper from '@mui/material/Paper';
 import PublishIcon from '@mui/icons-material/Publish';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import { useContext, useState } from 'react';
 import { VideoControlContext } from 'components/VideoControlProvider';
-import { dialogMode as uploadChangesMode } from 'components/UploadChangesDialogContent';
 import { useActionDialog } from 'components/ActionDialogProvider'
 import { useAnnotations } from 'components/AnnotationsProvider'
 
@@ -81,7 +81,7 @@ export default function TranscriptControlBar(
         aria-label="publish-changes"
         color="secondary"
         disabled={!annotationsContext.needsPublish()}
-        onClick={() => setActionDialogMode({mode: uploadChangesMode})}
+        onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}
       >
         <PublishIcon />
       </Button>

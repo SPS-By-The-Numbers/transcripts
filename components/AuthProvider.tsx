@@ -1,7 +1,7 @@
 'use client'
 
 import { firebaseApp } from 'utilities/client/firebase'
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
+import { getAuth, signInWithPopup, signOut, GoogleAuthProvider } from "firebase/auth"
 
 import { createContext, useContext, useState, useMemo } from 'react'
 
@@ -31,12 +31,12 @@ export function useAuth() {
 }
 
 class AuthContextState {
-  readonly authState: SpeakerInfoData;
-  readonly setAuthState:(x: SpeakerInfoData) => void;
+  readonly authState: AuthStateType;
+  readonly setAuthState:(x: AuthStateType) => void;
 
   constructor(
-      authState: SpeakerInfoData,
-      setAuthState: (x: SpeakerInfoData) => void) {
+      authState: AuthStateType,
+      setAuthState: (x: AuthStateType) => void) {
     this.authState = authState;
     this.setAuthState = setAuthState;
   }
@@ -67,6 +67,21 @@ class AuthContextState {
       // The AuthCredential type that was used.
       const credential = GoogleAuthProvider.credentialFromError(error);
       console.error("Signin failed", errorCode, errorMessage, email, credential);
+    }
+  }
+
+  async signOut() {
+    try {
+      const result = await signOut(firebaseAuth);
+      this.setAuthState({});
+
+    } catch (error) {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData?.email;
+      console.error("Signout failed", errorCode, errorMessage, email);
     }
   }
 };

@@ -96,6 +96,8 @@ export default async function Index(props: {params: Promise<VideoParams>}) {
   return (
     <AuthProvider>
       <AnnotationsProvider
+          category={params.category}
+          videoId={params.videoId}
           initialSpeakerInfo={speakerControlInfo.speakerInfo}
           initialExistingNames={speakerControlInfo.existingNames}
           initialExistingTags={speakerControlInfo.existingTags}

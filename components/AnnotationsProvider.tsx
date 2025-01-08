@@ -4,7 +4,7 @@ import { isEqual, cloneDeep } from 'lodash-es'
 
 import { createContext, useContext, useState, useMemo } from 'react'
 
-import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
+import type { CategoryId, VideoId, ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
 type LastPublishedState = {
   speakerInfo: SpeakerInfoData;
@@ -12,12 +12,17 @@ type LastPublishedState = {
 
 type AnnotationsContextParams = {
   children: React.ReactNode;
+  category: CategoryId;
+  videoId: VideoId;
   initialSpeakerInfo: SpeakerInfoData;
   initialExistingNames: ExistingNames;
   initialExistingTags: TagSet;
 };
 
 class AnnotationsContextState {
+  readonly category: CategoryId;
+  readonly videoId: VideoId;
+
   readonly speakerInfo: SpeakerInfoData;
   readonly setSpeakerInfo:(x: SpeakerInfoData) => void;
 
@@ -31,6 +36,9 @@ class AnnotationsContextState {
   readonly setLastPublishedState: (x: LastPublishedState) => void;
 
   constructor(
+      category: CategoryId,
+      videoId: VideoId,
+
       speakerInfo: SpeakerInfoData,
       setSpeakerInfo:(x: SpeakerInfoData) => void,
 
@@ -42,6 +50,9 @@ class AnnotationsContextState {
 
       lastPublishedState: LastPublishedState,
       setLastPublishedState: (x: LastPublishedState) => void) {
+    this.category = category;
+    this.videoId = videoId;
+
     this.speakerInfo = speakerInfo;
     this.setSpeakerInfo = setSpeakerInfo;
 
@@ -56,9 +67,7 @@ class AnnotationsContextState {
   }
 
   needsPublish() : bool {
-    console.log(this.lastPublishedState.speakerInfo)
-    console.log(this.speakerInfo)
-    return !isEqual(this.lastPublishedState.speakerInfo, this.speakerInfo);
+    return !isEqual(this.lastPublishedState?.speakerInfo, this?.speakerInfo);
   }
 }
 
@@ -77,7 +86,7 @@ export function useAnnotations() {
 }
 
 export default function AnnotationsProvider({
-  children, initialSpeakerInfo, initialExistingNames, initialExistingTags}: AnnotationsContextParams) {
+  children, category, videoId, initialSpeakerInfo, initialExistingNames, initialExistingTags}: AnnotationsContextParams) {
 
   const [speakerInfo, setSpeakerInfo] = useState<SpeakerInfoData>(initialSpeakerInfo)
   const [existingNames, setExistingNames] = useState<ExistingNames>(initialExistingNames);
@@ -90,6 +99,8 @@ export default function AnnotationsProvider({
   );
 
   const value = useMemo(() => (new AnnotationsContextState(
+      category,
+      videoId,
       speakerInfo,
       setSpeakerInfo,
       existingNames,
@@ -99,7 +110,7 @@ export default function AnnotationsProvider({
       lastPublishedState,
       setLastPublishedState,
     )),
-    [speakerInfo, existingNames, existingTags, lastPublishedState]
+    [speakerInfo, existingNames, existingTags, lastPublishedState, category, videoId]
   );
  
   return (
