@@ -10,6 +10,7 @@ import Paper from '@mui/material/Paper';
 import PublishIcon from '@mui/icons-material/Publish';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
 import { useContext, useState } from 'react';
 import { VideoControlContext } from 'components/VideoControlProvider';
 import { useActionDialog } from 'components/ActionDialogProvider'
@@ -51,40 +52,47 @@ export default function TranscriptControlBar(
         ...(Array.isArray(sx) ? sx : [sx])
       ]}
     >
-      <Paper
-        variant="outlined"
-        sx={{
-            backgroundColor: (autoscroll ? "primary.main" : undefined),
-            paddingX: "0.5ex",
-            justifyItems: "center",
-            width: "100%",
-          }}>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={autoscroll}
-                color="warning"
-                onChange={handleAutoscrollChange}
-                />
-            }
-            label="Autoscroll"/>
-        </FormGroup>
-      </Paper>
+      <Tooltip title="Scroll transcript along with video">
+        <Paper
+          variant="outlined"
+          sx={{
+              backgroundColor: (autoscroll ? "primary.main" : undefined),
+              paddingX: "0.5ex",
+              justifyItems: "center",
+              width: "100%",
+            }}>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={autoscroll}
+                  color="warning"
+                  onChange={handleAutoscrollChange}
+                  />
+              }
+              label="Autoscroll"/>
+          </FormGroup>
+        </Paper>
+      </Tooltip>
       <LanguageNav
         name='lang-nav'
         curLang={curLang}
         sx={{width: "100%"}}
       />
-      <Button
-        variant="contained"
-        aria-label="publish-changes"
-        color="secondary"
-        disabled={!annotationsContext.needsPublish()}
-        onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}
-      >
-        <PublishIcon />
-      </Button>
+      <Tooltip title="Publish changes">
+        <span>
+          <Button
+            variant="contained"
+            aria-label="publish-changes"
+            color="secondary"
+            disabled={!annotationsContext.needsPublish()}
+            onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}
+            sx={{width: "100%", height: "100%"}}
+          >
+            <PublishIcon />
+          </Button>
+        </span>
+      </Tooltip>
     </Stack>
   );
 }

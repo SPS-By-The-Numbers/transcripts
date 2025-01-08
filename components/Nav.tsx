@@ -21,68 +21,78 @@ export default function Nav() {
             width: "100%"}}>
           Dev Mode. Emulators used.
         </Box>
-        <Box maxWidth="xl">
-          <Toolbar disableGutters variant="dense">
-            <Link href={Constants.HOME_URL}>
-              <Box component="div" sx={{ paddingX: "1ex", alignItem: "Center"}} >
-                <img alt="Home" src={'/logo.png'} height={35} />
-              </Box>
+        <Toolbar
+            variant="dense"
+            sx={{
+              display: "flex",
+              alignItem: "center",
+              justifyContent:"space-between"
+            }}>
+          <Box sx={{ display:"flex", paddingRight: "1.25rem", alignItem: "center"}} >
+            <Link href={Constants.HOME_URL}
+                sx={{
+                  display:"inline-flex",
+                  alignItem:"center"
+                }}>
+              <img alt="Home" src={'/logo.png'} height={36} />
             </Link>
+          </Box>
 
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              <Stack
-                  direction="row"
-                  divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
-                  spacing={1}
-              >
-                <Typography
-                    noWrap
-                    component="a"
-                    href="/"
-                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
-                  Recents
-                </Typography>
-                <Typography
-                    noWrap
-                    component="a"
-                    href="/seattle-city-council"
-                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
-                  Seattle City Council
-                </Typography>
-                <Typography
-                    noWrap
-                    component="a"
-                    href="/sps-board"
-                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
-                  SPS Board
-                </Typography>
-                <Typography
-                    noWrap
-                    component="a"
-                    href="/seattle-city-council/search"
-                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
-                   Text Search[Seattle City Council]
-                </Typography>
-                <Typography
-                    noWrap
-                    component="a"
-                    href="/sps-board/search"
-                    sx={{ mr: 2, color: 'inherit', textDecoration: 'none' }}>
-                  Text Search[SPS Board]
-                </Typography>
-              </Stack>
-            </Box>
-            <Box sx={{flexGrow: 0}}>
-              <Typography
-                  noWrap
-                  component="a"
-                  href="/about"
-                  sx={{ color: 'inherit', textDecoration: 'none' }}>
-                About
-              </Typography>
-            </Box>
-          </Toolbar>
-        </Box>
+          <Stack
+              direction="row"
+              divider={<Divider orientation="vertical" flexItem aria-hidden="true" />}
+              spacing={1.2}
+              justifyContent="flex-start"
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                flexGrow: 1,
+              }}>
+            <Typography
+                noWrap
+                component="a"
+                href="/"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+              Recents
+            </Typography>
+            <Typography
+                noWrap
+                component="a"
+                href="/seattle-city-council"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+              Seattle City Council
+            </Typography>
+            <Typography
+                noWrap
+                component="a"
+                href="/sps-board"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+              SPS Board
+            </Typography>
+            <Typography
+                noWrap
+                component="a"
+                href="/seattle-city-council/search"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+               Text Search[Seattle City Council]
+            </Typography>
+            <Typography
+                noWrap
+                component="a"
+                href="/sps-board/search"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+              Text Search[SPS Board]
+            </Typography>
+          </Stack>
+          <Box>
+            <Typography
+                noWrap
+                component="a"
+                href="/about"
+                sx={{ color: 'inherit', textDecoration: 'none' }}>
+              About
+            </Typography>
+          </Box>
+        </Toolbar>
       </AppBar>
   );
 }

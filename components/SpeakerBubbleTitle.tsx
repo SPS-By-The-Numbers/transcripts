@@ -40,11 +40,13 @@ export default function SpeakerBubbleTitle({speakerNum} : SpeakerBubbleTitlePara
           sx={{
             flexWrap: "wrap",
             flexGrow: 1,
-          }}>{
-        [...tags].map(t => {
-          return <Chip label={t} key={t} size="small" color="info" />;
-        })
-      }</Stack>
+          }}>
+        {
+          [...tags].map(t => {
+            return <Chip label={t} key={t} size="small" color="info" />;
+          })
+        }
+      </Stack>
       <Box>
         <Typography>
           <IconButton

@@ -43,7 +43,7 @@ function SignedOutContent({authContext}) {
           This is to prevent abuse.
         </p>
         <p>
-          Any Google account will work. There is no need to register.
+          Any Google account will work.
         </p>
       </Paper>
       <Tooltip title="Sign in to upload changes">
@@ -144,13 +144,14 @@ function SignedInContent({authContext}) {
         </p>
       </Paper>
 
-      <Tooltip title="Submit changes">
+      <Tooltip title="Publish changes">
         <span>
           <Button
               variant="contained"
               disabled={!annotationsContext.needsPublish()}
-              onClick={publishChanges}>
-            Submit
+              onClick={publishChanges}
+              sx={{width: "100%"}}>
+            Publish
           </Button>
         </span>
       </Tooltip>
