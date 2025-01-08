@@ -17,8 +17,6 @@ import type { SxProps, Theme } from '@mui/material';
 type TranscriptParams = {
   metadata: any;
   category: CategoryId;
-  initialExistingNames: ExistingNames;
-  initialExistingTags: TagSet;
   diarizedTranscript: DiarizedTranscript;
   speakerInfo: SpeakerInfoData;
   languageOrder: Array<string>;
@@ -49,8 +47,6 @@ export default function Transcript({
     diarizedTranscript,
     languageOrder,
     speakerInfo,
-    initialExistingNames,
-    initialExistingTags,
     sx = []} : TranscriptParams) {
   const videoId = metadata.video_id;
   const speakerNums = new Set<number>();
@@ -74,10 +70,10 @@ export default function Transcript({
   });
 
   return (
-    <Box sx={[
+    <Paper sx={[
       {
           display: "grid",
-          height: `calc(100% - 100px)`,
+          height: `calc(100% - 80px)`,
           columnGap: "1ex",
           rowGap: "0.5ex",
           padding: "1ex",
@@ -88,17 +84,25 @@ export default function Transcript({
             xs: "1fr",
             lg: "max-content max-content",
           },
-          gridTemplateRows: "auto 3fr",
+          gridTemplateRows: "auto auto 3fr",
           gridTemplateAreas: {
-            xs: `"transcriptVideo"
+            xs: `"title"
+                 "transcriptVideo"
                  "transcript"`,
-            lg: `"transcriptVideo transcript"
+            lg: `"title title"
+                 "transcriptVideo transcript"
                  "infoeditpanel transcript"`
           },
       },
       ...(Array.isArray(sx) ? sx : [sx])]}>
+      <Box sx={{ gridArea: "title",
+                 justifyItems: "center" }}>
+        <Typography variant="h5" component="h1" >
+          {metadata.title}
+        </Typography>
+      </Box>
+
       <TranscriptVideo
-        title={metadata.title}
         curLang={languageOrder[0]}
         videoId={videoId}
         sx={{ gridArea: "transcriptVideo" }}
@@ -107,28 +111,25 @@ export default function Transcript({
       <InfoEditPanel
         category={category}
         speakerNums={speakerNums}
-        initialExistingNames={initialExistingNames}
-        initialExistingTags={initialExistingTags}
-        videoId={videoId}
+        metadata={metadata}
         sx={{
           gridArea: "infoeditpanel",
-          overflowY: "scroll",
-          display: {xs: "none", lg: "block" }
+          display: {xs: "none", lg: "block" },
+          overflowY: "hidden"
         }}
       />
-
-      <Paper sx={{
+      <Box sx={{
           gridArea: "transcript",
           marginX: "auto",
           padding: "0.5ex",
           overflowY: "scroll",
           maxWidth: "75ch" }}>
-          <TranscriptClickHandler>
-            <main>
-              {speakerBubbles}
-            </main>
-          </TranscriptClickHandler>
-      </Paper>
-    </Box>
+        <TranscriptClickHandler>
+          <main>
+            {speakerBubbles}
+          </main>
+        </TranscriptClickHandler>
+      </Box>
+    </Paper>
   );
 }

@@ -52,14 +52,14 @@ jobs:
       # Only ci, no build. The action-hosting-deploy with the webframeworks does the build.
       - run: npm ci
 
-      # Firebase webframeworks doesn't do npm install on the functions directory.
-      - run: npm --prefix functions ci
-
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPS_BY_THE_NUMBERS }}
-          channelId: live
-          projectId: sps-by-the-numbers
-        env:
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
+#      # Firebase webframeworks doesn't do npm install on the functions directory.
+#      - run: npm --prefix functions ci
+#
+#      - uses: FirebaseExtended/action-hosting-deploy@v0
+#        with:
+#          repoToken: ${{ secrets.GITHUB_TOKEN }}
+#          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPS_BY_THE_NUMBERS }}
+#          channelId: live
+#          projectId: sps-by-the-numbers
+#        env:
+#          FIREBASE_CLI_EXPERIMENTS: webframeworks
