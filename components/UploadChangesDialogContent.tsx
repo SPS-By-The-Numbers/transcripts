@@ -18,14 +18,15 @@ import { useAuth } from 'components/AuthProvider'
 import { useState } from 'react'
 
 type UploadChangesDialogContentProps = {
-  speakerNum : int;
   onClose: (value: string) => void;
 };
 
-type ErrorMessage ={
+type ErrorMessage = {
   message: string;
-  severity: string;
+  severity: 'error' | 'info' | 'success' | 'warning' | undefined;
 };
+
+const noError = { message: '', severity: undefined };
 
 function SignedOutContent({authContext}) {
   return (
@@ -58,8 +59,7 @@ function SignedOutContent({authContext}) {
 function SignedInContent({authContext}) {
   const annotationsContext = useAnnotations();
   const [isPublishing, setIsPublishing] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>(
-    {message: '', severity: ''});
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(noError);
 
   async function publishChanges() {
     const data = {
@@ -109,7 +109,7 @@ function SignedInContent({authContext}) {
       <Alert
           sx={{ display: errorMessage.message !== '' ? 'flex': 'none' }}
           severity={errorMessage.severity}
-          onClose={()=>setErrorMessage({message: '', severity: ''})}>
+          onClose={()=>setErrorMessage(noError)}>
         {errorMessage.message}
       </Alert>
       <Backdrop
@@ -125,7 +125,6 @@ function SignedInContent({authContext}) {
             <IconButton
               size="small"
               color="secondary"
-              variant="contained"
               sx={{paddingLeft: "1ex"}}
               onClick={()=>authContext.signOut()}>
               <LogoutIcon fontSize="inherit" />

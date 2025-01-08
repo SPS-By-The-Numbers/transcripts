@@ -4,7 +4,7 @@ import { createContext, useState, useMemo } from 'react';
 
 type VideoPlayerControl = {
   jumpToTime: (hhmmss: string) => void;
-  setAutoscroll: (follow: bool) => void;
+  setAutoscroll: (follow: boolean) => void;
 };
 
 type VideoControlContextType = {
@@ -18,7 +18,7 @@ type VideoControlProviderParams = {
 
 const emptyVideoControl = {
   jumpToTime: (ts: string) => {},
-  setAutoscroll: (x: bool) => {},
+  setAutoscroll: (x: boolean) => {},
 };
 
 // Pattern from https://stackoverflow.com/a/74174425

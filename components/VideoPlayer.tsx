@@ -41,7 +41,7 @@ export default function VideoPlayer({ videoId, sx = [] } : VideoPlayerParams) {
             jumpToTimeInternal(fromHhmmss(hhmmss));
           }
         },
-        setAutoscroll: (follow: bool) => {
+        setAutoscroll: (follow: boolean) => {
           autoscroll = follow;
         }
       });

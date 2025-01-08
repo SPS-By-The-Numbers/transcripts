@@ -58,9 +58,7 @@ export default function InfoEditPanel({
   };
 
   return (
-    <Box 
-        elevation={3}
-      sx={[{paddingY: 0, height: "100%"}, ...(Array.isArray(sx) ? sx : [sx])]}>
+    <Box sx={[{paddingY: 0, height: "100%"}, ...(Array.isArray(sx) ? sx : [sx])]}>
       <Tabs
         value={value}
         onChange={handleChange}

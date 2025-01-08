@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 
 type ActionDialogContentsParams = {
   title: string;
-  children: React.Node;
+  children: React.ReactNode;
   onClose: (value: string) => void;
 };
 
@@ -21,7 +21,7 @@ export default function ActionDialogContents({title, children, onClose}) {
               alignItems:"center"}}>
           {title}
           <IconButton onClick={onClose}>
-            <CloseIcon size="inherit"/>
+            <CloseIcon fontSize="inherit"/>
           </IconButton>
         </Stack>
       </DialogTitle>

@@ -16,8 +16,12 @@ import { useContext } from 'react';
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
 type SpeakerEditDialogContentProps = {
-  speakerNum : int;
+  speakerNum : number;
   onClose: (value: string) => void;
+};
+
+type OptionType = {
+  label : string;
 };
 
 export default function SpeakerEditDialogContent(

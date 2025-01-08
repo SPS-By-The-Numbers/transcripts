@@ -1,10 +1,10 @@
 'use client'
  
+import { createContext, useContext, useState, useMemo } from 'react'
 import { isEqual, cloneDeep } from 'lodash-es'
 
-import { createContext, useContext, useState, useMemo } from 'react'
-
-import type { CategoryId, VideoId, ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
+import type { CategoryId, VideoId } from 'common/params';
+import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'
 
 type LastPublishedState = {
   speakerInfo: SpeakerInfoData;
@@ -32,7 +32,7 @@ class AnnotationsContextState {
   readonly existingTags: TagSet;
   readonly setExistingTags: (x: TagSet) => void;
 
-  readonly publishedState: LastPublishedState;
+  readonly lastPublishedState: LastPublishedState;
   readonly setLastPublishedState: (x: LastPublishedState) => void;
 
   constructor(
@@ -66,7 +66,7 @@ class AnnotationsContextState {
     this.setLastPublishedState = setLastPublishedState;
   }
 
-  needsPublish() : bool {
+  needsPublish() : boolean {
     return !isEqual(this.lastPublishedState?.speakerInfo, this?.speakerInfo);
   }
 }

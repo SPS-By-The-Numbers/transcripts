@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useMemo } from 'react';
 
 type ActionDialogMode = {
   mode: string;
-  params?: string;
+  params?: string | number;
 };
 
 type ActionDialogModeType = {
@@ -17,7 +17,7 @@ type DialogProviderParams = {
 };
 
 // Pattern from https://stackoverflow.com/a/74174425
-const ActionDialogModeContext = createContext<ActionDialogModeContextType | undefined>(undefined);
+const ActionDialogModeContext = createContext<ActionDialogModeType | undefined>(undefined);
 
 export function useActionDialog() {
   const context = useContext(ActionDialogModeContext);

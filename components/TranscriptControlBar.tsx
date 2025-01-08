@@ -27,11 +27,10 @@ type TranscriptControlBarProps = {
 
 export default function TranscriptControlBar(
     { curLang, sx = [] }: TranscriptControlBarProps) {
-  const [ autoscroll, setAutoscroll ] = useState<bool>(true);
+  const [ autoscroll, setAutoscroll ] = useState<boolean>(true);
 
   const annotationsContext = useAnnotations();
   const { setActionDialogMode } = useActionDialog();
-  const { serverState } = useContext(VideoControlContext);
   const { videoControl } = useContext(VideoControlContext);
 
   const handleAutoscrollChange = (event: ChangeEvent<HTMLInputElement>) => {

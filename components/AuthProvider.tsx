@@ -5,12 +5,14 @@ import { getAuth, signInWithPopup, signOut, GoogleAuthProvider } from "firebase/
 
 import { createContext, useContext, useState, useMemo } from 'react'
 
+import type { OAuthCredential } from 'firebase/auth';
+
 const firebaseAuth = getAuth(firebaseApp);
 const googleAuthProvider = new GoogleAuthProvider();
 
 type AuthStateType = {
   user?: object;
-  credential?: object;
+  credential: OAuthCredential | null;
 };
 
 type AuthProviderParams = {
@@ -73,7 +75,7 @@ class AuthContextState {
   async signOut() {
     try {
       const result = await signOut(firebaseAuth);
-      this.setAuthState({});
+      this.setAuthState({credential: null});
 
     } catch (error) {
       // Handle Errors here.
@@ -87,7 +89,7 @@ class AuthContextState {
 };
 
 export default function AnnotationsProvider({children}: AuthProviderParams) {
-  const [authState, setAuthState] = useState<AuthStateType>({});
+  const [authState, setAuthState] = useState<AuthStateType>({credential: null});
 
   const value = useMemo(
     () => new AuthContextState(authState, setAuthState),
