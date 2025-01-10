@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box';
 import YouTube from 'react-youtube'
 import { Options } from 'youtube-player/dist/types';
-import { VideoControlContext } from 'components/VideoControlProvider';
+import { VideoControlContext } from 'components/providers/VideoControlProvider';
 import { useRef, useEffect, useState } from 'react';
 import { fromHhmmss, toHhmmss } from 'utilities/client/css'
 import { useContext } from 'react'

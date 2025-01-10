@@ -12,9 +12,9 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import { useContext, useState } from 'react';
-import { VideoControlContext } from 'components/VideoControlProvider';
-import { useActionDialog } from 'components/ActionDialogProvider'
-import { useAnnotations } from 'components/AnnotationsProvider'
+import { VideoControlContext } from 'components/providers/VideoControlProvider';
+import { useActionDialog } from 'components/providers/ActionDialogProvider'
+import { useAnnotations } from 'components/providers/AnnotationsProvider'
 
 import type { Iso6393Code } from 'common/params';
 import type { SxProps, Theme } from '@mui/material';

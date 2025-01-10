@@ -1,8 +1,8 @@
 'use client'
 
 import ActionDialogConstants from 'components/ActionDialogConstants';
-import { VideoControlContext } from 'components/VideoControlProvider';
-import { useActionDialog } from 'components/ActionDialogProvider';
+import { VideoControlContext } from 'components/providers/VideoControlProvider';
+import { useActionDialog } from 'components/providers/ActionDialogProvider';
 import { useContext } from 'react'
 
 export const speakerClassPrefix = 'editSpeaker';

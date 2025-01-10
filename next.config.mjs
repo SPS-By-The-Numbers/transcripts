@@ -8,14 +8,12 @@ const baseNextConfig = {
     api: 'modern-compiler',
   },
   async redirects() {
-    const categories = ['sps-board', 'seattle-city-council'];
-
     return [
-      ...categories.map(category => ({
-        source: `/${category}/:date(\\d{4}-\\d{2}-\\d{2})`,
-        destination: `/?category=${category}&start=:date&end=:date`,
-        permanent: true,
-      })),
+      {
+        source: '/:category/',
+        destination: '/:category/info',
+        permanent: false,
+      }
     ]
   }
 }

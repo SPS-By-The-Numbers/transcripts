@@ -6,8 +6,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 
-export default function Providers({ children }) {
-  return(
+export default function MuiProviders({ children }) {
+  return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <AppRouterCacheProvider options={{ enableCssLayer: true }}>
         <ThemeProvider theme={theme}>
@@ -15,6 +15,5 @@ export default function Providers({ children }) {
         </ThemeProvider>
       </AppRouterCacheProvider>
     </LocalizationProvider>
-    );
-
+  );
 }
