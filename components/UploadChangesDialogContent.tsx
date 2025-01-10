@@ -13,8 +13,8 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { fetchEndpoint } from 'utilities/client/endpoint'
-import { useAnnotations } from 'components/AnnotationsProvider'
-import { useAuth } from 'components/AuthProvider'
+import { useAnnotations } from 'components/providers/AnnotationsProvider'
+import { useAuth } from 'components/providers/AuthProvider'
 import { useState } from 'react'
 
 type UploadChangesDialogContentProps = {
@@ -23,7 +23,7 @@ type UploadChangesDialogContentProps = {
 
 type ErrorMessage = {
   message: string;
-  severity: 'error' | 'info' | 'success' | 'warning' | undefined;
+  severity?: 'error' | 'info' | 'success' | 'warning';
 };
 
 const noError = { message: '', severity: undefined };

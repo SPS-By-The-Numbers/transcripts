@@ -132,8 +132,8 @@ async function setSpeakerInfo(req, res) {
 
     res.status(200).send(makeResponseJson(true, "success",
       {speakerInfo,
-        existingTags: Object.keys(existingOptions.tags ?? {}),
-        existingNames: Object.keys(existingOptions.names ?? {})}));
+       existingTags: Object.keys(existingOptions.tags ?? {}),
+       existingNames: Object.keys(existingOptions.names ?? {})}));
   } catch (e) {
     console.error("Updating DB failed with: ", e);
     res.status(500).send(makeResponseJson(false, "Internal error"));

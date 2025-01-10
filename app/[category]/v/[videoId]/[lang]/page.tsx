@@ -1,10 +1,10 @@
 import * as Constants from 'config/constants'
 import ActionDialog from 'components/ActionDialog';
-import ActionDialogProvider from 'components/ActionDialogProvider';
-import AnnotationsProvider from 'components/AnnotationsProvider';
-import AuthProvider from 'components/AuthProvider';
+import ActionDialogProvider from 'components/providers/ActionDialogProvider';
+import AnnotationsProvider from 'components/providers/AnnotationsProvider';
+import AuthProvider from 'components/providers/AuthProvider';
 import Transcript from 'components/Transcript'
-import VideoControlContextProvider from 'components/VideoControlProvider'
+import VideoControlContextProvider from 'components/providers/VideoControlProvider'
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { SupportedLanguages } from 'common/languages';

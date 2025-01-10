@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import Nav from 'components/Nav'
-import Providers from './providers';
+import MuiProviders from './MuiProviders';
 import Script from 'next/script'
 import { Metadata } from 'next'
 
@@ -14,7 +14,10 @@ export const metadata: Metadata = {
   description: 'Public meeting transcriptions from SPS By The Numbers',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout(
+    props: { children: React.ReactNode, params: Promise<Params>}) {
+  const children = props.children;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -36,14 +39,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'GA_MEASUREMENT_ID');
           `}
         </Script>
-        <Providers>
+        <MuiProviders>
           <CssBaseline />
           <InitColorSchemeScript attribute="class"/>
           <Nav />
-          <Box sx={{marginTop: "0.5ex", height: "100%"}}>
+          <Box sx={{
+              marginTop: "0.5ex",
+              height: "100%",
+              maxWidth: "120ch",
+              marginX: 'auto',
+            }}>
             {children}
           </Box>
-        </Providers>
+        </MuiProviders>
       </body>
     </html>
   )
