@@ -6,7 +6,7 @@ import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useAnnotations } from 'components/AnnotationsProvider'
+import { useAnnotations } from 'components/providers/AnnotationsProvider'
 import { speakerClassPrefix } from 'components/TranscriptClickHandler'
 import { getSpeakerAttributes } from 'utilities/client/speaker'
 import { useContext } from 'react'

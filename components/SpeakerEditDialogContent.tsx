@@ -9,8 +9,8 @@ import TextField from '@mui/material/TextField';
 
 import { getSpeakerAttributes } from 'utilities/client/speaker';
 import { isEqual } from 'lodash-es';
-import { useActionDialog } from 'components/ActionDialogProvider';
-import { useAnnotations } from 'components/AnnotationsProvider'
+import { useActionDialog } from 'components/providers/ActionDialogProvider';
+import { useAnnotations } from 'components/providers/AnnotationsProvider'
 import { useContext } from 'react';
 
 import type { ExistingNames, TagSet, SpeakerInfoData } from 'utilities/client/speaker'

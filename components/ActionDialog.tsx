@@ -4,7 +4,7 @@ import ActionDialogConstants from 'components/ActionDialogConstants';
 import Dialog from '@mui/material/Dialog';
 import SpeakerEditDialogContent from 'components/SpeakerEditDialogContent';
 import UploadChangesDialogContent from 'components/UploadChangesDialogContent';
-import { useActionDialog } from 'components/ActionDialogProvider';
+import { useActionDialog } from 'components/providers/ActionDialogProvider';
 
 function makeContents(actionDialogMode, handleClose) {
   if (actionDialogMode?.mode === ActionDialogConstants.speakerMode) {

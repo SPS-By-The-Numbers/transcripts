@@ -1,6 +1,8 @@
 import * as Constants from 'config/constants';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { getVideoPath } from "common/paths"
 import { format, parseISO } from "date-fns";
@@ -20,34 +22,36 @@ export default function SearchResults({category, videoId, title, publishDate} : 
   const isoDate = parseISO(publishDate);
   const publishDateOnly = new Date(isoDate.valueOf() + isoDate.getTimezoneOffset() * 60 * 1000);
   return (
-    <Paper sx={{ p:1, display: 'inline-flex', alignItems: "center" }}>
-      <Box
-          component="img"
-          alt={`Screenshot of ${title}`}
-          src={`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`}
-          sx={{
-            mx:2,
-            width: {
-              xs: 100,
-              sm: 200,
-              md: 300,
-              lg: 400,
-              xl: 500,
-           },
-           height: '100%',
-          }}
-          />
-      <Typography
-          href={`${getVideoPath(category, videoId)}`}
-          component="a"
-          variant="h5"
-          sx={{ textDecoration: 'none' }}
-          >
-        {title}
-        <Typography>
-          published: {format(publishDateOnly, "yyyy-MM-dd")}
-        </Typography>
-      </Typography>
+    <Paper elevation={22}>
+      <Stack
+        justifyContent="space-between"
+        direction="row"
+        sx={{
+          p: 1,
+          display: 'flex',
+          alignItems: "center",
+          justifyContent: "start",
+        }}>
+        <Box
+            component="img"
+            alt={`Screenshot of ${title}`}
+            src={`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`}
+            sx={{
+              mx:2,
+              width: {
+                xs: 100,
+                sm: 200,
+             },
+            }}/>
+        <Link underline="hover" href={`${getVideoPath(category, videoId)}`}>
+          <Typography variant="h6" component="h6" color="textPrimary">
+            {title}
+          </Typography>
+          <Typography color="textSecondary">
+            published: {format(publishDateOnly, "yyyy-MM-dd")}
+          </Typography>
+        </Link>
+      </Stack>
     </Paper>
   );
 }
