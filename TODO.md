@@ -4,4 +4,3 @@ Missing features:
     * Text extract.
     * Periodic Meilisearch update.
     * Cloud scheduler into Cloud function onSchedule.
-    * Remove tailwind.
