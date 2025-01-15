@@ -2,10 +2,11 @@ import * as Constants from 'config/constants';
 import Alert from '@mui/material/Alert';
 import Archive from 'components/Archive';
 import Stack from '@mui/material/Stack';
-import { encodeDate, decodeDate } from 'common/params';
+import { encodeDateNoThrow, decodeDate } from 'common/params';
 import { fetchEndpoint } from 'utilities/client/endpoint';
 import { parseISO } from 'date-fns';
 
+import type { CategoryId } from 'common/params';
 import type { DateRange } from 'components/DateRangePicker';
 
 const mostRecentLimit = 50;
@@ -17,13 +18,13 @@ type SearchParams = {
 async function doDateSearch(category : CategoryId, range : DateRange) {
   const metadataParams : Record<string, string> = { category };
   if (range.start !== null) {
-    const encoded = encodeDate(range.start, true);
+    const encoded = encodeDateNoThrow(range.start);
     if (encoded) {
       metadataParams['start'] = encoded;
     }
   }
   if (range.end !== null) {
-    const encoded = encodeDate(range.end, true);
+    const encoded = encodeDateNoThrow(range.end);
     if (encoded) {
       metadataParams['end'] = encoded;
     }

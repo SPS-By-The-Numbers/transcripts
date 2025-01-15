@@ -22,7 +22,8 @@ export default function DateRangePicker(
     const newRange = {...range, start};
 
     // Ensure the start does not exceed the end.
-    if (newRange.end !== null && isAfter(newRange.start, newRange.end)) {
+    if (newRange.end !== null && newRange.start !== null&&
+        isAfter(newRange.start, newRange.end)) {
       newRange.end = null;
     }
 
@@ -33,7 +34,8 @@ export default function DateRangePicker(
     const newRange = {...range, end};
 
     // Ensure end does not move before the start.
-    if (newRange.start !== null && isBefore(newRange.end, newRange.start)) {
+    if (newRange.start !== null && newRange.end !== null &&
+        isBefore(newRange.end, newRange.start)) {
       newRange.start = null;
     }
 
