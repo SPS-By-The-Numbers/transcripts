@@ -11,7 +11,7 @@ const baseNextConfig = {
     return [
       {
         source: '/:category/',
-        destination: '/:category/info',
+        destination: '/:category/v',
         permanent: false,
       }
     ]
