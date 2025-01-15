@@ -2,6 +2,7 @@
 
 import * as Constants from 'config/constants';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
@@ -25,10 +26,14 @@ import { useEffect, useState } from 'react';
 
 import type { CategoryId } from 'common/params.ts';
 import type { MeiliSearchErrorResponse } from 'meilisearch';
-import type { ReactNode } from 'react';
+import type { ReactNode, ChangeEvent } from 'react';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import type { SearchResponse, MatchesPosition } from 'meilisearch';
 
-type SearchParams = {
-  [key: string]: string | string[] | undefined;
+type Position = {
+  start: number;
+  length: number;
+  indices?: number[];
 };
 
 type ErrorMessage = {
@@ -38,46 +43,9 @@ type ErrorMessage = {
 
 const noError = { message: 'what', severity: undefined };
 
-type Position = {
-  length: number;
-  start: number;
-};
-
-type MatchesPosition = {
-  text: Array<Position>;
-};
-
-type ResultAttributes = {
-  videoId: string;
-  start: number;
-  publishDate: string;
-  title: string;
-  _formatted: {
-    id: string;
-    text: string;
-    videoId: string;
-    start: string;
-    end: string;
-    publishDate: string;
-    title: string;
-    transcribDate: string;
-  };
-  _matchesPosition: MatchesPosition;
-};
-
-type SearchResults = {
-  hits: Array<ResultAttributes>,
-  query: string;
-  processingTimeMs: number;
-  limit: number;
-  offset: number;
-  estimatedTotalHits?: number;
-  totalHits?: number;
-};
-
 type ResultParams = {
     category: string,
-    results?: SearchResults,
+    results?: SearchResponse,
 };
 
 const searchClient = new MeiliSearch({
@@ -132,25 +100,34 @@ async function doSearch(category : string,
   return await index.search(query, queryOptions);
 }
 
-function Snippet({ text, matchesPosition }: { text: string, matchesPosition: MatchesPosition } ) {
-  const textSegments : Array<ReactNode> = [];
+function Snippet({ text, position }: { text: string, position: Array<Position> | undefined } ) {
+  const textSegments = new Array<ReactNode>();
   let lastStart = 0;
-  for (const [i, match] of Object.entries(matchesPosition.text)) {
-    // Unmatched part.
-    if (lastStart !== match.start) {
-      textSegments.push(<span key={`${i}-no`}>{text.slice(lastStart, match.start)}</span>);
+
+  if (position) {
+    for (let i = 0; i < (position).length; i = i+1) {
+      const match = position[i];
+      if (match === undefined) {
+        continue;
+      }
+
+      // Unmatched part.
+      if (lastStart !== match.start) {
+        textSegments.push(<span key={`${i}-no`}>{text.slice(lastStart, match.start)}</span>);
+      }
+      textSegments.push(<span className="bg-yellow-300 font-semibold" key={`${i}-em`}>{text.slice(match.start, match.start + match.length)}</span>);
+      lastStart = match.start + match.length;
     }
-    textSegments.push(<span className="bg-yellow-300 font-semibold" key={`${i}-em`}>{text.slice(match.start, match.start + match.length)}</span>);
-    lastStart = match.start + match.length;
   }
+
   if (lastStart !== text.length -1) {
     textSegments.push(<span key='last'>{text.slice(lastStart)}</span>);
   }
 
   return (
-   <div>
+   <Box>
      { textSegments }
-   </div>
+   </Box>
   );
 }
 
@@ -181,7 +158,7 @@ function ResultList({ category, results }: ResultParams) {
     return (
       <Item key={i}>
         <Typography sx={{ fontSize: 14 }} color="text.primary" variant="h2">
-          <Link className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
+          <Link component={NextLink} className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
             {h.title}
           </Link>
         </Typography>
@@ -190,7 +167,9 @@ function ResultList({ category, results }: ResultParams) {
         </Typography>
 
         <Typography sx={{ fontSize: 14 }} color="text.secondary">
-          <Snippet text={h._formatted.text} matchesPosition={h._matchesPosition} />
+          <Snippet
+            text={h._formatted?.text ?? ""}
+            position={h._matchesPosition?.['text']} />
         </Typography>
       </Item>
     );
@@ -221,7 +200,7 @@ function extractCategory(param) {
 
 export default function TranscriptSearch({category} : {category: CategoryId}) {
 
-  const [results, setResults] = useState<SearchResults | undefined>();
+  const [results, setResults] = useState<SearchResponse | undefined>();
 
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
@@ -229,8 +208,13 @@ export default function TranscriptSearch({category} : {category: CategoryId}) {
   const [errorMessage, setErrorMessage] = useState<ErrorMessage>(noError);
   const [requestNum, setRequestNum] = useState<number>(0);
 
-  const handleSearch = (event: SelectChangeEvent) => {
-    setRequestNum(requestNum + 1);
+  const handleSearch = async () => {
+    try {
+      setResults(await doSearch(category, query, sortType, groupType));
+      setErrorMessage(noError);
+    } catch (err) {
+      setErrorMessage({severity: 'error', message: err.message});
+    }
   };
 
   const handleGroupTypeChange = (event: SelectChangeEvent) => {
@@ -241,24 +225,9 @@ export default function TranscriptSearch({category} : {category: CategoryId}) {
     setSortType(event.target.value as string);
   };
 
-  const handleQueryChange = (event: SelectChangeEvent) => {
+  const handleQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value as string);
   };
-
-  useEffect(() => {
-    if (requestNum > 0) {
-      async function thunk() {
-        try {
-          setResults(await doSearch(category, query, sortType, groupType));
-          setErrorMessage(noError);
-        } catch(err : MeiliSearchErrorResponse) {
-          setErrorMessage({severity: 'error', message: err.message});
-        }
-      }
-
-      thunk();
-    }
-  }, [requestNum]);
 
   return (
     <Stack

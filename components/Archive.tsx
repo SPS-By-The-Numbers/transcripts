@@ -7,7 +7,7 @@ import Divider from '@mui/material/Divider';
 import SearchResult from 'components/SearchResult';
 import Stack from '@mui/material/Stack';
 import { compareDesc } from 'date-fns';
-import { encodeDate } from 'common/params';
+import { encodeDateNoThrow } from 'common/params';
 import { useEffect, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -22,7 +22,7 @@ type SearchEntry = {
 
 type ArchiveProps = {
   category: CategoryId;
-  initialRange: DateRange;
+  dateRange: DateRange;
   videos: Array<SearchEntry>;
 };
 
@@ -34,7 +34,7 @@ export default function Archive({category, dateRange, videos}: ArchiveProps) {
   const pathName = usePathname();
 
   const handleRangeChange = (newRange: DateRange) => {
-    const searchParamsEntries = new Array<Record<string, string>>;
+    const searchParamsEntries = new Array<[string, string]>;
     for (const [key, value] of searchParams.entries()) {
       if (key === 'start' || key === 'end') {
         continue;
@@ -44,15 +44,15 @@ export default function Archive({category, dateRange, videos}: ArchiveProps) {
     }
 
     if (newRange.start !== null) {
-      const encoded = encodeDate(newRange.start, true);
-      if (encodeDate) {
+      const encoded = encodeDateNoThrow(newRange.start);
+      if (encoded) {
         searchParamsEntries.push(['start', encoded]);
       }
     }
 
     if (newRange.end !== null) {
-      const encoded = encodeDate(newRange.end, true);
-      if (encodeDate) {
+      const encoded = encodeDateNoThrow(newRange.end);
+      if (encoded) {
         searchParamsEntries.push(['end', encoded]);
       }
     }
