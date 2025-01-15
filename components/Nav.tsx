@@ -184,7 +184,7 @@ function MobileToggle() {
         sx={{ display: { xs: 'block', md: 'none' } }}
       >
         {navConfigs.map(({name}, i) => (
-          <MenuItem key={i} onClick={() => menuSelected(i)}>
+          <MenuItem key={i} onClick={() => menuSelected()}>
             <Typography sx={{ textAlign: 'center' }}>{name}</Typography>
           </MenuItem>
         ))}

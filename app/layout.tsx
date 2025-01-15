@@ -14,10 +14,7 @@ export const metadata: Metadata = {
   description: 'Public meeting transcriptions from SPS By The Numbers',
 }
 
-export default function RootLayout(
-    props: { children: React.ReactNode, params: Promise<Params>}) {
-  const children = props.children;
-
+export default function RootLayout({ children }: {children: React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

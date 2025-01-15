@@ -15,14 +15,18 @@ export type VideoMetadata = {
 
 const pathDateFormat = 'yyyy-MM-dd';
 
-export function encodeDate(date: Date, noThrow: boolean = false): string {
+export function encodeDate(date: Date): string {
+  return format(date, pathDateFormat);
+}
+
+export function encodeDateNoThrow(date: Date) : string | undefined {
   try {
-    return format(date, pathDateFormat);
+    return encodeDate(date);
   } catch(e) {
-    if (!noThrow) {
-      throw e;
-    }
+    // Ignore error.
   }
+
+  return undefined;
 }
 
 export function decodeDate(dateString: string): Date {
