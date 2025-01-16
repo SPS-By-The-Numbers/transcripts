@@ -2,10 +2,16 @@
  
 import { createContext, useContext, useState, useMemo } from 'react';
 
-type ActionDialogMode = {
-  mode: string;
-  params?: string | number;
+type SpeakerEditMode = {
+  mode: "speaker";
+  speakerNum: number;
 };
+
+type UploadChangesMode = {
+  mode: "upload_changes";
+};
+
+export type ActionDialogMode = SpeakerEditMode | UploadChangesMode;
 
 type ActionDialogModeType = {
   actionDialogMode : ActionDialogMode | undefined;

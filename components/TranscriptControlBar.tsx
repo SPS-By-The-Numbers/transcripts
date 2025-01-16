@@ -1,6 +1,5 @@
 'use client'
 
-import ActionDialogConstants from 'components/ActionDialogConstants';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
@@ -85,7 +84,7 @@ export default function TranscriptControlBar(
             aria-label="publish-changes"
             color="secondary"
             disabled={!annotationsContext.needsPublish()}
-            onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}
+            onClick={() => setActionDialogMode({mode: "upload_changes"})}
             sx={{width: "100%", height: "100%"}}
           >
             <PublishIcon />
