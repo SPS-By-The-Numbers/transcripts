@@ -22,11 +22,13 @@ import Tab from '@mui/material/Tab';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
+import { useNavState } from 'components/providers/NavStateProvider';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-import type { SxProps, Theme } from '@mui/material';
 import type { CategoryId } from 'common/params';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import type { SxProps, Theme } from '@mui/material';
 
 const navConfigs = [
   { name: 'Transcripts',
@@ -89,7 +91,7 @@ function NavLink({href, children, sx=[]} : {href: string, children: React.ReactN
   );
 }
 
-function CategorySelection({category} : {category: CategoryId}) {
+function CategorySelection({category, suffixPath, onCategoryChange} : {category: CategoryId, suffixPath: string, onCategoryChange: (event: SelectChangeEvent) => void}) {
   return (
     <Box
         sx={{
@@ -116,6 +118,7 @@ function CategorySelection({category} : {category: CategoryId}) {
             </Typography>
           )}
           value={category}
+          onChange={onCategoryChange}
           sx={{
             minWidth: "20ch",
             color: 'primary.contrastText',
@@ -126,7 +129,7 @@ function CategorySelection({category} : {category: CategoryId}) {
               <MenuItem key={item.categoryId} value={item.categoryId}>
                 <Link
                   component={NextLink}
-                  href={`/${item.categoryId}`}
+                  href={['',item.categoryId, suffixPath].join('/')}
                   underline="none"
                   sx={{color: 'inherit'}}
                 >
@@ -140,7 +143,7 @@ function CategorySelection({category} : {category: CategoryId}) {
   );
 }
 
-function MobileToggle() {
+function MobileToggle({category} : {category: CategoryId}) {
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -227,9 +230,15 @@ function DesktopLinks({category} : {category: CategoryId}) {
 }
 
 export default function Nav() {
+  const {category, setCategory} = useNavState();
+
+  const handleCategoryChange = (event: SelectChangeEvent) => {
+    setCategory(event.target.value);
+  };
+
   const pathname = usePathname();
   const parts = pathname.split('/');
-  const categoryOrDefault = Constants.ALL_CATEGORIES.includes(parts[1]) ? parts[1] : Constants.DEFAULT_CATEGORY;
+  const suffixPath = parts.splice(2).join('/');
 
   return (
       <AppBar position="sticky" color="primary">
@@ -261,9 +270,9 @@ export default function Nav() {
               }}>
             <img alt="Home" src={'/logo.png'} height={36} />
           </NavLink>
-          <DesktopLinks category={categoryOrDefault} />
-          <CategorySelection category={categoryOrDefault} />
-          <MobileToggle />
+          <DesktopLinks category={category} />
+          <CategorySelection category={category} onCategoryChange={handleCategoryChange} suffixPath={suffixPath} />
+          <MobileToggle category={category} />
         </Toolbar>
       </AppBar>
   );
