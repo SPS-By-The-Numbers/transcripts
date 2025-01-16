@@ -1,6 +1,5 @@
 'use client'
 
-import ActionDialogConstants from 'components/ActionDialogConstants';
 import ActionDialogContent from 'components/ActionDialogContent';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
@@ -141,7 +140,7 @@ export default function SpeakerEditDialogContent(
         <Stack direction="row" spacing={1} sx={{paddingTop: "2ex", justifyContent: "right"}}>
           <Button
               variant="contained"
-              onClick={() => setActionDialogMode({mode: ActionDialogConstants.uploadChangesMode})}>
+              onClick={() => setActionDialogMode({mode: "upload_changes"})}>
             Publish Changes
           </Button>
         </Stack>

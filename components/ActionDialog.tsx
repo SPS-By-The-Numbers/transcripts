@@ -1,23 +1,33 @@
 'use client'
 
-import ActionDialogConstants from 'components/ActionDialogConstants';
 import Dialog from '@mui/material/Dialog';
 import SpeakerEditDialogContent from 'components/SpeakerEditDialogContent';
 import UploadChangesDialogContent from 'components/UploadChangesDialogContent';
+import { assertNever } from "assert-never";
 import { useActionDialog } from 'components/providers/ActionDialogProvider';
 
-function makeContents(actionDialogMode, handleClose) {
-  if (actionDialogMode?.mode === ActionDialogConstants.speakerMode) {
-     return (
-       <SpeakerEditDialogContent
-         speakerNum={actionDialogMode.params.speakerNum}
-         onClose={handleClose}/>
-     );
-  } else if (actionDialogMode?.mode === ActionDialogConstants.uploadChangesMode) {
-    return (<UploadChangesDialogContent onClose={handleClose}/>);
+import type { ActionDialogMode } from 'components/providers/ActionDialogProvider';
+
+function makeContents(actionDialogMode : ActionDialogMode | undefined,
+                      handleClose : (s: string) => void) {
+  if (actionDialogMode === undefined) {
+    return (<></>);
   }
 
-  return (<></>);
+  switch(actionDialogMode.mode) {
+    case "speaker":
+      return (
+        <SpeakerEditDialogContent
+          speakerNum={actionDialogMode.speakerNum}
+          onClose={handleClose}/>
+    );
+
+    case "upload_changes":
+      return (<UploadChangesDialogContent onClose={handleClose}/>);
+
+    default:
+      return assertNever(actionDialogMode);
+  }
 }
 
 export default function ActionDialog() {

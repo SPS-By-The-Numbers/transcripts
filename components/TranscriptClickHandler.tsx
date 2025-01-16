@@ -1,6 +1,5 @@
 'use client'
 
-import ActionDialogConstants from 'components/ActionDialogConstants';
 import { VideoControlContext } from 'components/providers/VideoControlProvider';
 import { useActionDialog } from 'components/providers/ActionDialogProvider';
 import { useContext } from 'react'
@@ -30,8 +29,8 @@ export default function TranscriptControl({children} : TranscriptControlParams) 
     // Command is ts-NNNNN
     const speakerNum = parseInt(command.split('-')[1]);
     setActionDialogMode({
-      mode: ActionDialogConstants.speakerMode,
-      params: {speakerNum},
+      mode: "speaker",
+      speakerNum,
     });
   }
 
