@@ -2,8 +2,9 @@ import * as Constants from 'config/constants'
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
-import Nav from 'components/Nav'
 import MuiProviders from './MuiProviders';
+import Nav from 'components/Nav'
+import NavStateProvider from 'components/providers/NavStateProvider'
 import Script from 'next/script'
 import { Metadata } from 'next'
 
@@ -39,15 +40,17 @@ export default function RootLayout({ children }: {children: React.ReactNode}) {
         <MuiProviders>
           <CssBaseline />
           <InitColorSchemeScript attribute="class"/>
-          <Nav />
-          <Box sx={{
+          <NavStateProvider>
+            <Nav />
+            <Box sx={{
               marginTop: "0.5ex",
               height: "100%",
               maxWidth: "120ch",
               marginX: 'auto',
-            }}>
-            {children}
-          </Box>
+              }}>
+              {children}
+            </Box>
+          </NavStateProvider>
         </MuiProviders>
       </body>
     </html>
