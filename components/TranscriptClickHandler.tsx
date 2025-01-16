@@ -31,7 +31,7 @@ export default function TranscriptControl({children} : TranscriptControlParams) 
     const speakerNum = parseInt(command.split('-')[1]);
     setActionDialogMode({
       mode: ActionDialogConstants.speakerMode,
-      params: speakerNum,
+      params: {speakerNum},
     });
   }
 

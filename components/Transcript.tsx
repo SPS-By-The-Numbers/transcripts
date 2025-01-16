@@ -82,7 +82,7 @@ export default function Transcript({
 
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "max-content max-content",
+            lg: "1fr 3fr",
           },
           gridTemplateRows: "auto auto 3fr",
           gridTemplateAreas: {
