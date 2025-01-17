@@ -1,7 +1,9 @@
 import * as Constants from 'config/constants';
 import Alert from '@mui/material/Alert';
 import Archive from 'components/Archive';
+
 import Stack from '@mui/material/Stack';
+import type { Metadata, ResolvingMetadata } from 'next'
 import { encodeDateNoThrow, decodeDate } from 'common/params';
 import { fetchEndpoint } from 'utilities/client/endpoint';
 import { parseISO } from 'date-fns';
@@ -9,11 +11,32 @@ import { parseISO } from 'date-fns';
 import type { CategoryId } from 'common/params';
 import type { DateRange } from 'components/DateRangePicker';
 
-const mostRecentLimit = 50;
-
 type SearchParams = {
   [key: string]: string | string[] | undefined;
 };
+
+type PageProps = {
+  params: Promise<{category: CategoryId}>,
+  searchParams?: Promise<SearchParams>
+}
+
+export async function generateMetadata({ params, searchParams }: PageProps, parent: ResolvingMetadata): Promise<Metadata> {
+  const category = (await params).category;
+  const categoryInfo = Constants.CATEGORY_CHANNEL_MAP[category];
+
+  if (!categoryInfo) {
+    return await parent;
+  }
+
+
+  return ({
+    title: `${categoryInfo.name} Transcription Archive`,
+    description: `Date searchable archive of all transcriptions for ${categoryInfo.name}`,
+    keywords: [categoryInfo.name, "archive", "transcripts"],
+  });
+}
+
+const mostRecentLimit = 50;
 
 async function doDateSearch(category : CategoryId, range : DateRange) {
   const metadataParams : Record<string, string> = { category };
@@ -37,8 +60,7 @@ async function doDateSearch(category : CategoryId, range : DateRange) {
   return await fetchEndpoint('metadata', 'GET', metadataParams);
 }
 
-export default async function ArchiveIndex(
-    props: { params: Promise<{category: CategoryId}>, searchParams?: Promise<SearchParams> }) {
+export default async function ArchiveIndex(props: PageProps) {
   const searchParams = await props.searchParams;
   const params = (await props.params);
 
