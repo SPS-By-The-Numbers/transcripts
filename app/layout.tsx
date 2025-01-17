@@ -11,9 +11,7 @@ import { Metadata } from 'next'
 import '../styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: {
-    default: Constants.APP_TITLE,
-  },
+  title: Constants.APP_TITLE,
   description: `Transcriptions of ${Object.entries(Constants.CATEGORY_CHANNEL_MAP).map(([k,info]) => info.name).join(', ')}`,
 };
 
