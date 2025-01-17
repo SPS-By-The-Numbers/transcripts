@@ -4,6 +4,7 @@ import * as Constants from 'config/constants';
 import Autocomplete from '@mui/material/Autocomplete';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import LanguageIcon from '@mui/icons-material/Language';
 import TextField from '@mui/material/TextField';
 import { SupportedLanguages } from 'common/languages';
 import { useState } from 'react'
@@ -13,7 +14,7 @@ import type { SxProps, Theme } from '@mui/material';
 
 function makeLangOptions() {
   const options = Object.entries(SupportedLanguages).map(
-      ([langCode, info]) => ({ label: info.displayName, value: langCode}));
+      ([langCode, info]) => ({ label: `🌐 ${info.displayName}`, value: langCode}));
   const moveTopToFront = (x,y) => {
     const xLocation = Constants.TOP_LANGUAGES.findIndex(element => element === x.value);
     const yLocation = Constants.TOP_LANGUAGES.findIndex(element => element === y.value);

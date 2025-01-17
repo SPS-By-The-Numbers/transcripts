@@ -13,6 +13,10 @@ import { fetchEndpoint } from 'utilities/client/endpoint';
 import type { ApiResponse } from 'common/response';
 import type { CategoryId } from 'common/params';
 
+export const metadata: Metadata = {
+  title: Constants.APP_TITLE + ": Recent Transcriptions",
+};
+
 function ResultAccordion({category, categoryName, response} : {category : CategoryId, categoryName : string, response : ApiResponse}) {
   return (
     <Accordion defaultExpanded disableGutters>

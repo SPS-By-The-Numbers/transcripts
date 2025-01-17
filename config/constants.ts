@@ -3,6 +3,9 @@ export const isProduction = process.env.NODE_ENV === 'production';
 export const SITE_ROOT_URL = 'https://transcripts.sps-by-the-numbers.com';
 export const HOME_URL = 'https://sps-by-the-numbers.com';
 
+// Used to generate the title and description in the <head> element.
+export const APP_TITLE = 'SPS By The Numbers Transcriptions';
+
 // Originally this was a static HTML site with files spit into a prefix tree directory
 // structure to avoid having too many files in one directory. This isn't necessary
 // anymore. Setting LEGACY_PREFIX_REDIRECT to true redirect URLS where there is a

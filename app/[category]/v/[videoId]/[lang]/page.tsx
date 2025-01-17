@@ -42,6 +42,7 @@ export async function generateMetadata(props: Props, parent: ResolvingMetadata):
     return {
       title: `Transcript of ${params.category} -  ${videoMetadata.title}`,
       description: `Transcript of ${params.category} - ${videoMetadata.title}`,
+      keywords: [params.category, "transcript"],
       openGraph: {
         images: `https://i.ytimg.com/vi/${params.videoId}/hqdefault.jpg`,
       },

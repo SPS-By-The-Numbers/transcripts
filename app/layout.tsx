@@ -11,9 +11,11 @@ import { Metadata } from 'next'
 import '../styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: 'SPS By The Numbers - Transcriptions',
-  description: 'Public meeting transcriptions from SPS By The Numbers',
-}
+  title: {
+    default: Constants.APP_TITLE,
+  },
+  description: `Transcriptions of ${Object.entries(Constants.CATEGORY_CHANNEL_MAP).map(([k,info]) => info.name).join(', ')}`,
+};
 
 export default function RootLayout({ children }: {children: React.ReactNode}) {
   return (

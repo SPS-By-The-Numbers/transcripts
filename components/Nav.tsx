@@ -91,13 +91,40 @@ function NavLink({href, children, sx=[]} : {href: string, children: React.ReactN
   );
 }
 
+function makeNavLinks(category: CategoryId) {
+  return navConfigs.map(({name, useCategory, pathSuffix}, i) => (
+    <SingleDesktopLink
+      key={i}
+      href={useCategory? `/${category}/${pathSuffix}`: `/${pathSuffix}`}
+      name={name}
+    />
+  ));
+}
+
+function makeMobileItems(category: CategoryId, onClick : () => void) {
+  return navConfigs.map(({name, useCategory, pathSuffix}, i) => (
+    <MenuItem key={i} onClick={onClick}>
+      <Link
+          href={useCategory? `/${category}/${pathSuffix}`: `/${pathSuffix}`}
+          underline="none"
+          sx={{
+            color: 'primary.contrastText',
+          }}
+        >
+        {name}
+      </Link>
+    </MenuItem>
+  ));
+}
+
 function CategorySelection({category, suffixPath, onCategoryChange} : {category: CategoryId, suffixPath: string, onCategoryChange: (event: SelectChangeEvent) => void}) {
   return (
     <Box
         sx={{
           display: 'flex',
-          alignSelf: 'stretch',
+          justifyContent: 'end',
           alignItems: 'center',
+          alignSelf: 'stretch',
           paddingX: '0.75rem',
           ':hover': {
             backgroundColor: 'primary.dark',
@@ -186,11 +213,7 @@ function MobileToggle({category} : {category: CategoryId}) {
         onClose={handleCloseMenu}
         sx={{ display: { xs: 'block', md: 'none' } }}
       >
-        {navConfigs.map(({name}, i) => (
-          <MenuItem key={i} onClick={() => menuSelected()}>
-            <Typography sx={{ textAlign: 'center' }}>{name}</Typography>
-          </MenuItem>
-        ))}
+        { makeMobileItems(category, menuSelected) }
       </Menu>
     </Box>
   );
@@ -214,17 +237,9 @@ function DesktopLinks({category} : {category: CategoryId}) {
         sx={{
           display: { xs: 'none', md: "flex"},
           alignSelf: "stretch",
-          flexGrow: 1,
+          flexGrow: 2,
         }}>
-      {
-        navConfigs.map(({name, useCategory, pathSuffix}, i) => (
-          <SingleDesktopLink
-            key={i}
-            href={useCategory? `/${category}/${pathSuffix}`: `/${pathSuffix}`}
-            name={name}
-          />
-        ))
-      }
+      { makeNavLinks(category) }
     </Stack>
   );
 }
