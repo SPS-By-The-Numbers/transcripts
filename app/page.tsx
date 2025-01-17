@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchResult from 'components/SearchResult';
 import Stack from '@mui/material/Stack';
+import { Metadata } from 'next'
 import { fetchEndpoint } from 'utilities/client/endpoint';
 
 import type { ApiResponse } from 'common/response';

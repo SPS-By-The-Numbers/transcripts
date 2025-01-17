@@ -14,7 +14,7 @@ export default function About() {
         <Stack spacing={2}>
           <div>
             {"The Transcriptions functionality is an offshoot of "}
-            <a href="https://sps-by-the-numbers.com" display="inline">
+            <a href="https://sps-by-the-numbers.com">
               SPS By The Numbers
             </a>, a data oriented site about Seattle Public Schools. The
             site was created because there was a huge information disparity
@@ -25,7 +25,7 @@ export default function About() {
           <div>
             The first version was a simple adaptation by Albert J Wong of the {" "}
             <a href="https://colab.research.google.com/github/Majdoddin/nlp/blob/main/Pyannote_plays_and_Whisper_rhymes_v_2_0.ipynb">
-              Majdoddin's collab example
+              Majdoddin&amp;s collab example
             </a>
             {" "}for using{" "}<a href="https://github.com/openai/whisper">Whipser</a> and <a href="https://github.com/pyannote">Pyannote</a>
             {" "} <a href="https://huggingface.co/pyannote/speaker-diarization-3.1">speaker diarization</a> to transcribe

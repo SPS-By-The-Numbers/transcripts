@@ -3,7 +3,7 @@ import Alert from '@mui/material/Alert';
 import Archive from 'components/Archive';
 
 import Stack from '@mui/material/Stack';
-import type { Metadata, ResolvingMetadata } from 'next'
+import type { Metadata } from 'next'
 import { encodeDateNoThrow, decodeDate } from 'common/params';
 import { fetchEndpoint } from 'utilities/client/endpoint';
 import { parseISO } from 'date-fns';
@@ -11,21 +11,17 @@ import { parseISO } from 'date-fns';
 import type { CategoryId } from 'common/params';
 import type { DateRange } from 'components/DateRangePicker';
 
-type SearchParams = {
-  [key: string]: string | string[] | undefined;
-};
-
 type PageProps = {
   params: Promise<{category: CategoryId}>,
-  searchParams?: Promise<SearchParams>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const category = (await params).category;
   const categoryInfo = Constants.CATEGORY_CHANNEL_MAP[category];
 
   if (!categoryInfo) {
-    return await parent;
+    return {};
   }
 
 

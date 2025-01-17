@@ -3,18 +3,19 @@ import * as Constants from 'config/constants';
 import TranscriptSearch from 'components/TranscriptSearch';
 
 import type { CategoryId } from 'common/params.ts';
+import type { Metadata } from 'next'
 
 type PageProps = {
   params: Promise<{category: CategoryId}>,
-  searchParams?: Promise<SearchParams>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const category = (await params).category;
   const categoryInfo = Constants.CATEGORY_CHANNEL_MAP[category];
 
   if (!categoryInfo) {
-    return await parent;
+    return {};
   }
 
   return ({
