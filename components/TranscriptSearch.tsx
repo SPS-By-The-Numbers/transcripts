@@ -4,11 +4,11 @@ import * as Constants from 'config/constants';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import Link from '@mui/material/Link';
-import NextLink from 'next/link';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import SearchIcon from '@mui/icons-material/Search';
@@ -16,6 +16,7 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import SearchResult from 'components/SearchResult';
 
 import { MeiliSearch } from 'meilisearch';
 import { getVideoPath } from 'common/paths';
@@ -113,15 +114,35 @@ function Snippet({ text, position }: { text: string, position: Array<Position> |
 
       // Unmatched part.
       if (lastStart !== match.start) {
-        textSegments.push(<span key={`${i}-no`}>{text.slice(lastStart, match.start)}</span>);
+        textSegments.push(
+          <Typography 
+            key={`${i}-nomatch`}
+            component="span"
+          >
+            {text.slice(lastStart, match.start)}
+          </Typography>);
       }
-      textSegments.push(<span className="bg-yellow-300 font-semibold" key={`${i}-em`}>{text.slice(match.start, match.start + match.length)}</span>);
+      textSegments.push(
+        <Typography
+          key={`${i}-match`}
+          component="span"
+          color="secondary"
+          sx={{fontWeight:"bold"}}
+        >
+          {text.slice(match.start, match.start + match.length)}
+        </Typography>);
       lastStart = match.start + match.length;
     }
   }
 
   if (lastStart !== text.length -1) {
-    textSegments.push(<span key='last'>{text.slice(lastStart)}</span>);
+    textSegments.push(
+      <Typography
+        key='last-nomatch'
+        component="span"
+      >
+        {text.slice(lastStart)}
+      </Typography>);
   }
 
   return (
@@ -130,13 +151,6 @@ function Snippet({ text, position }: { text: string, position: Array<Position> |
    </Box>
   );
 }
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? 'rgb(209 213 219)' : 'rgb(209 213 219)',
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  color: theme.palette.text.primary,
-}));
 
 function ResultList({ category, results }: ResultParams) {
   if (!results) {
@@ -156,32 +170,29 @@ function ResultList({ category, results }: ResultParams) {
 
   const resultElements = hits.map((h,i) => {
     return (
-      <Item key={i}>
-        <Typography sx={{ fontSize: 14 }} color="text.primary" variant="h2">
-          <Link component={NextLink} className="text-lg font-medium" href={`${getVideoPath(category, h.videoId)}#${toHhmmss(h.start)}`}>
-            {h.title}
-          </Link>
-        </Typography>
-        <Typography sx={{ fontSize: 14 }} color="text.primary" gutterBottom>
-          <b>Published:</b> {formatDate(h.publishDate)}, <b>VideoId:</b> {h.videoId}, <b>Time:</b> {toHhmmss(h.start)}
-        </Typography>
-
-        <Typography sx={{ fontSize: 14 }} color="text.secondary">
-          <Snippet
-            text={h._formatted?.text ?? ""}
-            position={h._matchesPosition?.['text']} />
-        </Typography>
-      </Item>
+      <SearchResult
+          key={i}
+          category={category}
+          videoId={h.videoId}
+          title={h.title}
+          publishDate={h.publishDate}
+        >
+        <Snippet
+          text={h._formatted?.text ?? ""}
+          position={h._matchesPosition?.['text']} />
+      </SearchResult>
     );
   });
 
   return (
       <Stack spacing={2}>
-        <Item>
-         <b>Query:</b> {results.query}<br/>
-         <b>Results:</b> {results.estimatedTotalHits || results.totalHits}<br/>
-         <b>Processing Time:</b> {results.processingTimeMs}ms<br/>
-        </Item>
+        <Paper>
+          <ul>
+            <li><b>Query:</b> {results.query}</li>
+            <li><b>Results:</b> {results.estimatedTotalHits || results.totalHits}</li>
+            <li><b>Processing Time:</b> {results.processingTimeMs}ms</li>
+          </ul>
+        </Paper>
         { resultElements }
       </Stack>);
 }
@@ -198,19 +209,23 @@ function extractCategory(param) {
   return param;
 }
 
-export default function TranscriptSearch({category} : {category: CategoryId}) {
+type SearchControlsProps = {
+  category: CategoryId;
+  setResults: (r: SearchResponse | undefined) => void;
+  setErrorMessage: (m: ErrorMessage) => void;
+}
 
-  const [results, setResults] = useState<SearchResponse | undefined>();
-
+function SearchControls({category, setResults, setErrorMessage} : SearchControlsProps) {
   const [query, setQuery] = useState<string>("");
   const [sortType, setSortType] = useState<string>("relevance");
   const [groupType, setGroupType] = useState<string>("speaker");
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(noError);
-  const [requestNum, setRequestNum] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSearch = async () => {
     try {
+      setLoading(true);
       setResults(await doSearch(category, query, sortType, groupType));
+      setLoading(false);
       setErrorMessage(noError);
     } catch (err) {
       setErrorMessage({severity: 'error', message: err.message});
@@ -230,6 +245,70 @@ export default function TranscriptSearch({category} : {category: CategoryId}) {
   };
 
   return (
+    <Stack component="search" direction="column" spacing={1.5}>
+      <Stack direction="row" spacing={1}>
+        <FormControl
+          sx={{
+            minWidth: "30ch",
+            flexGrow: 1,
+          }}>
+          <TextField
+            size="small"
+            placeholder="Enter Search Query Here"
+            value={query}
+            onChange={handleQueryChange} />
+        </FormControl>
+
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          sx={{flexGrow:0}}>
+          <SearchIcon fontSize="small" />
+        </Button>
+        <Backdrop open={loading}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Stack>
+
+      <Stack component="search" direction="row" spacing={1}>
+        <FormControl size="small" sx={{minWidth: "19ch"}}>
+          <InputLabel id="grouping-select-label">Result Grouping</InputLabel>
+          <Select
+            id="grouping-select"
+            labelId="grouping-select-label"
+            onChange={handleGroupTypeChange}
+            label="Result Grouping"
+            value={groupType}>
+            <MenuItem value="speaker">By Speaker Turn</MenuItem>
+            <MenuItem value="video">By Video</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{minWidth: "22ch"}}>
+          <InputLabel id="sort-select-label">Result Sort</InputLabel>
+          <Select
+            id="sort-select"
+            labelId="sort-select-label"
+            label="Result Sort"
+            value={sortType}
+            onChange={handleSortTypeChange}
+          >
+            <MenuItem value="relevance">Relevance</MenuItem>
+            <MenuItem value="publishDate:asc">Publish Date (asc)</MenuItem>
+            <MenuItem value="publishDate:desc">Publish Date (desc)</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
+    </Stack>
+  );
+}
+
+export default function TranscriptSearch({category} : {category: CategoryId}) {
+
+  const [results, setResults] = useState<SearchResponse | undefined>();
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(noError);
+
+  return (
     <Stack
         spacing={2}
         sx={{
@@ -247,55 +326,7 @@ export default function TranscriptSearch({category} : {category: CategoryId}) {
         {errorMessage['message']}
       </Alert>
 
-      <Stack component="search" direction="column" spacing={1.5}>
-        <Stack direction="row" spacing={1}>
-          <FormControl
-              sx={{
-                minWidth: "30ch",
-                flexGrow: 1,
-              }}>
-            <TextField
-              size="small"
-              placeholder="Enter Search Query Here"
-              value={query}
-              onChange={handleQueryChange} />
-          </FormControl>
-
-          <Button variant="contained" onClick={handleSearch} sx={{flexGrow:0}}>
-            <SearchIcon fontSize="small"/>
-          </Button>
-        </Stack>
-
-        <Stack component="search" direction="row" spacing={1}>
-          <FormControl size="small" sx={{minWidth: "19ch"}}>
-            <InputLabel id="grouping-select-label">Result Grouping</InputLabel>
-            <Select
-              id="grouping-select"
-              labelId="grouping-select-label"
-              onChange={handleGroupTypeChange}
-              label="Result Grouping"
-              value={groupType}>
-              <MenuItem value="speaker">By Speaker Turn</MenuItem>
-              <MenuItem value="video">By Video</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{minWidth: "22ch"}}>
-            <InputLabel id="sort-select-label">Result Sort</InputLabel>
-            <Select
-              id="sort-select"
-              labelId="sort-select-label"
-              label="Result Sort"
-              value={sortType}
-              onChange={handleSortTypeChange}
-            >
-              <MenuItem value="relevance">Relevance</MenuItem>
-              <MenuItem value="publishDate:asc">Publish Date (asc)</MenuItem>
-              <MenuItem value="publishDate:desc">Publish Date (desc)</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-      </Stack>
+      <SearchControls category={category} setResults={setResults} setErrorMessage={setErrorMessage} />
 
       <Divider />
 
