@@ -6,12 +6,13 @@ on:
   push:
     branches:
       - main
+      - production
 permissions:
   checks: write
   contents: read
   pull-requests: write
 jobs:
-  build_and_deploy:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,10 +39,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
+      - name: Setup functions-python/venv
+        working-directory: functions-python
+        run: |
+          python -m venv venv
+          . venv/bin/activate
+          python -m pip install -r requirements.txt
+
       - if: ${{ steps.cache-next.outputs.cache-hit != 'true' }}
         name: List the state of node modules
         continue-on-error: true
         run: npm list; npm --prefix functions list
+
+      - name: Cache functions-python/venv
+        id: cache-functions-python-venv
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-functions-python-venv
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: functions-python/venv
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: Cache firebase emulators
         uses: actions/cache@v4
@@ -49,17 +71,15 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: ${{ runner.os }}-firebase-${{ steps.cache-next.outputs.firebase-tools }}
 
-      # Only ci, no build. The action-hosting-deploy with the webframeworks does the build.
+      # The action-hosting-deploy with the webframeworks does a build too but do it here
+      # so tests can be run.
       - run: npm ci
+      - run: npm run bootstrap
+      - run: npm run build
+      - run: npm test
 
-#      # Firebase webframeworks doesn't do npm install on the functions directory.
-#      - run: npm --prefix functions ci
-#
-#      - uses: FirebaseExtended/action-hosting-deploy@v0
-#        with:
-#          repoToken: ${{ secrets.GITHUB_TOKEN }}
-#          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPS_BY_THE_NUMBERS }}
-#          channelId: live
-#          projectId: sps-by-the-numbers
-#        env:
-#          FIREBASE_CLI_EXPERIMENTS: webframeworks
+      # Firebase doesn't recur down into the functions directory.
+      - run: npm --prefix functions ci
+      - run: npm --prefix functions run bootstrap
+      - run: npm --prefix functions run build
+      - run: npm --prefix functions test

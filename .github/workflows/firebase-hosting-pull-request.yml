@@ -8,7 +8,7 @@ permissions:
   contents: read
   pull-requests: write
 jobs:
-  build_and_preview:
+  build_and_test:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     steps:
@@ -75,16 +75,8 @@ jobs:
       - run: npm run build
       - run: npm test
 
-      # Firebase webframeworks doesn't recur down into the functions directory.
+      # Firebase doesn't recur down into the functions directory.
       - run: npm --prefix functions ci
       - run: npm --prefix functions run bootstrap
       - run: npm --prefix functions run build
       - run: npm --prefix functions test
-
-#      - uses: FirebaseExtended/action-hosting-deploy@v0
-#        with:
-#          repoToken: ${{ secrets.GITHUB_TOKEN }}
-#          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPS_BY_THE_NUMBERS }}
-#          projectId: sps-by-the-numbers
-#        env:
-#          FIREBASE_CLI_EXPERIMENTS: webframeworks
