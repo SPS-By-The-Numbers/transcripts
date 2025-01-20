@@ -40,7 +40,7 @@ export const SENTENCE_TABLE_SUBDIR = "sentences";
 // Subdirectory for archive of raw WhisperX files.
 export const WHISPERX_ARCHIVE_SUBDIR = "archive/whisperx";
 
-// Map of ALL_CATEGORIES to channels.
+// Map of ALL_CATEGORIES to information such as channels.
 export const CATEGORY_CHANNEL_MAP = {
   'sps-board': {
     id: "UC07MVxpRKdDJmqwWDGYqotA",

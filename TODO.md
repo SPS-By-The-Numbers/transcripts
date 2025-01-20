@@ -1,6 +1,7 @@
 Missing features:
     * Download selector
-    * Help instructions + credits.
+    * Storage bucket difference for archives.
+    * Help instructions.
     * Text extract.
     * Periodic Meilisearch update.
     * Cloud scheduler into Cloud function onSchedule.
