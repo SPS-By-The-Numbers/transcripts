@@ -1,25 +1,28 @@
-import { CATEGORY, CATEGORY_ORIG_LANG, index } from './client.mts';
-import { readFile, writeFile } from 'node:fs/promises';
 import { DiarizedTranscript } from 'common/transcript';
 import { FirebaseWebClientStorageAccessor } from 'utilities/client/storage';
-//import allMetadata from './allMetadata.json';
-import allMetadata from './allMetadata-sea.json';
-const metadataMap = Object.fromEntries(allMetadata.map(e => [e.videoId, e]));
+import { getIndex } from './client.mts';
+import { getSpeakerControlInfo, getSpeakerAttributes } from 'utilities/client/speaker';
 
-import type { Document } from './client.mts';
+import type { CategoryId, VideoId, VideoMetadata } from 'common/params';
 
-async function insertDocs(documents) {
+type Document = {
+  id : string,
+  sentenceGroup : string,
+  text: string,
+  start: string,
+  end: string,
+};
+
+async function insertDocs(category: CategoryId,
+                          categoryLang: Iso6393Code,
+                          documents) {
   console.log(`Indexing ${documents.length} docs`);
+  const index = getIndex(category, categoryLang);
 
   const task = await index.addDocuments(documents)
   const result = await index.waitForTask(task.taskUid);
   console.log(result);
 }
-
-const accessor = new FirebaseWebClientStorageAccessor();
-
-const data = await readFile(process.argv[2], 'utf-8');
-const videoIds = data.split('\n').map(s => s.trim());
 
 function makeId(videoId, start) {
   // ID videoID suffixed with the starttime in milliseconds separated by an underscore.
@@ -27,39 +30,54 @@ function makeId(videoId, start) {
   return `${videoId}_${Math.round(parseFloat(start) * 1000)}`;
 }
 
-async function indexBatch(batch) {
+async function indexBatch(accessor: FirebaseWebClientStorageAccessor,
+                          category: CategoryId,
+                          categoryLang: Iso6393Code,
+                          batch: Array<VideoId>,
+                          metadataMap: {[VideoId]: VideoMetadata}) {
   const resultsArray : Document = await Promise.all(batch.map(async (videoId) => {
     try {
-      const transcript = await DiarizedTranscript.fromStorage(accessor, CATEGORY, videoId, [CATEGORY_ORIG_LANG]);
+      const transcript = await DiarizedTranscript.fromStorage(accessor, category, videoId, [categoryLang]);
       
-      const bySpeaker = transcript.groupSentenceInfoBySpeaker();
-      const sentences = transcript.languageToSentenceTable[CATEGORY_ORIG_LANG];
+      const speakerInfo = await getSpeakerControlInfo(category, videoId).speakerInfo;
+      const speakerBubble = transcript.groupSentenceInfoBySpeaker();
+      const sentences = transcript.languageToSentenceTable[categoryLang];
 
-      return bySpeaker.map(groupedInfo => ({
-          id: makeId(videoId, groupedInfo.sentenceInfo[0][2]),
-          videoId,
-          start: groupedInfo.sentenceInfo[0][2],
-          end: groupedInfo.sentenceInfo.at(-1)[3],
-          text: groupedInfo.sentenceInfo.map(info => sentences[info[0]]).join(' '),
-          title: (metadataMap[videoId]?.title ?? `${videoId} missing title`),
-          publishDate: metadataMap[videoId]?.publishDate ?? '1950-01-01T00:00:00.000Z',
-          transcribDate: metadataMap[videoId]?.publishDate ?? '2024-07-14T00:00:00.000Z',
-      }));
+      return speakerBubble.map(
+        groupedInfo => {
+          const { name, tags } = getSpeakerAttributes(groupedInfo.speaker, speakerInfo);
+
+          return {
+            id: makeId(videoId, groupedInfo.sentenceInfo[0][2]),
+            speaker: name,
+            tags: [...tags],
+            videoId,
+            start: groupedInfo.sentenceInfo[0][2],
+            end: groupedInfo.sentenceInfo.at(-1)[3],
+            text: groupedInfo.sentenceInfo.map(info => sentences[info[0]]).join(' '),
+              title: (metadataMap[videoId]?.title ?? `${videoId} missing title`),
+            publishDate: metadataMap[videoId]?.publishDate ?? '1950-01-01T00:00:00.000Z',
+            transcribeDate: metadataMap[videoId]?.publishDate ?? '2024-07-14T00:00:00.000Z',
+          };
+        }
+      );
     } catch (e) {
        console.error('failed: ', videoId, ' ', e);
        throw e;
     }
   }));
 
-  await insertDocs(resultsArray.flat());
+  await insertDocs(category, categoryLang, resultsArray.flat());
 }
 
-let numDone = 0;
-const batchSize = 10;
-while (numDone < videoIds.length) {
-  await indexBatch(videoIds.slice(numDone, numDone + batchSize));
-  numDone += batchSize;
-}
+export async function indexVideos(category: CategoryId, categoryLang: Iso6393Code, videoIds: Array<VideoId>, allMetadata: Array<VideoMetadata>) {
+  const batchSize = 10;
+  const accessor = new FirebaseWebClientStorageAccessor();
+  const metadataMap = Object.fromEntries(allMetadata.map(e => [e.videoId, e]));
 
-// Terminate cause firebase keeps a handle open
-process.exit(0);
+  for (let numDone = 0; numDone < videoIds.length; numDone += batchSize) {
+    await indexBatch(accessor, category, categoryLang,
+                     videoIds.slice(numDone, numDone + batchSize), metadataMap);
+    console.log(`${numDone} out of ${videoIds.length} done`);
+  }
+}

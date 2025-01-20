@@ -24,10 +24,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     return {};
   }
 
-
   return ({
     title: `${categoryInfo.name} Transcription Archive`,
-    description: `Date searchable archive of all transcriptions for ${categoryInfo.name}`,
+    description: `Date searchable archive of all transcriptions for ${categoryInfo.name} in ${categoryInfo.type}: ${categoryInfo.id}`,
     keywords: [categoryInfo.name, "archive", "transcripts"],
   });
 }

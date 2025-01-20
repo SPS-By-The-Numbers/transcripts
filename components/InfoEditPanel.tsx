@@ -71,7 +71,7 @@ export default function InfoEditPanel({
           Publish Date: {new Date(metadata.publish_date).toLocaleDateString()}
         </section>
         <section>
-          Description: {metadata.description}
+          Description: {metadata.description.split('\n').map((paragraph, i) => <p key={i}>{paragraph}</p>)}
         </section>
       </CustomTabPanel>
     </Box>

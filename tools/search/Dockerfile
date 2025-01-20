@@ -1,6 +1,6 @@
 FROM getmeili/meilisearch:latest
 
-COPY meili_data/dumps/20240716-191250755.dump /meili_data/dumps/latest.dump
+COPY /meili_data/dumps/20250120-081408619.dump /meili_data/dumps/latest.dump
 
 EXPOSE 7700
 ENTRYPOINT ["tini", "--"]
