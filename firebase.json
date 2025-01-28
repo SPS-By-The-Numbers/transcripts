@@ -19,18 +19,6 @@
       "source": "functions-python"
     }
   ],
-  "hosting": {
-    "site": "transcripts-spsbtn",
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-west1"
-    }
-  },
   "storage": {
     "rules": "storage.rules"
   },
@@ -43,9 +31,6 @@
     },
     "database": {
       "port": 9000
-    },
-    "hosting": {
-      "port": 5000
     },
     "pubsub": {
       "port": 8085
