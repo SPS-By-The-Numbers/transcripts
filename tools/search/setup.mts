@@ -31,7 +31,7 @@ async function recreate(category: CategoryId, lang: Iso6393Code) {
 async function main() {
   for (const category of Constants.ALL_CATEGORIES) {
     if (process.argv[2] === 'recreate') {
-      console.log("recreateing: " + category);
+      console.log("recreating: " + category);
       await recreate(category, 'eng');
     }
 
