@@ -1,0 +1,15 @@
+**/node_modules
+**/venv
+.git
+
+data/
+
+**/__pycache__
+
+# typescript and esbuild output for cloud functions.
+functions/lib
+
+tsconfig.tsbuildinfo
+
+# If we're in docker build, we don't care about the dockerfiles.
+Dockerfile*
