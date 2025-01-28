@@ -2,6 +2,12 @@ name: Build and Test Hosting + Functions
 
 on:
   workflow_call:
+    inputs:
+      deploy-functions:
+        description: "Firebase project for deploying functions"
+        default: ''
+        required: false
+        type: string
 
 jobs:
   build-all:
@@ -30,8 +36,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-      - if: ${{ steps.cache-next.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
+      - name: List the state of node modules
+        if: ${{ steps.cache-next.outputs.cache-hit != 'true' }}
         continue-on-error: true
         run: npm list; npm --prefix functions list
 
@@ -72,3 +78,7 @@ jobs:
       - run: npm --prefix functions ci
       - run: npm --prefix functions run build
       - run: npm --prefix functions test
+
+      - name: Deploy Functions
+        if: ${{ inputs.deploy-functions != '' }}
+        run: npm --prefix functions deploy -P ${{ inputs.deploy-functions }}
