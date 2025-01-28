@@ -1,7 +1,7 @@
 // Fetches the metadata from cloud functions.
 import { fetchEndpoint } from 'utilities/client/endpoint';
 
-import type { CategoryId, VideoId } from 'common/params';
+import type { CategoryId, VideoId, VideoMetadata } from 'common/params';
 
 export async function getMetadata(category: CategoryId, videoId: VideoId): Promise<VideoMetadata> {
   const response = await fetchEndpoint('metadata', 'GET', {category, videoId});
