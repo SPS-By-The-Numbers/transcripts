@@ -16,3 +16,5 @@ permissions:
 jobs:
   build_and_test:
     uses: ./.github/workflows/build-all.yml
+    with:
+      deploy-functions: ${{ push.branches == 'production' && 'sps-by-the-numbers' || '' }}
