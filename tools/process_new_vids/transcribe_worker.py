@@ -158,7 +158,7 @@ def main():
                         required=True)
     parser.add_argument('-m', '--model', dest='model', metavar="MODEL",
                         type=str, help='Downloads whisper MODEL',
-                        default="large-v3")
+                        default="large-v3-turbo")
     parser.add_argument('--compute_type', dest='compute_type',
                         metavar="COMPUTE_TYPE", type=str,
                         help='The compute type to use', default="float16")
