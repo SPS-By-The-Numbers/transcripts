@@ -17,4 +17,4 @@ jobs:
   build_and_test:
     uses: ./.github/workflows/build-all.yml
     with:
-      deploy-functions: ${{ (github.head_ref || github.ref_name) == 'production' && 'sps-by-the-numbers' || '' }}
+      deploy-functions: ${{ push.branches == 'production' && 'sps-by-the-numbers' || '' }}
