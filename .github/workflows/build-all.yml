@@ -81,4 +81,4 @@ jobs:
 
       - name: Deploy Functions
         if: ${{ inputs.deploy-functions != '' }}
-        run: npm --prefix functions run deploy -P ${{ inputs.deploy-functions }}
+        run: npm --prefix functions run deploy -- -P ${{ inputs.deploy-functions }}
