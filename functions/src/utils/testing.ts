@@ -14,9 +14,16 @@ export const FAKE_AUTH_CODE = 'fake_auth';
 
 // One whisperX transcript. Note the stored file has a .xz extension but it is actually plaintext to avoid
 // needing to load the xz codec!
-export const DATA_WHISPERX_TRANSCRIPT = JSON.parse(fs.readFileSync(
-    "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz",
-    "utf-8"));
+function readFileOrEmpty(path: string) {
+  try {
+    return JSON.parse(fs.readFileSync(path, "utf-8"));
+  } catch (e) {
+    return {}
+  }
+}
+
+export const DATA_WHISPERX_TRANSCRIPT = readFileOrEmpty(
+  "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz");
 
   // Fake metadata to use in test.
 export const DATA_METADATA = {
