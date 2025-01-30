@@ -18,3 +18,4 @@ jobs:
     uses: ./.github/workflows/build-all.yml
     with:
       deploy-functions: ${{ (github.head_ref || github.ref_name) == 'production' && 'sps-by-the-numbers' || '' }}
+    secrets: inherit
