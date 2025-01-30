@@ -83,4 +83,4 @@ jobs:
         if: ${{ inputs.deploy-functions != '' }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: npm --prefix functions run deploy -- --token "${ FIREBASE_TOKEN }" -P "${{ inputs.deploy-functions }}"
+        run: npm --prefix functions run deploy -- --token $FIREBASE_TOKEN -P "${{ inputs.deploy-functions }}"
