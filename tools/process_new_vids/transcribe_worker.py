@@ -68,7 +68,8 @@ def process_vids(vid_list, args):
 
             # Download the audio file.
             outfile_name = f"{video_id}.mp4"
-            video = YouTube.from_id(video_id)
+            video = YouTube(f"https://www.youtube.com/watch?v={video_id}",
+                            "WEB")
             audio_streams = video.streams.filter(
                 only_audio=True).order_by('abr')
             audio_streams.first().download(
@@ -161,7 +162,7 @@ def main():
                         default="large-v3-turbo")
     parser.add_argument('--compute_type', dest='compute_type',
                         metavar="COMPUTE_TYPE", type=str,
-                        help='The compute type to use', default="float16")
+                        help='The compute type to use', default="float32")
     parser.add_argument('-s', '--shuffle', dest='shuffle',
                         help='Shuffle video list as poorman race reduction',
                         action=argparse.BooleanOptionalAction)
