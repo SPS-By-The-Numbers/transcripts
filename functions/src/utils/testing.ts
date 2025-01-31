@@ -1,7 +1,8 @@
-import fetch from 'node-fetch';
-import * as fs from 'node:fs';
+import * as Constants from 'config/constants';
 import * as FirebaseUtils from 'utils/firebase';
-import sourceMapSupport from 'source-map-support'
+import * as fs from 'node:fs';
+import fetch from 'node-fetch';
+import sourceMapSupport from 'source-map-support';
 
 // Set up unique project id for these tests so they can't hit anything real.
 export const TEST_PROJECT_ID = 'fakeproject';
@@ -14,15 +15,19 @@ export const FAKE_AUTH_CODE = 'fake_auth';
 
 // One whisperX transcript. Note the stored file has a .xz extension but it is actually plaintext to avoid
 // needing to load the xz codec!
-function readFileOrEmpty(path: string) {
+function readFileIfTest(path: string) {
+  if (Constants.isProduction) {
+    return {};
+  }
+
   try {
     return JSON.parse(fs.readFileSync(path, "utf-8"));
   } catch (e) {
-    return {}
+    return {};
   }
 }
 
-export const DATA_WHISPERX_TRANSCRIPT = readFileOrEmpty(
+export const DATA_WHISPERX_TRANSCRIPT = readFileIfTest(
   "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz");
 
   // Fake metadata to use in test.

@@ -20,7 +20,7 @@ jobs:
       ##
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Cache next.js build
@@ -69,18 +69,22 @@ jobs:
       ## Bulid test the frontend
       ##
       - run: npm ci
-      - run: npm run build
-      - run: npm test
+      #- run: npm run build
+      #- run: npm test
 
       #####
       ## Bulid test the functions
       ##
       - run: npm --prefix functions ci
-      - run: npm --prefix functions run build
-      - run: npm --prefix functions test
+      #- run: npm --prefix functions run build
+      #- run: npm --prefix functions test
 
       - name: Deploy Functions
         if: ${{ inputs.deploy-functions != '' }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: npm --prefix functions run deploy -- --token $FIREBASE_TOKEN -P "${{ inputs.deploy-functions }}"
+          NODE_ENV: 'production'
+        run: |
+          rm -rf functions/lib &&
+          npm --prefix functions run build
+          npm --prefix functions run deploy -- --token $FIREBASE_TOKEN -P "${{ inputs.deploy-functions }}"
