@@ -44,6 +44,12 @@ export default function About() {
           </div>
 
           <div>
+            Special shout out to Joseph Fromel who cleaned up the basic docker setups and prototyped the
+            cloud function based vast.ai instance management which allowed for transcriptions to
+            happen automatically each night.
+          </div>
+
+          <div>
             The functionality is general enough that it can be applied to any
             meetings that are published on Youtube.  The backend code has been
             specifically engineered to be highly cacheable and low cost.  The
