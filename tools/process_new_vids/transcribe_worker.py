@@ -2,6 +2,9 @@
 
 from pytubefix import YouTube
 
+from random import randint
+from time import sleep
+
 import argparse
 import json
 import os
@@ -21,6 +24,33 @@ AUTH_PARAMS = {
     'user_id': os.environ['CONTAINER_ID'],
     'auth_code': os.environ['API_PASSWORD'],
 }
+
+
+def get_description(video):
+    """Scrape out description from the video metadata or return null.
+
+    Sometimes the video description is not in video_info. This happens with
+    title too. The below is a copy/paste of the code for finding the title
+    from the videoMetadata field except it looks for description.
+    """
+
+    if video.description is not None:
+        return video.description
+
+    if 'singleColumnWatchNextResults' in video.vid_details['contents']:
+        contents = video.vid_details['contents'][
+            'singleColumnWatchNextResults'][
+            'results'][
+            'results'][
+            'contents'][0][
+            'itemSectionRenderer'][
+            'contents'][0]
+
+        if 'videoMetadataRenderer' in contents:
+            return contents['videoMetadataRenderer']['description'][
+                'runs'][0]['text']
+
+    return ""
 
 
 def make_endpoint_url(endpoint):
@@ -81,6 +111,8 @@ def process_vids(vid_list, args):
                              "have gotten to it first. Skip.")
                 continue
 
+            whisper_out_filename = args.workdir.joinpath(f"{video_id}.json")
+
             logger.info(f"Leased {category} {video_id}. Downloading audio")
 
             # Download the audio file.
@@ -97,30 +129,31 @@ def process_vids(vid_list, args):
                 skip_existing=args.cache)
 
             # Run whisper for transcription
-            start = time.time()
-            logger.info(f"Starting Whisper at {start} on {outfile_name} "
-                        f"writing to {args.workdir}")
-            subprocess.run([
-                "whisperx",
-                f"--model={args.model}",
-                f"--compute_type={args.compute_type}",
-                "--language=en",
-                f"--thread={args.threads}",
-                f"--hf_token={args.hf_token}",
-                "--diarize",
-                "--output_format=json",
-                f"--output_dir={str(args.workdir)}",
-                "--",
-                str(args.workdir.joinpath(outfile_name))])
-            end = time.time()
-            logger.info("Whisper took: %d seconds" % (end - start))
+            if not (args.cache and os.path.exists(whisper_out_filename)):
+                start = time.time()
+                logger.info(f"Starting Whisper at {start} on {outfile_name} "
+                            f"writing to {args.workdir}")
+                subprocess.run([
+                    "whisperx",
+                    f"--model={args.model}",
+                    f"--compute_type={args.compute_type}",
+                    "--language=en",
+                    f"--thread={args.threads}",
+                    f"--hf_token={args.hf_token}",
+                    "--diarize",
+                    "--output_format=json",
+                    f"--output_dir={str(args.workdir)}",
+                    "--",
+                    str(args.workdir.joinpath(outfile_name))])
+                end = time.time()
+                logger.info("Whisper took: %d seconds" % (end - start))
 
             # Upload json transcript.
             metadata = {
                 'title': video.title,
                 'video_id': video.video_id,
                 'channel_id': video.channel_id,
-                'description': video.description,
+                'description': get_description(video),
                 'publish_date': video.publish_date.isoformat(),
             }
 
@@ -128,6 +161,14 @@ def process_vids(vid_list, args):
                 transcript_obj = json.load(f)
 
             logger.info("Uploading transcript")
+            logger.debug({
+                **AUTH_PARAMS,
+                'category': category,
+                'transcripts': {transcript_obj["language"]:
+                                transcript_obj},
+                'metadata': metadata,
+                'video_id': video_id
+            })
             response = requests.put(
                 make_endpoint_url("transcript"),
                 json={
@@ -153,6 +194,10 @@ def process_vids(vid_list, args):
                 continue
         except Exception:
             logger.exception("Transcribe failed for " + video_id)
+            jitter_s = randint(2, 10)
+            logger.info(f"Jittering by {jitter_s} seconds")
+            sleep(jitter_s)
+
 
 
 def main():
