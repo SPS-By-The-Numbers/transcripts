@@ -84,7 +84,7 @@ def start_transcribe(
             offers_json = vast.search_offers(
                 storage=DISK_GB,
                 order="dph_total",
-                query=('cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=8 '
+                query=('cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=10 '
                        'reliability>=0.95 dph<2'))
             cheapest = json.loads(offers_json)[0]
             print(f"cheapest ask id {cheapest['ask_contract_id']} cost "

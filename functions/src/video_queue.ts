@@ -166,8 +166,9 @@ async function updateEntry(req, res) {
     return res.status(400).send(makeResponseJson(false, "Expects category"));
   }
 
+  // Give a 30 minute lease.
   const lease_expire_ts = new Date();
-  lease_expire_ts.setTime(lease_expire_ts.getTime() + (2*60*60*1000));
+  lease_expire_ts.setTime(lease_expire_ts.getTime() + (40 * 60 * 1000));
   const now = new Date().toISOString();
 
   const queue_ref = getCategoryPrivateDb(category).child("new_vids");
