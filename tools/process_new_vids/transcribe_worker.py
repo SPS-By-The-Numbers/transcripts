@@ -14,6 +14,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
+YT_TOKEN_FILE = './yt_token.json'
+
 WORKING_DIR = '/tmp/workspace/app/transcribe'
 AUTH_PARAMS = {
     'user_id': os.environ['CONTAINER_ID'],
@@ -45,7 +47,22 @@ def get_vid_list():
     return response.json()['data']
 
 
+def write_token_file(refresh_token):
+    token_data = {
+        "access_token": "dummy",
+        "refresh_token": refresh_token,
+        "expires": 0,
+        "visitorData": None,
+        "po_token": None}
+
+    with open(YT_TOKEN_FILE, "w") as f:
+        json.dump(token_data, f)
+
+
 def process_vids(vid_list, args):
+    # Setup the token file
+    write_token_file(args.yt_token)
+
     for category, video_id in vid_list:
         try:
             logger.info(f"Processing {category} {video_id}")
@@ -69,7 +86,8 @@ def process_vids(vid_list, args):
             # Download the audio file.
             outfile_name = f"{video_id}.mp4"
             video = YouTube(f"https://www.youtube.com/watch?v={video_id}",
-                            "WEB")
+                            use_oauth=True, allow_oauth_cache=True,
+                            token_file=YT_TOKEN_FILE)
             audio_streams = video.streams.filter(
                 only_audio=True).order_by('abr')
             audio_streams.first().download(
@@ -156,6 +174,10 @@ def main():
     parser.add_argument('-x', '--hf_token', dest='hf_token',
                         metavar="HF_TOKEN", type=str,
                         help='Hugging Face token',
+                        required=True)
+    parser.add_argument('-y', '--yt_token', dest='yt_token',
+                        metavar="YT_TOKEN", type=str,
+                        help='Youtube Oauth Refresh Token',
                         required=True)
     parser.add_argument('-m', '--model', dest='model', metavar="MODEL",
                         type=str, help='Downloads whisper MODEL',

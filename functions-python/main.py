@@ -17,13 +17,13 @@ INSTANCE_STALE_S = 60 * 60 * 2  # 2hrs is a long time for these jobs.
 
 
 def _access_secret_version(project_id, secret_id, version_id="latest"):
-    client = secretmanager.SecretManagerServiceClient()
+    secret_client = secretmanager.SecretManagerServiceClient()
 
     # Build the resource name of the secret version
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
 
     # Access the secret version
-    response = client.access_secret_version(request={"name": name})
+    response = secret_client.access_secret_version(request={"name": name})
 
     # Decode the secret payload
     payload = response.payload.data.decode("UTF-8")
@@ -56,6 +56,12 @@ def start_transcribe(
         vast = VastAI(
             _access_secret_version('sps-by-the-numbers', 'vast_api_key'),
             raw=True)
+
+        yt_refresh_token = _access_secret_version('sps-by-the-numbers',
+                                                  'youtube_oauth')
+
+        hf_token = _access_secret_version('sps-by-the-numbers',
+                                          'huggingface')
 
         target_num_instances = max(1, int(num_new_videos / VIDS_PER_MACHINE))
 
@@ -98,7 +104,8 @@ def start_transcribe(
                 onstart_cmd=("env | grep _ >> /etc/environment; "
                              "nohup /workspace/app/onstart_hook.sh "
                              f"{int(cheapest['cpu_cores_effective'])} "
-                             "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 "
+                             f"{hf_token} "
+                             f"{yt_refresh_token} "
                              f"{lysine_timeout} 10 &"),
                 disk=DISK_GB,
                 args="",
