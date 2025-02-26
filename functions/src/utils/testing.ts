@@ -1,7 +1,8 @@
-import fetch from 'node-fetch';
-import * as fs from 'node:fs';
+import * as Constants from 'config/constants';
 import * as FirebaseUtils from 'utils/firebase';
-import sourceMapSupport from 'source-map-support'
+import * as fs from 'node:fs';
+import fetch from 'node-fetch';
+import sourceMapSupport from 'source-map-support';
 
 // Set up unique project id for these tests so they can't hit anything real.
 export const TEST_PROJECT_ID = 'fakeproject';
@@ -14,9 +15,20 @@ export const FAKE_AUTH_CODE = 'fake_auth';
 
 // One whisperX transcript. Note the stored file has a .xz extension but it is actually plaintext to avoid
 // needing to load the xz codec!
-export const DATA_WHISPERX_TRANSCRIPT = JSON.parse(fs.readFileSync(
-    "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz",
-    "utf-8"));
+function readFileIfTest(path: string) {
+  if (Constants.isProduction) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(path, "utf-8"));
+  } catch (e) {
+    return {};
+  }
+}
+
+export const DATA_WHISPERX_TRANSCRIPT = readFileIfTest(
+  "../testdata/testbucket/transcripts/public/testcategory/archive/whisperx/a95KMDHf4vQ.en.json.xz");
 
   // Fake metadata to use in test.
 export const DATA_METADATA = {
@@ -36,7 +48,8 @@ export function initializeFirebaseTesting() {
     process.env.FIREBASE_DATABASE_EMULATOR_HOST="127.0.0.1:9000"
     FirebaseUtils.initializeFirebase({
         projectId : TEST_PROJECT_ID,
-        databaseURL: "http://127.0.0.1:9000/?ns=sps-by-the-numbers-default-rtdb"
+        databaseURL: `http://127.0.0.1:9000/?ns=${TEST_PROJECT_ID}-default-rtdb`,
+        storageBucket: `${TEST_PROJECT_ID}.appspot.com`,
     });
     processInitialized = true;
   }

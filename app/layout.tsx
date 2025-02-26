@@ -1,31 +1,23 @@
 import * as Constants from 'config/constants'
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
+import MuiProviders from './MuiProviders';
 import Nav from 'components/Nav'
-import Providers from './providers';
+import NavStateProvider from 'components/providers/NavStateProvider'
 import Script from 'next/script'
 import { Metadata } from 'next'
 
 import '../styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: 'SPS By The Numbers - Transcriptions',
-  description: 'Public meeting transcriptions from SPS By The Numbers',
-}
+  title: Constants.APP_TITLE,
+  description: `Transcriptions of ${Object.entries(Constants.CATEGORY_CHANNEL_MAP).map(([k,info]) => info.name).join(', ')}`,
+};
 
-function getDevBanner() {
-  if (Constants.isProduction) {
-    return undefined;
-  }
-
-  return (<Alert variant="filled" severity="warning">Is Dev Mode</Alert>);
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: {children: React.ReactNode}) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -45,15 +37,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'GA_MEASUREMENT_ID');
           `}
         </Script>
-        <Providers>
+        <MuiProviders>
           <CssBaseline />
-          <InitColorSchemeScript />
-          { getDevBanner() }
-          <Nav />
-          <Box mx="4rex" mt="1ex" >
-            {children}
-          </Box>
-        </Providers>
+          <InitColorSchemeScript attribute="class"/>
+          <NavStateProvider>
+            <Nav />
+            <Box sx={{
+              marginTop: "0.5ex",
+              height: "100%",
+              maxWidth: "120ch",
+              marginX: 'auto',
+              }}>
+              {children}
+            </Box>
+          </NavStateProvider>
+        </MuiProviders>
       </body>
     </html>
   )

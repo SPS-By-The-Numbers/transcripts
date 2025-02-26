@@ -3,7 +3,7 @@ import { Innertube, YTNodes } from 'youtubei.js';
 
 let global_youtube : Innertube | null;
 
-type Video = YTNodes.CompactVideo | YTNodes.GridVideo | YTNodes.PlaylistPanelVideo | YTNodes.PlaylistVideo | YTNodes.ReelItem | YTNodes.Video | YTNodes.WatchCardCompactVideo;
+type Video = YTNodes.CompactVideo | YTNodes.GridVideo | YTNodes.PlaylistPanelVideo | YTNodes.PlaylistVideo | YTNodes.ReelItem | YTNodes.Video | YTNodes.WatchCardCompactVideo | YTNodes.ShortsLockupView;
 
 async function getYoutube() {
   if (!global_youtube) {

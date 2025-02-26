@@ -2,6 +2,8 @@
 
 import * as Constants from 'config/constants';
 
+import type { ApiResponse } from 'common/response';
+
 export function getEndpointUrl(endpoint : string, parameters? : Record<string,string> | object) {
   const urlRoot = `${Constants.ENDPOINTS[endpoint]}`;
   if (parameters !== undefined) {
@@ -11,7 +13,7 @@ export function getEndpointUrl(endpoint : string, parameters? : Record<string,st
   return urlRoot;
 }
 
-export async function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string> | object) {
+export async function fetchEndpoint(endpoint : string, method: string, parameters : Record<string,string> | object) : Promise<ApiResponse> {
   if (method === 'GET') {
     const fullUrl = getEndpointUrl(endpoint, <Record<string, string>>parameters);
     return await (await fetch(fullUrl, { next: { revalidate: 300 } } )).json();

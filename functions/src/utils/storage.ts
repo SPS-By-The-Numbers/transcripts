@@ -28,7 +28,7 @@ export class FirebaseAdminStorageAccessor implements StorageAccessor {
 
   readBytes(path: string) : Promise<ArrayBuffer> {
     return (async () => {
-      return (await this.bucket.file(path).download())[0];
+      return new Uint8Array((await this.bucket.file(path).download())[0]).buffer;
     })();
   }
 

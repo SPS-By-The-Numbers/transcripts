@@ -14,13 +14,29 @@ import type { AppOptions } from "firebase-admin/app";
 export { getDatabase } from "firebase-admin/database";
 export { UserRecord } from "firebase-admin/auth";
 
+function logReqRes(logFunc, header, req, res) {
+  logFunc(header, 'URL: ', req.originalUrl,
+          'Params: ', req.params,
+          'Body: ', req.body,
+          'Response Status: ', res.statusCode);
+}
+
 export function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
     try {
       return await func(req, res);
     } catch (e) {
-      console.log(e);
+      console.error("Exception: ", e);
       return res.status(500).send(makeResponseJson(false, "Exception"));
+    } finally {
+      const statusType = Math.trunc(res.statusCode/100);
+      if (statusType === 2) {
+        logReqRes(console.log, 'Success ', req, res);
+      } else if (statusType === 4) {
+        logReqRes(console.warn, 'Client error ', req, res);
+      } else {
+        logReqRes(console.error, 'Internal error ', req, res);
+      }
     }
   });
 }

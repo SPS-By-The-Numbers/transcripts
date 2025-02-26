@@ -19,14 +19,15 @@ async function setSpeakerInfo(req, res) {
   let user;
   try {
     user = await getUser(req.body?.auth);
-  } catch (error) {
+  } catch (e) {
+    console.error("User auth error: ", e);
     res.status(401).send(makeResponseJson(false, "Did you forget to login?"));
     return;
   }
 
   const category = req.body?.category;
   if (!category || category.length > 20) {
-    res.status(400).send(makeResponseJson(false, "Invalid Category"));
+    res.status(400).send(makeResponseJson(false, "Malformed Category"));
     return;
   }
 
@@ -86,7 +87,7 @@ async function setSpeakerInfo(req, res) {
     // by public.
     const txnId = `${(new Date).toISOString().split(".")[0]}Z`;
     const auditRef = privateRoot.child(`audit/${txnId}`);
-    console.error("User ", user);
+    console.log("User submitted: ", user);
     auditRef.set({
       name: "speakerinfo POST",
       headers: req.headers,
@@ -103,6 +104,10 @@ async function setSpeakerInfo(req, res) {
     const existingRef = publicRoot.child("existing");
     const existingOptions = (await existingRef.once("value")).val();
 
+    // Ensure the names and tags fields are populated.
+    existingOptions.names = existingOptions.names ?? {};
+    existingOptions.tags = existingOptions.tags ?? {};
+
     // Add new tags.
     let existingOptionsUpdated = false;
     for (const name of allNames) {
@@ -113,20 +118,22 @@ async function setSpeakerInfo(req, res) {
         existingOptionsUpdated = true;
       }
     }
+
     for (const tag of allTags) {
       if (!Object.prototype.hasOwnProperty.call(existingOptions.tags, tag)) {
         existingOptions.tags[tag] = txnId;
         existingOptionsUpdated = true;
       }
     }
+
     if (existingOptionsUpdated) {
       existingRef.set(existingOptions);
     }
 
     res.status(200).send(makeResponseJson(true, "success",
       {speakerInfo,
-        existingTags: Object.keys(existingOptions.tags),
-        existingNames: Object.keys(existingOptions.names)}));
+       existingTags: Object.keys(existingOptions.tags ?? {}),
+       existingNames: Object.keys(existingOptions.names ?? {})}));
   } catch (e) {
     console.error("Updating DB failed with: ", e);
     res.status(500).send(makeResponseJson(false, "Internal error"));

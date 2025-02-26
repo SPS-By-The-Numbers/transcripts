@@ -1,7 +1,10 @@
 import * as Constants from 'config/constants'
-import BoardMeeting from 'components/BoardMeeting'
-import SpeakerInfoProvider from 'components/SpeakerInfoProvider'
-import VideoControlContextProvider from 'components/VideoControlProvider'
+import ActionDialog from 'components/ActionDialog';
+import ActionDialogProvider from 'components/providers/ActionDialogProvider';
+import AnnotationsProvider from 'components/providers/AnnotationsProvider';
+import AuthProvider from 'components/providers/AuthProvider';
+import Transcript from 'components/Transcript'
+import VideoControlContextProvider from 'components/providers/VideoControlProvider'
 import { DiarizedTranscript } from "common/transcript"
 import { Metadata, ResolvingMetadata } from "next"
 import { SupportedLanguages } from 'common/languages';
@@ -23,13 +26,12 @@ export type VideoParams = {
 };
 
 type Props = {
-  params: VideoParams
-  searchParams: { [key: string]: string | string[] | undefined }
+    params: Promise<VideoParams>,
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>,
 };
 
-export async function generateMetadata(
-    { params, searchParams }: Props,
-    parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params;
 
   try {
     const videoMetadata = await getMetadata(params.category, params.videoId);
@@ -40,6 +42,7 @@ export async function generateMetadata(
     return {
       title: `Transcript of ${params.category} -  ${videoMetadata.title}`,
       description: `Transcript of ${params.category} - ${videoMetadata.title}`,
+      keywords: [params.category, "transcript"],
       openGraph: {
         images: `https://i.ytimg.com/vi/${params.videoId}/hqdefault.jpg`,
       },
@@ -52,7 +55,8 @@ export async function generateMetadata(
   }
 }
 
-export default async function Index({params}: {params: VideoParams}) {
+export default async function Index(props: {params: Promise<VideoParams>}) {
+  const params = await props.params;
   // Handle the legacy URL redirect.
   if (Constants.LEGACY_PREFIX_REDIRECT && params.videoId.length === 2) {
     // If this is a legacy url with a prefix like /v/AB/ABCD123 then 
@@ -91,17 +95,27 @@ export default async function Index({params}: {params: VideoParams}) {
     ]);
 
   return (
-    <SpeakerInfoProvider initialSpeakerInfo={ speakerControlInfo.speakerInfo }>
-      <VideoControlContextProvider>
-        <BoardMeeting
-            metadata={ metadata }
-            category={ params.category }
-            diarizedTranscript={ diarizedTranscript }
-            languageOrder={ languageOrder }
-            speakerInfo={ speakerControlInfo.speakerInfo }
-            initialExistingNames={ speakerControlInfo.existingNames }
-            initialExistingTags={ speakerControlInfo.existingTags } />
-      </VideoControlContextProvider>
-    </SpeakerInfoProvider>
+    <AuthProvider>
+      <AnnotationsProvider
+          category={params.category}
+          videoId={params.videoId}
+          initialSpeakerInfo={speakerControlInfo.speakerInfo}
+          initialExistingNames={speakerControlInfo.existingNames}
+          initialExistingTags={speakerControlInfo.existingTags}
+        >
+        <VideoControlContextProvider>
+          <ActionDialogProvider>
+            <ActionDialog />
+            <Transcript
+              metadata={ metadata }
+              category={ params.category }
+              diarizedTranscript={ diarizedTranscript }
+              languageOrder={ languageOrder }
+              speakerInfo={ speakerControlInfo.speakerInfo }
+            />
+          </ActionDialogProvider>
+        </VideoControlContextProvider>
+      </AnnotationsProvider>
+    </AuthProvider>
   );
 }

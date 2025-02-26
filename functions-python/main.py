@@ -69,12 +69,17 @@ def start_transcribe(
             return
 
         for _ in range(target_num_instances - len(running_transcribers)):
-            # Find an offer
+            # Find an offer. large-v3-turbe needs about 6GB VRAM so look for
+            # 8Gb.
+            #
+            # Also, the slowest portion is diarization which is fully CPU and
+            # parallelizable. More cores is much faster.
+            # https://github.com/openai/whisper
             offers_json = vast.search_offers(
                 storage=DISK_GB,
                 order="dph_total",
                 query=('cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=8 '
-                       'reliability>=0.95 dph<2 total_flops>=10'))
+                       'reliability>=0.95 dph<2'))
             cheapest = json.loads(offers_json)[0]
             print(f"cheapest ask id {cheapest['ask_contract_id']} cost "
                   f"{json.dumps(cheapest)}")
@@ -87,7 +92,7 @@ def start_transcribe(
             # Create the instance
             create_result = json.loads(vast.create_instance(
                 ID=cheapest["ask_contract_id"],
-                image="awongdev/transcribe:0.5",
+                image="awongdev/transcribe:latest",
                 label=INSTANCE_LABEL,
                 # Kill the server after 30 mins if it's still running.
                 onstart_cmd=("env | grep _ >> /etc/environment; "

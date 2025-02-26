@@ -1,8 +1,11 @@
 'use client'
  
-import { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useState, useMemo } from 'react';
 
-import type { VideoPlayerControl } from 'components/VideoPlayer';
+type VideoPlayerControl = {
+  jumpToTime: (hhmmss: string) => void;
+  setAutoscroll: (follow: boolean) => void;
+};
 
 type VideoControlContextType = {
   videoControl : VideoPlayerControl;
@@ -15,6 +18,7 @@ type VideoControlProviderParams = {
 
 const emptyVideoControl = {
   jumpToTime: (ts: string) => {},
+  setAutoscroll: (x: boolean) => {},
 };
 
 // Pattern from https://stackoverflow.com/a/74174425
@@ -26,7 +30,7 @@ export const VideoControlContext = createContext<VideoControlContextType>({
 export default function VideoControlContextProvider({children}: VideoControlProviderParams) {
   const [videoControl, setVideoControl] = useState<VideoPlayerControl>(emptyVideoControl);
 
-  const value = useMemo(() => ({ videoControl, setVideoControl }), [videoControl]);
+  const value = useMemo(() => ({videoControl, setVideoControl}), [videoControl]);
  
   return (
     <VideoControlContext.Provider value={value}>
