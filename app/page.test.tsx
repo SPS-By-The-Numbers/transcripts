@@ -1,34 +1,38 @@
 import Landing from './page';
 import { render, screen, RenderResult } from '@testing-library/react';
+import * as Constants from 'config/constants';
 import { fetchEndpoint } from 'utilities/client/endpoint';
 
 jest.mock('utilities/client/endpoint');
 
-const dummyMetadata =   {
-  "-95KMDHf4vQ": {
-    "_updated": "2024-09-12T08:56:14.419Z",
-    "channel_id": "UC07MVxpRKdDJmqwWDGYqotA",
-    "description": "Seattle Public Schools",
-    "publish_date": "2015-11-04T21:05:52-08:00",
-    "title": "School Board Meeting Date November 4th, 2015 Pt.2",
-    "video_id": "-95KMDHf4vQ"
-  },
-  "-MyMd2xOYdw": {
-    "_updated": "2024-10-15T08:03:00.594Z",
-    "channel_id": "UC07MVxpRKdDJmqwWDGYqotA",
-    "description": "Seattle Public Schools",
-    "publish_date": "2024-10-09T22:02:50-07:00",
-    "title": "Seattle Schools Board Meeting Oct. 9, 2024",
-    "video_id": "-MyMd2xOYdw"
-  },
-  "-PMPKQzkJYg": {
-    "_updated": "2024-09-12T08:56:14.043Z",
-    "channel_id": "UC07MVxpRKdDJmqwWDGYqotA",
-    "description": "Seattle Public Schools",
-    "publish_date": "2017-01-20T15:21:53-08:00",
-    "title": "School Board Meeting 1 18 2017 Part 2",
-    "video_id": "-PMPKQzkJYg"
-  },
+const dummyMetadata = [{
+  channelId: 'UC07MVxpRKdDJmqwWDGYqotA',
+  description: 'Seattle Public Schools',
+  publishDate: '2015-11-04T21:05:52-08:00',
+  title: 'School Board Meeting Date November 4th, 2015 Pt.2',
+  videoId: '-95KMDHf4vQ'
+}, {
+  channelId: 'UC07MVxpRKdDJmqwWDGYqotA',
+  description: 'Seattle Public Schools',
+  publishDate: '2024-10-09T22:02:50-07:00',
+  title: 'Seattle Schools Board Meeting Oct. 9, 2024',
+  videoId: '-MyMd2xOYdw'
+}, {
+  channelId: 'UC07MVxpRKdDJmqwWDGYqotA',
+  description: 'Seattle Public Schools',
+  publishDate: '2017-01-20T15:21:53-08:00',
+  title: 'School Board Meeting 1 18 2017 Part 2',
+  videoId: '-PMPKQzkJYg'
+}];
+
+// const dummyCategories = Constants.ALL_CATEGORIES.map(category => ({
+//   [category]: {...dummyMetadata}
+// }));
+
+const dummyResponse = {
+  ok: true,
+  message: 'success',
+  data: [...dummyMetadata]
 };
 
 async function renderServerFunctionComponent(
@@ -48,12 +52,12 @@ async function renderServerFunctionComponent(
 
 describe('Transcripts index page', () => {
   beforeEach(() => {
-    (fetchEndpoint as jest.MockedFunction<typeof fetchEndpoint>).mockResolvedValue({...dummyMetadata});
+    (fetchEndpoint as jest.MockedFunction<typeof fetchEndpoint>).mockResolvedValue({...dummyResponse});
   });
 
   it('renders', async () => {
     const Page = await Landing();
     await renderServerFunctionComponent(Page);
-    expect(screen.queryAllByRole('banner').length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole('heading').length).toBeGreaterThan(0);
   });
 });
