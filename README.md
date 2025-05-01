@@ -44,13 +44,31 @@ times.
 
 ## Getting started for development
 
-TODO: Document firebase setup
+### Firebase
+
+This site uses Firebase Functions. To run the functions locally, you need to install
+[Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite).
+
+Due to [some complications](functions/README.md), you need to build
+`functions/lib/index.js` first before starting the emulator.
+
+```bash
+cd functions
+npm install
+npm run build
+cd ..
+firebase emulators:start
+```
+
+### Start the frontend
 
 ```bash
 npm install
 npm run dev &
 npx tsc --watch
 ```
+
+The website must have "Dev Mode. Emulators used." banner on the top.
 
 Production site is [https://transcripts.sps-by-the-numbers.com/](https://transcripts.sps-by-the-numbers.com/)
 
