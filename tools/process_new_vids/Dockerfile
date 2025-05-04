@@ -1,3 +1,5 @@
+#syntax=docker/dockerfile:1.4
+
 FROM pytorch/pytorch
 
 WORKDIR /workspace/app

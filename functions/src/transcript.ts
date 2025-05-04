@@ -54,12 +54,14 @@ async function uploadTrancript(req, res) {
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
-  if (req.body.metadata && ! (await setMetadata(req.body.category, req.body.metadata))) {
-    console.log("Failed setting metadata: ", req.body.metadata);
-    res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
-    return;
-  } else {
+  if (!req.body.metadata) {
     console.warn("No metadata! May not be indexed!");
+  } else {
+    if (!(await setMetadata(req.body.category, req.body.metadata))) {
+      console.log("Failed setting metadata: ", req.body.metadata);
+      res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
+      return;
+    }
   }
 
   res.status(200).send(makeResponseJson(true, "update done"));
