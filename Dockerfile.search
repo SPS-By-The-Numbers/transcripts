@@ -1,61 +1,8 @@
-FROM node:lts
-
-# File locations.
-ARG SEARCH_DIR=/search
-ARG SEARCH_DB=${SEARCH_DIR}/data.ms
-ARG APP_DIR=/app
-ARG MASTER_KEY=masterKey
-
-#COPY /meili_data/dumps/20250120-081408619.dump /meili_data/dumps/latest.dump
-
-WORKDIR ${SEARCH_DIR}
-RUN <<EOF
-curl -L https://install.meilisearch.com | sh
-EOF
-
-WORKDIR ${APP_DIR}
-COPY package.json package-lock.json ${APP_DIR}
-
-RUN <<EOF
-npm install
-npm install -y tsx
-EOF
-
-COPY . ${APP_DIR}
-WORKDIR ${APP_DIR}
-
-# Load the dump and create the database while also initializing the keys.
-RUN <<EOF
-set -x
-nohup ${SEARCH_DIR}/meilisearch --db-path=$SEARCH_DB --master-key="$MASTER_KEY" &
-SEARCH_PID=$!
-
-# Wait until health check comes back witgh 200.
-until curl -X -f -o /dev/null "http://127.0.0.1:7700/health"
-do
-  sleep 1
-done
-
-# Register the key UID. The same (Master Key, UID) pair will generate the same key.
-until curl -X POST -H "Content-Type: application/json" --data-binary '{"name":"Transcript Front Search", "description":"Transcript Frontend Search Access", "uid": "fa82128d-a898-42ca-86eb-0e056195a111", "actions": ["search"], "indexes":["*"], "expiresAt": null}' -H "Authorization: Bearer $MASTER_KEY" -s -f -o /dev/null "http://127.0.0.1:7700/keys"
-do
-  sleep 1
-done
-
-# Recreate index
-npx tpx tools/search/setup.mts
-npx tpx tools/search/recreate_index.mts
-
-# Kill the meilisearch instance.
-kill -INT $SEARCH_PID
-EOF
-
-
 FROM getmeili/meilisearch:latest
 
 ARG SEARCH_DB
 
 ENTRYPOINT ["tini", "--"]
 EXPOSE 7700
-COPY --from=0 $SEARCH_DB /meili_data/data.ms
-CMD ["/bin/meilisearch", "--master-key=masterKey"]
+COPY tools/search/start_meilisearch.sh /
+CMD ["/start_meilisearch.sh"]
