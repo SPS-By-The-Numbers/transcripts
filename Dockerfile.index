@@ -1,0 +1,24 @@
+FROM node:lts
+
+# File locations.
+ENV SEARCH_DIR=/search
+ENV SEARCH_DB=${SEARCH_DIR}/data.ms
+ARG APP_DIR=/app
+
+#COPY /meili_data/dumps/20250120-081408619.dump /meili_data/dumps/latest.dump
+
+WORKDIR ${SEARCH_DIR}
+RUN <<EOF
+curl -L https://install.meilisearch.com | sh
+EOF
+
+WORKDIR ${APP_DIR}
+COPY package.json package-lock.json ${APP_DIR}
+
+RUN <<EOF
+npm install
+npm install -y tsx
+EOF
+
+COPY . ${APP_DIR}
+WORKDIR ${APP_DIR}
