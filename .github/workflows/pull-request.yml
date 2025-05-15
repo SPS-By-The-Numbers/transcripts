@@ -3,6 +3,7 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
+  packages: write
 
 jobs:
   build_and_test:
