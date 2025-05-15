@@ -1,7 +1,14 @@
 #! /bin/bash
 set -euo pipefail
 
-export MASTER_KEY=$(cat /run/secrets/meilisearch)
+master_key_path=/run/secrets/meilisearch
+if [[ ! -e "$master_key_path" ]]; then
+    echo "failed to find $master_key_path"
+    exit 1
+fi
+export MASTER_KEY=$(cat "$master_key_path")
+
+gcp_key_path=/run/secrets/gcp.json
 
 nohup ${SEARCH_DIR}/meilisearch --db-path=$SEARCH_DB --master-key="$MASTER_KEY" &
 SEARCH_PID=$!
@@ -22,7 +29,13 @@ done
 npx tsx tools/search/setup.mts
 npx tsx tools/search/recreate_index.mts
 
-ls -l $SEARCH_DB
+# For testing this image outside of Cloud Run.
+# On Cloud Run, we should use its service identity instead.
+if [[ -e $gcp_key_path ]]; then
+    gcloud auth activate-service-account "--key-file=$gcp_key_path"
+fi
+
+gcloud storage cp --project "$GCP_PROJECT_ID" --recursive "$SEARCH_DB" "gs://$GCP_BUCKET"
 
 # Kill the meilisearch instance.
 kill -INT $SEARCH_PID

@@ -1,4 +1,13 @@
-FROM node:lts
+# The base image is Google Cloud's CLI image, because adding Node on
+# this image would be slightly more straightforward than adding
+# the CLI to node image.
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:489.0.0-stable
+
+RUN <<EOF
+apt-get update
+apt-get install -y --no-install-recommends npm curl
+rm -rf /var/lib/apt/lists/*
+EOF
 
 # File locations.
 ENV SEARCH_DIR=/search
@@ -22,3 +31,5 @@ EOF
 
 COPY . ${APP_DIR}
 WORKDIR ${APP_DIR}
+
+ENTRYPOINT ["/app/tools/search/recreate_index.sh"]
