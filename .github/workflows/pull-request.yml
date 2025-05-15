@@ -54,4 +54,5 @@ jobs:
         with:
           file: Dockerfile.index
           push: true
-          tags: index
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
