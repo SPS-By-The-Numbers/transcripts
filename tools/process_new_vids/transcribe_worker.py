@@ -47,8 +47,9 @@ def get_description(video):
             'contents'][0]
 
         if 'videoMetadataRenderer' in contents:
-            return contents['videoMetadataRenderer']['description'][
-                'runs'][0]['text']
+            vmr = contents['videoMetadataRenderer']
+            if 'description' in vmr:
+                return vmr['description']['runs'][0]['text']
 
     return ""
 
@@ -92,9 +93,15 @@ def write_token_file(refresh_token):
 def process_vids(vid_list, args):
     # Setup the token file
     write_token_file(args.yt_token)
+    transcription_error_count = 0
 
     for category, video_id in vid_list:
         try:
+            if transcription_error_count > 3:
+                # Something is wedged. Stop here before burning more cpu.
+                logger.error("Too many errors in transcription. Bailing.")
+                break
+
             logger.info(f"Processing {category} {video_id}")
 
             # Mark us as starting work on this video. Failure okay as
@@ -128,6 +135,16 @@ def process_vids(vid_list, args):
                 max_retries=5,
                 skip_existing=args.cache)
 
+            # Create metadata struct early in case there are formatting issues.
+            # This way the script can abort before the expensive whipserx call.
+            metadata = {
+                'title': video.title,
+                'video_id': video.video_id,
+                'channel_id': video.channel_id,
+                'description': get_description(video),
+                'publish_date': video.publish_date.isoformat(),
+            }
+
             # Run whisper for transcription
             if not (args.cache and os.path.exists(whisper_out_filename)):
                 start = time.time()
@@ -149,14 +166,6 @@ def process_vids(vid_list, args):
                 logger.info("Whisper took: %d seconds" % (end - start))
 
             # Upload json transcript.
-            metadata = {
-                'title': video.title,
-                'video_id': video.video_id,
-                'channel_id': video.channel_id,
-                'description': get_description(video),
-                'publish_date': video.publish_date.isoformat(),
-            }
-
             with open(args.workdir.joinpath(f"{video_id}.json")) as f:
                 transcript_obj = json.load(f)
 
@@ -193,11 +202,11 @@ def process_vids(vid_list, args):
                 logger.error("Unable to delete queue item", response.json())
                 continue
         except Exception:
+            transcription_error_count += 1
             logger.exception("Transcribe failed for " + video_id)
             jitter_s = randint(2, 10)
             logger.info(f"Jittering by {jitter_s} seconds")
             sleep(jitter_s)
-
 
 
 def main():
