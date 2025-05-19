@@ -200,7 +200,7 @@ async function updateEntry(req, res) {
 }
 
 const video_queue = jsonOnRequest(
-  {cors: true, region: [Constants.GCP_REGION]},
+  {cors: true, region: [Constants.GCP_REGION], memory: "512MiB"},
   async (req, res) => {
     if (req.method === "GET") {
       return getVideoQueue(req, res);
