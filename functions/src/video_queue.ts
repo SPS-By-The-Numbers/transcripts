@@ -53,7 +53,7 @@ async function findNewVideos(req, res) {
       }
     }
 
-    console.log(`${category} adding ${new_video_ids}`);
+    console.log(`${category} adding ${Object.keys(new_video_ids)}`);
 
     all_new_vid_ids.push(...Object.keys(new_video_ids));
     getCategoryPrivateDb(category).child("new_vids").update(new_video_ids);
