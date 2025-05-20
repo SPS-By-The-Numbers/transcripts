@@ -3,6 +3,7 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
+  packages: write
 
 jobs:
   build_and_test:
@@ -34,14 +35,3 @@ jobs:
           file: Dockerfile.search
           push: false
           tags: search
-
-  build-index:
-    name: Build index
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile.index
-          push: false
-          tags: index

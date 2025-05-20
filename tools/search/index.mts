@@ -19,7 +19,10 @@ async function insertDocs(category: CategoryId,
   console.log(`Indexing ${documents.length} docs`);
   const index = getIndex(category, categoryLang);
 
-  const task = await index.addDocuments(documents)
+  const task = await index.addDocuments(documents, {
+    // documents have both "id" and "videoId" and the former is our primary ley.
+    primaryKey: 'id'
+  });
   const result = await index.waitForTask(task.taskUid);
   console.log(result);
 }
