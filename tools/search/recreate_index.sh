@@ -1,11 +1,14 @@
-#! /bin/bash
+#! /bin/sh
 set -euo pipefail
 
 # gcp_key_path is for testing this image outside of Cloud Run.
 # On Cloud Run, permissions are granted via the service account of the job.
 gcp_key_path=/run/secrets/gcp.json
-if [[ -e "$gcp_key_path" ]]; then
+if [ -e "$gcp_key_path" ]; then
     gcloud auth activate-service-account "--key-file=$gcp_key_path"
+else
+  export CLOUDSDK_AUTH_ACCESS_TOKEN=$(curl -s -H "Metadata-Flavor: Google" \
+    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" | jq -r .access_token)
 fi
 
 # Make sure the bucket is accessible, before starting the indexing process.
@@ -16,7 +19,7 @@ gcloud storage ls "gs://$GCP_BUCKET"
 # https://www.meilisearch.com/docs/learn/security/basic_security#creating-the-master-key-in-a-self-hosted-instance
 export MASTER_KEY='MEILI-9133dcf0-d6d9-4d24-a217-ae68fdb04475'
 
-nohup ${SEARCH_DIR}/meilisearch --db-path=$SEARCH_DB --master-key="$MASTER_KEY" &
+nohup /usr/local/bin/meilisearch --db-path=$SEARCH_DB --master-key="$MASTER_KEY" &
 SEARCH_PID=$!
 
 # Wait until health check comes back with 200.
