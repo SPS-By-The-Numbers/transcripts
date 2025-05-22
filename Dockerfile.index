@@ -1,25 +1,26 @@
-# The base image is Google Cloud's CLI image, because adding Node on
-# this image would be slightly more straightforward than adding
-# the CLI to node image.
-FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:489.0.0-stable
+FROM getmeili/meilisearch:v1.14 AS meilisearch
+
+FROM node:24-alpine
+
+# Take mailisearch from getmeili/meilisearch.
+COPY --from=meilisearch /bin/meilisearch /usr/local/bin/meilisearch
+
+# Install Google Cloud CLI.
+ARG GOOGLE_CLOUD_CLI_VERSION=522.0.0
 
 RUN <<EOF
-apt-get update
-apt-get install -y --no-install-recommends npm curl
-rm -rf /var/lib/apt/lists/*
+apk add --no-cache python3 curl jq
+curl --silent https://storage.googleapis.com/cloud-sdk-release/google-cloud-cli-${GOOGLE_CLOUD_CLI_VERSION}-linux-x86_64.tar.gz | tar zxf - -C /opt
+/opt/google-cloud-sdk/install.sh --quiet
 EOF
 
 # File locations.
+ENV PATH="/opt/google-cloud-sdk/bin:$PATH"
 ENV SEARCH_DIR=/search
 ENV SEARCH_DB=${SEARCH_DIR}/data.ms
 ARG APP_DIR=/app
 
 #COPY /meili_data/dumps/20250120-081408619.dump /meili_data/dumps/latest.dump
-
-WORKDIR ${SEARCH_DIR}
-RUN <<EOF
-curl -L https://install.meilisearch.com | sh
-EOF
 
 WORKDIR ${APP_DIR}
 COPY package.json package-lock.json ${APP_DIR}
