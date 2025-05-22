@@ -60,9 +60,21 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/search
       - uses: actions/checkout@v4
       - uses: docker/build-push-action@v6
+        id: build
         with:
           file: Dockerfile.search
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - uses: google-github-actions/auth@v2
+        with:
+          project_id: sps-by-the-numbers
+          workload_identity_provider: projects/319988578351/locations/global/workloadIdentityPools/github/providers/github-oidc
+          service_account: github-action-716919134@sps-by-the-numbers.iam.gserviceaccount.com
+      - uses: google-github-actions/deploy-cloudrun@v2
+        if: github.event_name == 'push'
+        with:
+          service: meilisearch-staging
+          image: us-west1-docker.pkg.dev/sps-by-the-numbers/ghcr/sps-by-the-numbers/search@${{ steps.build.outputs.digest }}
+          region: us-west1
 
