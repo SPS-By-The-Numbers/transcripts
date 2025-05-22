@@ -14,12 +14,7 @@ fi
 # Make sure the bucket is accessible, before starting the indexing process.
 gcloud storage ls "gs://$GCP_BUCKET"
 
-# This key is for testing.
-# The key must be at least 16 bytes long.
-# https://www.meilisearch.com/docs/learn/security/basic_security#creating-the-master-key-in-a-self-hosted-instance
-export MASTER_KEY='MEILI-9133dcf0-d6d9-4d24-a217-ae68fdb04475'
-
-nohup /usr/local/bin/meilisearch --db-path=$SEARCH_DB --master-key="$MASTER_KEY" &
+nohup /usr/local/bin/meilisearch --db-path=$SEARCH_DB --master-key="$MEILISEARCH_MASTER_KEY" &
 SEARCH_PID=$!
 
 # Wait until health check comes back with 200.
