@@ -1,6 +1,16 @@
-FROM getmeili/meilisearch:latest
+FROM getmeili/meilisearch:v1.14
 
-ARG SEARCH_DB
+ARG GOOGLE_CLOUD_CLI_VERSION=522.0.0
+
+RUN <<EOF
+apk add --no-cache python3
+curl --silent https://storage.googleapis.com/cloud-sdk-release/google-cloud-cli-${GOOGLE_CLOUD_CLI_VERSION}-linux-x86_64.tar.gz | tar zxf - -C /opt
+/opt/google-cloud-sdk/install.sh --quiet
+EOF
+
+ENV PATH="/opt/google-cloud-sdk/bin:$PATH"
+ENV SEARCH_DIR=/search
+ENV SEARCH_DB=${SEARCH_DIR}/data.ms
 
 ENTRYPOINT ["tini", "--"]
 EXPOSE 7700
