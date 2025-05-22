@@ -43,7 +43,6 @@ jobs:
           job: meilisearch-index
           image: us-west1-docker.pkg.dev/sps-by-the-numbers/ghcr/sps-by-the-numbers/index@${{ steps.build.outputs.digest }}
           region: us-west1
-          labels: ${{ steps.meta.outputs.labels }}
 
   build-search:
     name: Build search
