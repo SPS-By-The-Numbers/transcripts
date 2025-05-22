@@ -3,7 +3,7 @@ FROM getmeili/meilisearch:v1.14
 ARG GOOGLE_CLOUD_CLI_VERSION=522.0.0
 
 RUN <<EOF
-apk add --no-cache python3
+apk add --no-cache python3 jq
 curl --silent https://storage.googleapis.com/cloud-sdk-release/google-cloud-cli-${GOOGLE_CLOUD_CLI_VERSION}-linux-x86_64.tar.gz | tar zxf - -C /opt
 /opt/google-cloud-sdk/install.sh --quiet
 EOF
