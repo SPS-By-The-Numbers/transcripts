@@ -1,7 +1,7 @@
 'use client'
 
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
