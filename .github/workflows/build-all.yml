@@ -79,16 +79,17 @@ jobs:
       #- run: npm --prefix functions run build
       #- run: npm --prefix functions test
 
-      - name: Deploy Functions
-        if: ${{ inputs.deploy-functions != '' }}
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          NODE_ENV: 'production'
-        run: |
-          pushd functions-python
-          . venv/bin/activate
-          python3 -m pip install -r requirements.txt
-          popd
-          rm -rf functions/lib
-          npm --prefix functions run build
-          npm --prefix functions run deploy -- --token $FIREBASE_TOKEN -P "${{ inputs.deploy-functions }}"
+      # Disabled for now.  Something is weird with python venv lookups in firebase tools.
+      #- name: Deploy Functions
+      #  if: ${{ inputs.deploy-functions != '' }}
+      #  env:
+      #    FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      #    NODE_ENV: 'production'
+      #  run: |
+      #    pushd functions-python
+      #    . venv/bin/activate
+      #    python3 -m pip install -r requirements.txt
+      #    popd
+      #    rm -rf functions/lib
+      #    npm --prefix functions run build
+      #    npm --prefix functions run deploy -- --token $FIREBASE_TOKEN -P "${{ inputs.deploy-functions }}"
