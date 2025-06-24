@@ -81,8 +81,8 @@ export const FIREBASE_CLIENT_CONFIG = {
 export const RECAPTCHA_KEY = '6LfukwApAAAAAOysCMfJontBc36O2vly91NWpip8';
 
 // API key for read-only meilisearch.
-export const MEILI_KEY = 'fcb72b464bc4d53e1e6b69a315607874daf5e9880b5f41c1bda96a4172dc3518'; 
-export const MEILI_ENDPOINT = isProduction ? makeEndpointUri('meilisearch') : 'http://127.0.0.1:7700';
+export const MEILI_KEY = 'ceaaeef5ae0cbdac9f4476016a2cbcba8d61a6dcd09c9387482dac79992daaa9';
+export const MEILI_ENDPOINT = isProduction ? makeEndpointUri('meilisearch-staging') : 'http://127.0.0.1:7700';
 
 // Generate URLs for use in fetch() calls based on envrionment type.
 const ENDPOINT_NAMES = [
