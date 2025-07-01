@@ -13,7 +13,14 @@ EOF
 
 RUN <<EOF
   pip install whisperx==3.4.2
-  pip install ctranslate2==4.6.0  # HACKHACK: This technically is incompatible with whisper 3.4.2 but it also removes the cudnn8 dependency.
+
+  # HACKHACK: This technically is incompatible with whisper 3.4.2 but it also removes the cudnn8 dependency.
+  pip install ctranslate2==4.6.0
+
+  # HACKHACK: Another internally inconsistent dependency in whisper 3.4.2 through mathplotlib.
+  pip install python-dateutil==3.7
+
+  # Needed to get shared libraries working right for whisper 3.4.2 on pytorch 2.7.1 docker.
   pip install nvidia-cublas-cu12==12.9.1.4 
   CUDNN_PATH=$(dirname $(find / -name 'libcudnn.so.*' | head -1))
   CUBLAS_PATH=$(dirname $(find / -name 'libcublas.so.*' | head -1))

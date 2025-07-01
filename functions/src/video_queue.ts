@@ -34,33 +34,42 @@ async function getVideoQueue(req, res) {
 
 async function findNewVideos(req, res) {
   const all_new_vid_ids = new Array<string>;
+  const all_queued_videos = new Array<string>;
   const add_ts = new Date();
 
   let limit = 0;
   // Can be empty in test and initial bootstrap.
   for (const category of Constants.ALL_CATEGORIES) {
-    const metadata_ref = getCategoryPublicDb(category, "metadata");
-    const metadata_snapshot = await metadata_ref.once("value");
-    const new_video_ids = {};
+    console.log(`Scraping ${category}`);
+    try {
+      const metadata_ref = getCategoryPublicDb(category, "metadata");
+      const metadata_snapshot = await metadata_ref.once("value");
+      const new_video_ids = {};
 
-    for (const vid of await getVideosForCategory(category)) {
-      if (req.body.limit && ++limit > req.body.limit) {
-        break;
+      for (const vid of await getVideosForCategory(category)) {
+        if (req.body.limit && ++limit > req.body.limit) {
+          break;
+        }
+
+        if ('id' in vid && (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists())) {
+          new_video_ids[vid.id] = {add: add_ts, lease_expires: "", vast_instance: ""};
+        }
       }
 
-      if ('id' in vid && (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists())) {
-        new_video_ids[vid.id] = {add: add_ts, lease_expires: "", vast_instance: ""};
-      }
+      console.log(`${category} adding ${Object.keys(new_video_ids)}`);
+
+      all_new_vid_ids.push(...Object.keys(new_video_ids));
+      await getCategoryPrivateDb(category).child("new_vids").update(new_video_ids);
+    } catch (e) {
+      console.error(`Failed youtube scrape for ${category} ${e}`);
     }
 
-    console.log(`${category} adding ${Object.keys(new_video_ids)}`);
-
-    all_new_vid_ids.push(...Object.keys(new_video_ids));
-    getCategoryPrivateDb(category).child("new_vids").update(new_video_ids);
+    all_queued_videos.push(...Object.keys((await getCategoryPrivateDb(category).child("new_vids").once("value")).val()));
   }
 
+
   // If there are new video ids. Wake up the trasncription jobs.
-  if (all_new_vid_ids) {
+  if (all_queued_videos) {
     await getPubSubClient().topic("start_transcribe").publishMessage({data: Buffer.from("boo!")});
   }
 
