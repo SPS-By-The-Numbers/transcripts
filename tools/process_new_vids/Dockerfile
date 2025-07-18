@@ -28,8 +28,8 @@ RUN <<EOF
 EOF
 
 # Use int8 compute type just to make whisperx always complete at this step.
-RUN <<EOF
-  whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token=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 --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
+RUN --mount=type=secret,id=HF_TOKEN <<EOF
+  whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token=$(cat /run/secrets/HF_TOKEN) --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 
 RUN pip install vastai==0.3.1
@@ -38,9 +38,11 @@ COPY requirements.txt /workspace/app/
 RUN pip install -r requirements.txt
 
 RUN <<EOF
+apt clean
 apt-get -y install curl unzip
 curl -fsSL https://fnm.vercel.app/install | bash
 ~/.local/share/fnm/fnm install --lts
+apt clean
 EOF
 
 COPY transcribe_worker.py lysine_protocol.sh onstart_hook.sh /workspace/app/
