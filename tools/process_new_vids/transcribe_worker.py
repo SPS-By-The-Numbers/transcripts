@@ -6,6 +6,7 @@ from random import randint
 from time import sleep
 
 import argparse
+from datetime import datetime
 import json
 import os
 import pathlib
@@ -14,6 +15,7 @@ import requests
 import subprocess
 import logging
 import time
+
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +129,24 @@ def process_vids(vid_list, args):
             video = YouTube(f"https://www.youtube.com/watch?v={video_id}",
                             use_oauth=True, allow_oauth_cache=True,
                             token_file=YT_TOKEN_FILE)
+
+            # Create metadata struct early in case there are formatting issues.
+            # This way the script can abort before the youtube scrapes of
+            # expensive whipserx calls.
+            publish_date = video.publish_date
+            if publish_date is None:
+                # If publish date scraping breaks for some reasons...which
+                # randomly happens for months... use now.
+                publish_date = datetime.now()
+
+            metadata = {
+                'title': video.title,
+                'video_id': video.video_id,
+                'channel_id': video.channel_id,
+                'description': get_description(video),
+                'publish_date': publish_date.isoformat(),
+            }
+
             audio_streams = video.streams.filter(
                 only_audio=True).order_by('abr')
             audio_streams.first().download(
@@ -134,16 +154,6 @@ def process_vids(vid_list, args):
                 filename=outfile_name,
                 max_retries=5,
                 skip_existing=args.cache)
-
-            # Create metadata struct early in case there are formatting issues.
-            # This way the script can abort before the expensive whipserx call.
-            metadata = {
-                'title': video.title,
-                'video_id': video.video_id,
-                'channel_id': video.channel_id,
-                'description': get_description(video),
-                'publish_date': video.publish_date.isoformat(),
-            }
 
             # Run whisper for transcription
             if not (args.cache and os.path.exists(whisper_out_filename)):
