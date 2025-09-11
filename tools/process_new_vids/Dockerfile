@@ -24,7 +24,7 @@ RUN <<EOF
   pip install nvidia-cublas-cu12==12.9.1.4 
   CUDNN_PATH=$(dirname $(find / -name 'libcudnn.so.*' | head -1))
   CUBLAS_PATH=$(dirname $(find / -name 'libcublas.so.*' | head -1))
-  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:\${LD_LIBRARY_PATH}" >> /root/.bashrc
+  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" >> /root/.bashrc
 EOF
 
 # Use int8 compute type just to make whisperx always complete at this step.

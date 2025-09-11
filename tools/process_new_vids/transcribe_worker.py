@@ -36,24 +36,31 @@ def get_description(video):
     from the videoMetadata field except it looks for description.
     """
 
-    if video.description is not None:
-        return video.description
+    try:
+        if video.description is not None:
+            return video.description
+    except Exception as e:
+        # Just fall through to backup.
+        logger.debug("Primary description parsing failed: ", e)
+        pass
 
-    if 'singleColumnWatchNextResults' in video.vid_details['contents']:
-        contents = video.vid_details['contents'][
-            'singleColumnWatchNextResults'][
-            'results'][
-            'results'][
-            'contents'][0][
-            'itemSectionRenderer'][
-            'contents'][0]
+    try:
+        if 'singleColumnWatchNextResults' in video.vid_details['contents']:
+            contents = video.vid_details['contents'][
+                'singleColumnWatchNextResults'][
+                'results'][
+                'results'][
+                'contents'][0][
+                'itemSectionRenderer'][
+                'contents'][0]
 
-        if 'videoMetadataRenderer' in contents:
-            vmr = contents['videoMetadataRenderer']
-            if 'description' in vmr:
-                return vmr['description']['runs'][0]['text']
-
-    return ""
+            if 'videoMetadataRenderer' in contents:
+                vmr = contents['videoMetadataRenderer']
+                if 'description' in vmr:
+                    return vmr['description']['runs'][0]['text']
+    except Exception as e:
+        logger.warning("Unable to generate description ", e)
+        return ""
 
 
 def make_endpoint_url(endpoint):
