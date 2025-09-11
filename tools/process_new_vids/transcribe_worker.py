@@ -28,7 +28,7 @@ AUTH_PARAMS = {
 }
 
 
-def get_description(video):
+def raw_get_description(video):
     """Scrape out description from the video metadata or return null.
 
     Sometimes the video description is not in video_info. This happens with
@@ -44,20 +44,27 @@ def get_description(video):
         logger.debug("Primary description parsing failed: ", e)
         pass
 
-    try:
-        if 'singleColumnWatchNextResults' in video.vid_details['contents']:
-            contents = video.vid_details['contents'][
-                'singleColumnWatchNextResults'][
-                'results'][
-                'results'][
-                'contents'][0][
-                'itemSectionRenderer'][
-                'contents'][0]
+    if 'singleColumnWatchNextResults' in video.vid_details['contents']:
+        contents = video.vid_details['contents'][
+            'singleColumnWatchNextResults'][
+            'results'][
+            'results'][
+            'contents'][0][
+            'itemSectionRenderer'][
+            'contents'][0]
 
-            if 'videoMetadataRenderer' in contents:
-                vmr = contents['videoMetadataRenderer']
-                if 'description' in vmr:
-                    return vmr['description']['runs'][0]['text']
+        if 'videoMetadataRenderer' in contents:
+            vmr = contents['videoMetadataRenderer']
+            if 'description' in vmr:
+                return vmr['description']['runs'][0]['text']
+
+
+def get_description(video):
+    try:
+        description = raw_get_description(video)
+        if description is None:
+            logger.warning("No description")
+            return ""
     except Exception as e:
         logger.warning("Unable to generate description ", e)
         return ""
