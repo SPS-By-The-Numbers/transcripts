@@ -179,6 +179,7 @@ def process_vids(vid_list, args):
                     f"--model={args.model}",
                     f"--compute_type={args.compute_type}",
                     "--language=en",
+                    "--initial_prompt='Avoid all capitals. Common names: Gina Topp, Michelle Sarju. Liza Rankin. Tanya Woo.'",
                     f"--thread={args.threads}",
                     f"--hf_token={args.hf_token}",
                     "--diarize",
@@ -233,6 +234,16 @@ def process_vids(vid_list, args):
             sleep(jitter_s)
 
 
+def process_category(category, videos, args):
+    logger.info(f"Found {len(videos)} videos")
+    logger.debug(videos)
+
+    vids_to_process = [(category, v) for v in videos]
+    if args.shuffle:
+        random.shuffle(vids_to_process)
+    process_vids(vids_to_process, args)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='WhisperX transcription worker.',
@@ -272,16 +283,15 @@ def main():
 
     args = parser.parse_args()
     init_app(args)
-    vid_list = [(category_tuple[0], vid) for category_tuple
-                in get_vid_list().items() for vid in category_tuple[1]]
 
-    # Poorman race reduction between workers.
-    if args.shuffle:
-        random.shuffle(vid_list)
-    logger.info(f"Found {len(vid_list)} videos")
-    logger.debug(vid_list)
+    vid_list = get_vid_list()
 
-    process_vids(vid_list, args)
+    # Do SPS First
+    process_category('sps-board', vid_list['sps-board'], args)
+    for (category, vids) in vid_list.items():
+        if category == 'sps-board':
+            continue
+        process_category(category, vids, args)
 
 
 if __name__ == "__main__":

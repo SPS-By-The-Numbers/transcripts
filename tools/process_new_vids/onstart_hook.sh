@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ~/.bashrc
+source /workspace/app/cuda_path
 
 export PATH=${HOME}/.local/share/fnm:$PATH
 
@@ -14,9 +14,6 @@ cd /workspace/app
 
 # Always get the latest pytubefix cause youtube is always changing.
 pip install pytubefix --upgrade
-
-# HACKHACK: See Dockerfile for corresponding line. Somehow that doesn't propogate here.
-pip install python-dateutil==2.7
 
 # Do transcription
 python transcribe_worker.py -w /tmp/transcribe -t "${1:-4}" -x "$2" -y "$3" -m large-v3-turbo -c -s

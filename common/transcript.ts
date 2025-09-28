@@ -104,6 +104,7 @@ export class DiarizedTranscript {
     // Wait for everything.
     const [transcriptDataResult, ...sentenceTableResult] = await Promise.allSettled(loadPromises);
 
+    console.log("Raeding from " + videoId, transcriptDataResult);
     if (transcriptDataResult.status === 'rejected') {
       return new DiarizedTranscript(category, videoId, EMPTY_TRASCRIPT_DATA, {},
           ["Cannout load transcript Data"]);

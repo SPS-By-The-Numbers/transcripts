@@ -18,13 +18,14 @@ RUN <<EOF
   pip install ctranslate2==4.6.0
 
   # HACKHACK: Another internally inconsistent dependency in whisper 3.4.2 through mathplotlib.
-  pip install python-dateutil==3.7
+  pip install python-dateutil==2.7
 
   # Needed to get shared libraries working right for whisper 3.4.2 on pytorch 2.7.1 docker.
   pip install nvidia-cublas-cu12==12.9.1.4 
   CUDNN_PATH=$(dirname $(find / -name 'libcudnn.so.*' | head -1))
   CUBLAS_PATH=$(dirname $(find / -name 'libcublas.so.*' | head -1))
-  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" >> /root/.bashrc
+  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" > /workplace/app/cuda_path
+  echo "source /workspace/app/cuda_path" >> /root/.bashrc
 EOF
 
 # Use int8 compute type just to make whisperx always complete at this step.
@@ -39,7 +40,7 @@ RUN pip install -r requirements.txt
 
 RUN <<EOF
 apt clean
-apt-get -y install curl unzip
+apt-get -y install curl unzip vim
 curl -fsSL https://fnm.vercel.app/install | bash
 ~/.local/share/fnm/fnm install --lts
 apt clean
