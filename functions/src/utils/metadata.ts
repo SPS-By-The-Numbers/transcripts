@@ -31,7 +31,9 @@ function metadataToVideoMetadata(entry: StoredMetadata): VideoMetadata {
 }
 
 export function makePublishedIndexKey(metadata : StoredMetadata) {
-  return `${metadata.publish_date};${metadata.video_id}`;
+  // The DB path cannot handle a period so drop fractional seconds.
+  const publishDateSecondsOnly = metadata.publish_date.split('.')[0];
+  return `${publishDateSecondsOnly};${metadata.video_id}`;
 }
 
 export function splitPublishedIndexKey(key : string) : [Date, VideoId] {

@@ -15,6 +15,9 @@ cd /workspace/app
 # Always get the latest pytubefix cause youtube is always changing.
 pip install pytubefix --upgrade
 
+## HACK HACK. This shouldn't be need3d since it's done in the Dockerfile.
+pip install python-dateutil==2.7
+
 # Do transcription
 python transcribe_worker.py -w /tmp/transcribe -t "${1:-4}" -x "$2" -y "$3" -m large-v3-turbo -c -s
 

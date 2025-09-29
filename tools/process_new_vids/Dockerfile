@@ -24,7 +24,7 @@ RUN <<EOF
   pip install nvidia-cublas-cu12==12.9.1.4 
   CUDNN_PATH=$(dirname $(find / -name 'libcudnn.so.*' | head -1))
   CUBLAS_PATH=$(dirname $(find / -name 'libcublas.so.*' | head -1))
-  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" > /workplace/app/cuda_path
+  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" > /workspace/app/cuda_path
   echo "source /workspace/app/cuda_path" >> /root/.bashrc
 EOF
 
