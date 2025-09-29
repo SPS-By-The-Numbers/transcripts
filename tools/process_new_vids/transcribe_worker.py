@@ -179,7 +179,7 @@ def process_vids(vid_list, args):
                     f"--model={args.model}",
                     f"--compute_type={args.compute_type}",
                     "--language=en",
-                    "--initial_prompt='Avoid all capitals. Common names: Gina Topp, Michelle Sarju. Liza Rankin. Tanya Woo.'",
+                    "--initial_prompt='Avoid using all capitals'",
                     f"--thread={args.threads}",
                     f"--hf_token={args.hf_token}",
                     "--diarize",
