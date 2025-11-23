@@ -30,6 +30,8 @@ EOF
 
 # Use int8 compute type just to make whisperx always complete at this step.
 RUN --mount=type=secret,id=HF_TOKEN <<EOF
+  pip install --upgrade transformers
+  pip install tokenizers
   whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token=$(cat /run/secrets/HF_TOKEN) --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 

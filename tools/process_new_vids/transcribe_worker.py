@@ -6,7 +6,6 @@ from random import randint
 from time import sleep
 
 import argparse
-from datetime import datetime
 import json
 import os
 import pathlib
@@ -26,48 +25,6 @@ AUTH_PARAMS = {
     'user_id': os.environ['CONTAINER_ID'],
     'auth_code': os.environ['API_PASSWORD'],
 }
-
-
-def raw_get_description(video):
-    """Scrape out description from the video metadata or return null.
-
-    Sometimes the video description is not in video_info. This happens with
-    title too. The below is a copy/paste of the code for finding the title
-    from the videoMetadata field except it looks for description.
-    """
-
-    try:
-        if video.description is not None:
-            return video.description
-    except Exception as e:
-        # Just fall through to backup.
-        logger.debug("Primary description parsing failed: ", e)
-        pass
-
-    if 'singleColumnWatchNextResults' in video.vid_details['contents']:
-        contents = video.vid_details['contents'][
-            'singleColumnWatchNextResults'][
-            'results'][
-            'results'][
-            'contents'][0][
-            'itemSectionRenderer'][
-            'contents'][0]
-
-        if 'videoMetadataRenderer' in contents:
-            vmr = contents['videoMetadataRenderer']
-            if 'description' in vmr:
-                return vmr['description']['runs'][0]['text']
-
-
-def get_description(video):
-    try:
-        description = raw_get_description(video)
-        if description is None:
-            logger.warning("No description")
-            return ""
-    except Exception as e:
-        logger.warning("Unable to generate description ", e)
-        return ""
 
 
 def make_endpoint_url(endpoint):
@@ -144,23 +101,6 @@ def process_vids(vid_list, args):
                             use_oauth=True, allow_oauth_cache=True,
                             token_file=YT_TOKEN_FILE)
 
-            # Create metadata struct early in case there are formatting issues.
-            # This way the script can abort before the youtube scrapes of
-            # expensive whipserx calls.
-            publish_date = video.publish_date
-            if publish_date is None:
-                # If publish date scraping breaks for some reasons...which
-                # randomly happens for months... use now.
-                publish_date = datetime.now()
-
-            metadata = {
-                'title': video.title,
-                'video_id': video.video_id,
-                'channel_id': video.channel_id,
-                'description': get_description(video),
-                'publish_date': publish_date.isoformat(),
-            }
-
             audio_streams = video.streams.filter(
                 only_audio=True).order_by('abr')
             audio_streams.first().download(
@@ -200,7 +140,6 @@ def process_vids(vid_list, args):
                 'category': category,
                 'transcripts': {transcript_obj["language"]:
                                 transcript_obj},
-                'metadata': metadata,
                 'video_id': video_id
             })
             response = requests.put(
@@ -210,7 +149,6 @@ def process_vids(vid_list, args):
                     'category': category,
                     'transcripts': {transcript_obj["language"]:
                                     transcript_obj},
-                    'metadata': metadata,
                     'video_id': video_id
                 })
 

@@ -1,4 +1,5 @@
 import { getCategoryPublicDb } from 'utils/firebase';
+import { getVideo } from "../youtube";
 import { parseISO } from 'date-fns';
 
 import type { CategoryId, VideoId, VideoMetadata } from 'common/params';
@@ -45,6 +46,32 @@ export function splitPublishedIndexKey(key : string) : [Date, VideoId] {
 export async function indexMetadata(category : CategoryId, metadata : StoredMetadata) {
   console.log("Writing index for ", metadata.video_id);
   getCategoryPublicDb(category, PUBLISHED_INDEX_PATH, makePublishedIndexKey(metadata)).set(metadata);
+}
+
+export async function unindexMetadata(category : CategoryId, metadata : StoredMetadata) {
+  console.log("Writing index for ", metadata.video_id);
+  getCategoryPublicDb(category, PUBLISHED_INDEX_PATH, makePublishedIndexKey(metadata)).remove();
+}
+
+function getPublishDate(videoInfo) {
+  const dateString = videoInfo.primary_info?.published?.text;
+  if (dateString === undefined) {
+    return new Date();
+  }
+  return new Date(dateString);
+}
+
+export async function scrapeMetadata(videoId : VideoId) : Promise<StoredMetadata> {
+  const videoInfo = await getVideo(videoId);
+  const metadata = {
+    video_id: videoId,
+    channel_id: videoInfo.basic_info.channel?.url ?? "",
+    title: videoInfo.basic_info.title ?? "missing title",
+    description: videoInfo.secondary_info?.description?.text ?? videoInfo.basic_info.short_description ?? "missing description",
+    publish_date: getPublishDate(videoInfo).toISOString(),
+  }
+
+  return metadata;
 }
 
 export async function setMetadata(category : CategoryId, m: StoredMetadata) {

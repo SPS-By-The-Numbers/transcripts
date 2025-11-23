@@ -1,2 +1,2 @@
 requests
-pytubefix @ git+https://github.com/JuanBindez/pytubefix@71401b44045b1d92420cd6140554000533028e6f
+pytubefix==10.3.5

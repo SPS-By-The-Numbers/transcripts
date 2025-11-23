@@ -2,8 +2,8 @@ import * as Constants from 'config/constants';
 import langs from 'langs';
 import { DiarizedTranscript } from 'common/transcript';
 import { getAuthCode, jsonOnRequest } from './utils/firebase';
-import { setMetadata } from './utils/metadata';
 import { getStorageAccessor } from './utils/storage';
+import { scrapeMetadata, setMetadata } from './utils/metadata';
 import { makeResponseJson } from './utils/response';
 import { validateObj } from './utils/validation';
 
@@ -11,6 +11,14 @@ import type { WhisperXTranscript } from 'common/whisperx';
 import type { Iso6393Code, VideoId } from 'common/params';
 
 const LANGUAGES = new Set<Iso6393Code>(["eng"]);
+
+async function ensureMetadata(req, videoId) {
+  // If there is a manually constructed metadata, just send it.
+  if (req.body.metadata) {
+    return req.body.metadata;
+  }
+  return await scrapeMetadata(videoId);
+}
 
 async function uploadTrancript(req, res) {
   const authCodeErrors = validateObj(req.body, 'authCodeParam');
@@ -35,6 +43,7 @@ async function uploadTrancript(req, res) {
     return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
 
+  const videoId = req.body.video_id;
   const transcripts = req.body.transcripts || {};
   for (const iso6391Lang of Object.keys(transcripts)) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
@@ -47,21 +56,19 @@ async function uploadTrancript(req, res) {
 
   for (const [iso6391Lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
-    console.log("Saved video: ", req.body.video_id, " language: ", lang);
+    console.log("Saved video: ", videoId, " language: ", lang);
     const diarizedTranscript = await DiarizedTranscript.fromWhisperX(
-        req.body.category, req.body.video_id, whisperXTranscript);
+        req.body.category, videoId, whisperXTranscript);
     diarizedTranscript.writeSentenceTable(getStorageAccessor(), lang);
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
-  if (!req.body.metadata) {
-    console.warn("No metadata! May not be indexed!");
-  } else {
-    if (!(await setMetadata(req.body.category, req.body.metadata))) {
-      console.log("Failed setting metadata: ", req.body.metadata);
-      res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
-      return;
-    }
+  const metadata = await ensureMetadata(req, videoId);
+
+  if (!(await setMetadata(req.body.category, metadata))) {
+    console.log("Failed setting metadata: ", metadata);
+    res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
+    return;
   }
 
   res.status(200).send(makeResponseJson(true, "update done"));

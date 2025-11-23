@@ -47,7 +47,7 @@ async function findNewVideos(req, res) {
       const new_video_ids = {};
 
       for (const vid of await getVideosForCategory(category)) {
-        if (req.body.limit && ++limit > req.body.limit) {
+        if (req.body?.limit && ++limit > req.body.limit) {
           break;
         }
 

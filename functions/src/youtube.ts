@@ -1,5 +1,8 @@
 import * as Constants from 'config/constants';
-import { Innertube, YTNodes } from 'youtubei.js';
+import { Innertube } from 'youtubei.js';
+
+import type { YTNodes } from 'youtubei.js';
+import type { VideoId } from "common/params";
 
 let global_youtube : Innertube | null;
 
@@ -10,6 +13,11 @@ async function getYoutube() {
     global_youtube = await Innertube.create({generate_session_locally: true});
   }
   return global_youtube;
+}
+
+export async function getVideo(videoId : VideoId) {
+  const youtube = await getYoutube();
+  return await youtube.getInfo(videoId);
 }
 
 export async function getVideosForCategory(category : string) : Promise<Video[]> {

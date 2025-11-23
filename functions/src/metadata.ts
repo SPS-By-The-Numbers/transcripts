@@ -1,13 +1,13 @@
 import * as Constants from 'config/constants';
 import { decodeDate } from 'common/params';
 import { getCategoryPublicDb, jsonOnRequest } from "./utils/firebase";
-import { getMatchingMetdata, setMetadata } from "./utils/metadata";
+import { getMatchingMetdata, setMetadata, scrapeMetadata, unindexMetadata } from "./utils/metadata";
 import { makeResponseJson } from "./utils/response";
 import { sanitizeCategory } from "./utils/path";
 import { validateObj } from './utils/validation';
 
-import type { CategoryId, VideoId, VideoMetadata } from "common/params";
-import type { MatchOptions } from "./utils/metadata";
+import type { CategoryId, VideoId } from "common/params";
+import type { StoredMetadata, MatchOptions } from "./utils/metadata";
 
 async function getMetadata(req, res) {
   const category = sanitizeCategory(req.query.category);
@@ -63,7 +63,35 @@ async function replaceMetadata(req, res) {
   return res.status(200).send(makeResponseJson(true, "ok"));
 }
 
-async function getMetadataForVideo(category: CategoryId, videoId: VideoId) : Promise<VideoMetadata> {
+async function rescrapeMetadata(req, res) {
+  const authCodeErrors = validateObj(req.body, 'authCodeParam');
+  if (authCodeErrors.length) {
+    return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
+  }
+
+  const requestErrors = validateObj(req.body, 'scrapeMetadataRequest');
+  if (requestErrors.length) {
+    console.log("Failed validation: ", requestErrors);
+    return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
+  }
+
+  const videoId = req.body.video_id;
+  const category = req.body.category;
+
+  const oldMetadata = await getMetadataForVideo(category, videoId);
+  if (!oldMetadata) {
+    return res.status(404).send(makeResponseJson(false, `Could not find ${videoId} in ${category}`));
+  }
+
+  const newMetadata = await scrapeMetadata(videoId);
+
+  console.log(`Redoing metadata for ${category} ${videoId}, ${newMetadata.title} ${newMetadata.publish_date}`)
+  await unindexMetadata(category, oldMetadata)
+  await setMetadata(category, newMetadata)
+  return res.status(200).send(makeResponseJson(true, "ok"));
+}
+
+async function getMetadataForVideo(category: CategoryId, videoId: VideoId) : Promise<StoredMetadata> {
   return (await getCategoryPublicDb(category, 'metadata', videoId).once("value")).val();
 }
 
@@ -74,6 +102,8 @@ export const metadata = jsonOnRequest(
       return getMetadata(req, res);
     } else if (req.method === "POST") {
       return replaceMetadata(req, res);
+    } else if (req.method === "PUT") {
+      return rescrapeMetadata(req, res);
     }
 
     return res.status(405).send(makeResponseJson(false, "Method Not Allowed"));

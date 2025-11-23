@@ -112,6 +112,16 @@ export const Schemas = {
     },
   },
 
+  scrapeMetadataRequest : {
+    type: "object",
+    required: [ "category", "video_id" ],
+
+    properties: {
+      category: { "$ref": "category" },
+      video_id: { "$ref": "videoId" },
+    },
+  },
+
   // TODO: Remove these.
   reqCategory: {
     type: "object",
