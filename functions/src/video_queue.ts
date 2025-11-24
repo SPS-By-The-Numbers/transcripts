@@ -64,7 +64,7 @@ async function findNewVideos(req, res) {
       console.error(`Failed youtube scrape for ${category} ${e}`);
     }
 
-    all_queued_videos.push(...Object.keys((await getCategoryPrivateDb(category).child("new_vids").once("value")).val()));
+    all_queued_videos.push(...Object.keys((await getCategoryPrivateDb(category).child("new_vids").once("value")).val() ?? {}));
   }
 
 
