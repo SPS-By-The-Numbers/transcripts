@@ -88,7 +88,7 @@ async function rescrapeMetadata(req, res) {
   console.log(`Redoing metadata for ${category} ${videoId}, ${newMetadata.title} ${newMetadata.publish_date}`)
   await unindexMetadata(category, oldMetadata)
   await setMetadata(category, newMetadata)
-  return res.status(200).send(makeResponseJson(true, "ok"));
+  return res.status(200).send(makeResponseJson(true, "ok", {oldMetadata, newMetadata}));
 }
 
 async function getMetadataForVideo(category: CategoryId, videoId: VideoId) : Promise<StoredMetadata> {
@@ -96,7 +96,7 @@ async function getMetadataForVideo(category: CategoryId, videoId: VideoId) : Pro
 }
 
 export const metadata = jsonOnRequest(
-  {cors: true, region: [Constants.GCP_REGION]},
+  {cors: true, region: [Constants.GCP_REGION], memory: "512MiB"},
   async (req, res) => {
     if (req.method === "GET") {
       return getMetadata(req, res);

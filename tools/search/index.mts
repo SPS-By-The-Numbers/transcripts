@@ -1,6 +1,6 @@
 import { DiarizedTranscript } from 'common/transcript';
 import { FirebaseWebClientStorageAccessor } from 'utilities/client/storage';
-import { getIndex } from './client.mts';
+import { getIndex, waitForTask } from './client.mts';
 import { getSpeakerControlInfo, getSpeakerAttributes } from 'utilities/client/speaker';
 
 import type { CategoryId, VideoId, VideoMetadata } from 'common/params';
@@ -23,7 +23,7 @@ async function insertDocs(category: CategoryId,
     // documents have both "id" and "videoId" and the former is our primary ley.
     primaryKey: 'id'
   });
-  const result = await index.waitForTask(task.taskUid);
+  const result = await waitForTask(task);
   console.log(result);
 }
 

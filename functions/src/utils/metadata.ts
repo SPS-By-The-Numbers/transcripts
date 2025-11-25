@@ -63,6 +63,7 @@ function getPublishDate(videoInfo) {
 
 export async function scrapeMetadata(videoId : VideoId) : Promise<StoredMetadata> {
   const videoInfo = await getVideo(videoId);
+  console.log(videoInfo.basic_info)
   const metadata = {
     video_id: videoId,
     channel_id: videoInfo.basic_info.channel?.url ?? "",
