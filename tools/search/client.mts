@@ -8,9 +8,6 @@ export const client = new MeiliSearch({
   apiKey: process.env.MEILISEARCH_MASTER_KEY,
 });
 
-export async function waitForTask(task) {
-  await client.waitForTask(task.taskUid);
-}
 export function getIndexName(category: CategoryId, lang: Iso6393Code) {
   return`${category}-${lang}`;
 }
@@ -20,12 +17,10 @@ export function getIndex(category: CategoryId, lang: Iso6393Code) {
 }
 
 export async function deleteIndex(category: CategoryId, lang: Iso6393Code) {
-  const task = await client.deleteIndex(getIndexName(category, lang));
-  await waitForTask(task);
+  await client.deleteIndex(getIndexName(category, lang)).waitTask();
 }
 
 export async function createIndex(category: CategoryId, lang: Iso6393Code) {
-  const task = await client.createIndex(getIndexName(category, lang), {primaryKey: 'id'});
-  await waitForTask(task);
+  await client.createIndex(getIndexName(category, lang), {primaryKey: 'id'}).waitTask();
 }
 
