@@ -23,7 +23,6 @@ async function insertDocs(category: CategoryId,
     // documents have both "id" and "videoId" and the former is our primary ley.
     primaryKey: 'id'
   }).waitTask();
-  console.log(result);
 }
 
 function makeId(videoId, start) {
