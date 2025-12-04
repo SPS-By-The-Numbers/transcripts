@@ -1,3 +1,5 @@
+'use client';
+
 import * as Constants from 'config/constants';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
