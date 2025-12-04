@@ -8,7 +8,8 @@
     "build": "next build",
     "deploy": "firebase deploy --only hosting:transcripts-spsbtn",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "syncData": "bash syncdata.sh",
     "setupFirebase": "firebase target:apply hosting transcripts transcripts-sps-by-the-numbers",
     "start": "next start",
@@ -60,6 +61,8 @@
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
     "@types/bcryptjs": "^3.0.0",
