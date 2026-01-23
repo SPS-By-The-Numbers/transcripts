@@ -331,7 +331,7 @@ function toSentences(speaker : SpeakerId, firstId : number, words : string[], wo
 
 function tsvToSentenceTable(tsv : string) : SentenceTable {
   const sentenceTableRows : [string, string][] =
-    parse(tsv, { delimiter: '\t', trim: true });
+    parse(tsv, { delimiter: '\t', trim: true }) as [string, string][];
   const sentenceTable : SentenceTable = {};
   sentenceTableRows.forEach(row => sentenceTable[row[0]] = row[1]);
   return sentenceTable;
