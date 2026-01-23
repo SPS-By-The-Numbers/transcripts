@@ -61,8 +61,20 @@ function getPublishDate(videoInfo) {
   return new Date(dateString);
 }
 
+async function getVideoWithRetry(videoId) {
+  let videoInfo = await getVideo(videoId);
+  let count = 0;
+  while (count < 3 && videoId.basic_info.title === undefined) {
+    count++;
+    // Sometimes there's a race condition here. Wait 250ms and then scrap again.
+    await (new Promise(resolve => setTimeout(resolve, 500)));
+    videoInfo = await getVideo(videoId);
+  }
+  return videoInfo;
+}
+
 export async function scrapeMetadata(videoId : VideoId) : Promise<StoredMetadata> {
-  const videoInfo = await getVideo(videoId);
+  const videoInfo = await getVideoWithRetry(videoId);
   console.log(videoInfo.basic_info)
   const metadata = {
     video_id: videoId,
