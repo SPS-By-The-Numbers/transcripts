@@ -36,15 +36,17 @@ def start_transcribe(
         event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
     """Start the vast.ai instance which queries the new videos"""
 
+    logger.info("start_transcribe event", event)
+
     # See if there are videos
     num_new_videos = 0
     for category in ["sps-board", "seattle-city-council"]:
-        print(f"Examining video queue for in {category}")
+        logger.info(f"Examining video queue for in {category}")
         new_vids_queue = db.reference(
             f"/transcripts/private/{category}/new_vids").get(False, True)
 
         if new_vids_queue:
-            print(f"Found {len(new_vids_queue)} videos for {category}")
+            logger.info(f"Found {len(new_vids_queue)} videos for {category}")
             num_new_videos = num_new_videos + len(new_vids_queue)
 
     # If there are any entries, ensure a vast.ai instance is running.
@@ -70,7 +72,7 @@ def start_transcribe(
         running_transcribers = [
             x for x in all_instances if x.get('label') == INSTANCE_LABEL]
         if len(running_transcribers) >= target_num_instances:
-            print("Instances already running "
+            logger.warn("Instances already running "
                   f"{repr([x['id'] for x in running_transcribers])}.")
             return
 
@@ -87,13 +89,15 @@ def start_transcribe(
                 query=('cpu_cores_effective>=10 cpu_ram>=32 gpu_total_ram>=10 '
                        'reliability>=0.95 dph<2'))
             cheapest = json.loads(offers_json)[0]
-            print(f"cheapest ask id {cheapest['ask_contract_id']} cost "
+            logger.info(f"cheapest ask id {cheapest['ask_contract_id']} cost "
                   f"{json.dumps(cheapest)}")
 
             # Create a password for the instance to use with our REST API.
             instance_password = secrets.token_urlsafe(16)
             start_time = datetime.datetime.now(
                 datetime.UTC).strftime("%Y%m%dT%H%M%S.%fZ")
+
+            logger.info(f"Starting instance")
 
             # Create the instance
             create_result = json.loads(vast.create_instance(
@@ -115,15 +119,17 @@ def start_transcribe(
                      f"API_PASSWORD={instance_password} "
                      "-e API_BASE_URL=rdcihhc4la-uw.a.run.app")))
 
+            logger.info(f"create_result {json.dumps(create_result)}")
+
             if create_result['success']:
-                print(f"Created instance {create_result['new_contract']}")
+                logger.info(f"Created instance {create_result['new_contract']}")
                 db.reference(f"/transcripts/private/_admin/vast/"
                              f"{create_result['new_contract']}").set({
                                  'password': instance_password,
                                  'start': start_time,
                              })
             else:
-                print(f"frailed {json.dumps(create_result)}")
+                logger.error(f"failed {json.dumps(create_result)}")
 
 
 @pubsub_fn.on_message_published(topic="stop_transcribe_instance",
@@ -138,8 +144,9 @@ def stop_transcribe_instance(
     but this can be overrided with the stale_s parameter in the message.
     """
     params = event.data.message.json
-    logger.info("params", params)
+    logger.info("stop_transcript_instance event", event)
     instances_to_remove = {i for i in params["instance_ids"]}
+    logger.info("request contained instances to remove:", instances_to_remove)
 
     vast = VastAI(
         _access_secret_version('sps-by-the-numbers', 'vast_api_key'),
@@ -152,7 +159,7 @@ def stop_transcribe_instance(
             "label": x["label"],
         }
         for x in json.loads(vast.show_instances())}
-    logger.info("current", current_instances)
+    logger.info("currently active instances:", current_instances)
 
     to_destroy = []
     for instance_id, info in current_instances.items():
@@ -162,11 +169,14 @@ def stop_transcribe_instance(
         if (params.get('remove_stale', False) and
                 info['label'] == INSTANCE_LABEL and
                 info['duration'] > INSTANCE_STALE_S):
+            logger.warn(f"Instance {instance_id} is stale after "
+                  f"{info['duration']}s with status {info['actual_status']}")
             to_destroy.append(instance_id)
 
     if len(to_destroy) == 0:
-        logger.info("Nothing to destory")
+        logger.info("Nothing to destroy")
         return
 
-    logger.info("destroying", to_destroy)
-    logger.info(vast.destroy_instances(ids=to_destroy))
+    logger.warn("destroying these instances:", to_destroy)
+    logger.warn(vast.destroy_instances(ids=to_destroy))
+    logger.warn("done destroying instances")
