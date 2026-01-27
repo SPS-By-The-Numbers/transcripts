@@ -46,7 +46,11 @@ export function makeWhisperXTranscriptsPath(
     category: CategoryId,
     videoId: VideoId,
     language: Iso6393Code): string {
-  const iso6391Code = langs.where('3', language)['1'];
+  const iso6391Code = langs.where('3', language)?.['1'];
+  if (!iso6391Code) {
+    throw new Error(`Unsupported language code: ${language}`);
+  }
+
   return makePublicPath(
       category,
       Constants.WHISPERX_ARCHIVE_SUBDIR,
