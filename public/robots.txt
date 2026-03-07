@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: 
+Sitemap: https://transcripts.sps-by-the-numbers.com/sitemap.xml

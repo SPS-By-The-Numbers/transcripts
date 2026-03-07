@@ -13,7 +13,7 @@ type SiteMapEntry = {
 };
 
 function buildUrl(relativePath): string {
-  return `${Constants.SITE_ROOT_URL}/${relativePath}`;
+  return `${Constants.SITE_ROOT_URL}${relativePath}`;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
