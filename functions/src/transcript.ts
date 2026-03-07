@@ -21,6 +21,7 @@ async function ensureMetadata(req, videoId) {
 }
 
 async function uploadTrancript(req, res) {
+  console.log("Verifying auth");
   const authCodeErrors = validateObj(req.body, 'authCodeParam');
   if (authCodeErrors.length) {
     return res.status(401).send(makeResponseJson(false, authCodeErrors.join(', ')));
@@ -32,6 +33,7 @@ async function uploadTrancript(req, res) {
   }
 
   // Check request to ensure it looks like valid JSON request.
+  console.log("Verifying request format");
   if (req.headers["content-type"] !== "application/json") {
     res.status(400).send(makeResponseJson(false, "Expects JSON"));
     return;
@@ -43,6 +45,7 @@ async function uploadTrancript(req, res) {
     return res.status(400).send(makeResponseJson(false, requestErrors.join(', ')));
   }
 
+  console.log("Verifying languages");
   const videoId = req.body.video_id;
   const transcripts = req.body.transcripts || {};
   for (const iso6391Lang of Object.keys(transcripts)) {
@@ -54,6 +57,7 @@ async function uploadTrancript(req, res) {
     }
   }
 
+  console.log("Writing transcript");
   for (const [iso6391Lang, whisperXTranscript] of Object.entries(transcripts) as [Iso6393Code, WhisperXTranscript][]) {
     const lang : Iso6393Code = langs.where('1', iso6391Lang)['3'];
     console.log("Saved video: ", videoId, " language: ", lang);
@@ -63,14 +67,17 @@ async function uploadTrancript(req, res) {
     diarizedTranscript.writeDiarizedTranscript(getStorageAccessor());
   }
 
+  console.log("Getting metadata");
   const metadata = await ensureMetadata(req, videoId);
 
+  console.log("Setting metadata");
   if (!(await setMetadata(req.body.category, metadata))) {
     console.log("Failed setting metadata: ", metadata);
     res.status(500).send(makeResponseJson(false, "Unable to set metadata"));
     return;
   }
 
+  console.log("Done");
   res.status(200).send(makeResponseJson(true, "update done"));
 }
 

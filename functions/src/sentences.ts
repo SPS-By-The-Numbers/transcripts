@@ -58,7 +58,7 @@ export const sentences = jsonOnRequest(
         res.status(400).send(makeResponseJson(false, `invalid lang ${lang}`));
         return;
       }
-      console.log("Translating to ", lang, " as ", targetLang);
+      console.log(`Translating ${videoId} to ${lang} as ${targetLang}`);
       translatePromises.push(translateStrings(origSentences, targetLang));
     }
     const translateResults = await Promise.all(translatePromises);
@@ -107,6 +107,7 @@ async function translateStrings(
   }
 
   const allRequests = new Array<any>;
+  console.log(`Translation: Issuing ${batches.length} translate requests`);
   for (const batch of batches) {
     const request = {
       contents: batch,
