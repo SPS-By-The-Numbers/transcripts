@@ -67,7 +67,7 @@ export const STORAGE_BUCKET = "sps-by-the-numbers.appspot.com";
 
 // Firebase configuration for web clients. This data is public.
 export const FIREBASE_CLIENT_CONFIG = {
-  apiKey: "AIzaSyD30a3gVbP-7PgTvTqCjW4xx-GlLMBQ5Ns",
+  apiKey: "AIzaSyDN7oBGINczK2mosHWdpDRCCl1AMjFrV4k",
   authDomain: "sps-by-the-numbers.firebaseapp.com",
   databaseURL: "https://sps-by-the-numbers-default-rtdb.firebaseio.com",
   projectId: "sps-by-the-numbers",

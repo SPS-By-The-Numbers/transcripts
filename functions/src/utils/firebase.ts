@@ -24,6 +24,9 @@ function logReqRes(logFunc, header, req, res) {
 export function jsonOnRequest(options : object, func) {
   return onRequest(options, async (req, res) => {
     try {
+      if ((req as any).url === '/robots.txt') {
+        return res.status(200).send("User-agent: *\nDisallow: /\n");
+      }
       return await func(req, res);
     } catch (e) {
       console.error("Exception: ", e);
