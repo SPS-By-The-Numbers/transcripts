@@ -1,10 +1,15 @@
 // Converts seconds into a classname with the timestamp that can be searched for.
 // TODO: consider using seconds only.
 export function toTimeClassName(seconds) {
-    if (seconds) {
-        return `ts-${toHhmmss(seconds)}`;
-    }
-    return '';
+  if (seconds) {
+    return `ts-${toHhmmss(seconds)}`;
+  }
+  return '';
+}
+
+export function fromTimeClassName(str) {
+  const splits = str.split('-');
+  return fromHhmmss(splits[1]);
 }
 
 export function toHhmmss(seconds: number) {
@@ -12,8 +17,8 @@ export function toHhmmss(seconds: number) {
 }
 
 export function fromHhmmss(hhmmss: string): number {
-    const parts = hhmmss.split(':');
-    return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
+  const parts = hhmmss.split(':');
+  return Number(parts[2]) + (Number(parts[1]) * 60) + (Number(parts[0]) * 60 * 60);
 }
 
 export function toSpeakerColorClass(speakerNum: number) {

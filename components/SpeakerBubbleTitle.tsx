@@ -13,9 +13,24 @@ import { useContext } from 'react'
 
 type SpeakerBubbleTitleParams = {
   speakerNum : number;
+  start: number;
+  end: number;
 };
 
-export default function SpeakerBubbleTitle({speakerNum} : SpeakerBubbleTitleParams) {
+function formatTime(totalSeconds : number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (totalSeconds < 60) {
+  return `${seconds.toFixed(0)}s`;
+  }
+
+  // Format as MM:SS
+  return `${String(minutes)}m${String(seconds.toFixed(0)).padStart(2, '0')}s`
+}
+
+export default function SpeakerBubbleTitle({speakerNum, start, end} : SpeakerBubbleTitleParams) {
+  const durationSecs = end - start;
   const annotationsContext = useAnnotations();
   const { name, tags } = getSpeakerAttributes(speakerNum,
                                               annotationsContext.speakerInfo);
@@ -47,6 +62,12 @@ export default function SpeakerBubbleTitle({speakerNum} : SpeakerBubbleTitlePara
           })
         }
       </Stack>
+      <Box sx={{
+          flex: "0 0 auto",
+          maxWidth: "45%"
+        }}>
+        <Typography className="d" data-timing={`${start}-${end}`} variant="body2">[{formatTime(durationSecs)}]</Typography>
+      </Box>
       <Box>
         <Typography>
           <IconButton

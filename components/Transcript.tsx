@@ -54,17 +54,25 @@ export default function Transcript({
   // Merge all segments from the same speaker to produce speaking divs.
   const speakerBubbles = diarizedTranscript.groupSentenceInfoBySpeaker().map((bubble, i) => {
     speakerNums.add(bubble.speaker);
+    let bubbleStart = Number.MAX_VALUE;
+    let bubbleEnd = 0;
+    const sentenceElements = new Array<ReactNode>;
+    for (const si of bubble.sentenceInfo) {
+      const [segmentId, speakerId, start, end] = si;
+      bubbleStart = Math.min(bubbleStart, start);
+      bubbleEnd = Math.max(bubbleEnd, end);
+
+      sentenceElements.push(
+        <p key={ `${i}-${segmentId}` }
+          className={ toTimeClassName(start) }>
+          { textLines( segmentId, languageOrder, diarizedTranscript) }
+        </p>
+      );
+    }
 
     return (
-      <SpeakerBubble key={i} speakerNum={ bubble.speaker }>
-        {
-          bubble.sentenceInfo.map(([segmentId, speakerId, start]) => (
-            <p key={ `${i}-${segmentId}` }
-              className={ toTimeClassName(start) }>
-              { textLines( segmentId, languageOrder, diarizedTranscript) }
-            </p>
-          ))
-        }
+      <SpeakerBubble key={i} speakerNum={ bubble.speaker } start={bubbleStart} end={bubbleEnd}>
+        {sentenceElements}
       </SpeakerBubble>
     );
   });

@@ -4,13 +4,15 @@ import { toSpeakerColorClass } from 'utilities/client/css';
 
 type SpeakerBubbleParams = {
   speakerNum : number;
+  start: number;
+  end: number;
   children: React.ReactNode[];
 };
 
-export default function SpeakerBubble({speakerNum, children} : SpeakerBubbleParams) {
+export default function SpeakerBubble({speakerNum, start, end, children} : SpeakerBubbleParams) {
   return (
     <Paper component="article" className={`b ${toSpeakerColorClass(speakerNum)}`}>
-      <SpeakerBubbleTitle speakerNum={speakerNum} />
+      <SpeakerBubbleTitle speakerNum={speakerNum} start={start} end={end} />
       { children }
     </Paper>
   );
