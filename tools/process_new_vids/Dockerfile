@@ -1,6 +1,6 @@
 #syntax=docker/dockerfile:1.4
 
-FROM pytorch/pytorch:2.7.1-cuda11.8-cudnn9-runtime
+FROM pytorch/pytorch:2.10.0-cuda13.0-cudnn9-runtime
 
 WORKDIR /workspace/app
 COPY prime_model.mp4 /workspace/app/
@@ -8,44 +8,35 @@ COPY prime_model.mp4 /workspace/app/
 # Install all the programs and setup the paths.
 RUN <<EOF
   apt-get -y update
-  apt-get -y install git ffmpeg
+  apt-get -y install git ffmpeg libavutil-dev python3.12-venv vim curl unzip
+  apt clean
+
+  mkdir -p /workspace/venv
+  mkdir -p /workspace/tmp
 EOF
 
 RUN <<EOF
-  pip install whisperx==3.4.2
+  python -m venv /workspace/venv/whisperx
+  source /workspace/whisperx/bin/activate
+  pip install whisperx==3.8.2
 
-  # HACKHACK: This technically is incompatible with whisper 3.4.2 but it also removes the cudnn8 dependency.
-  pip install ctranslate2==4.6.0
-
-  # HACKHACK: Another internally inconsistent dependency in whisper 3.4.2 through mathplotlib.
-  pip install python-dateutil==2.7
-
-  # Needed to get shared libraries working right for whisper 3.4.2 on pytorch 2.7.1 docker.
-  pip install nvidia-cublas-cu12==12.9.1.4 
-  CUDNN_PATH=$(dirname $(find / -name 'libcudnn.so.*' | head -1))
-  CUBLAS_PATH=$(dirname $(find / -name 'libcublas.so.*' | head -1))
-  echo "export LD_LIBRARY_PATH=${CUDNN_PATH}:${CUBLAS_PATH}:${LD_LIBRARY_PATH}" > /workspace/app/cuda_path
-  echo "source /workspace/app/cuda_path" >> /root/.bashrc
-EOF
-
+# Download models into image.
 # Use int8 compute type just to make whisperx always complete at this step.
 RUN --mount=type=secret,id=HF_TOKEN <<EOF
-  pip install --upgrade transformers
-  pip install tokenizers
+  source /workspace/venv/whisperx/bin/activate
   whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token=$(cat /run/secrets/HF_TOKEN) --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 
-RUN pip install vastai==0.3.1
+RUN <<EOF
+  python -m venv /workspace/venv/vast
+  source /workspace/venv/vast/bin/activate
+  pip install vastai==0.5.0
+EOF
 
 COPY requirements.txt /workspace/app/
-RUN pip install -r requirements.txt
-
 RUN <<EOF
-apt clean
-apt-get -y install curl unzip vim
-curl -fsSL https://fnm.vercel.app/install | bash
-~/.local/share/fnm/fnm install --lts
-apt clean
+  source /workspace/venv/whisperx/bin/activate
+  pip install -r requirements.txt
 EOF
 
 COPY transcribe_worker.py lysine_protocol.sh onstart_hook.sh /workspace/app/

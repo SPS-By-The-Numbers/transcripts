@@ -1,2 +1,1 @@
 requests
-pytubefix==10.3.5

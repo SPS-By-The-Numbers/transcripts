@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Stops the container if it's been runnig for too long.
+source /workspace/venv/vast/bin/activate
+
+# Stops the container if it's been running for too long.
 
 # Sleep for 2 hours.
 sleep $((${1:-120} * 60))

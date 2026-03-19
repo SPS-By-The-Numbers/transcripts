@@ -1,11 +1,7 @@
 #!python
 
-from pytubefix import YouTube
-
-from random import randint
-from time import sleep
-
 import argparse
+import datetime
 import json
 import os
 import pathlib
@@ -14,17 +10,41 @@ import requests
 import subprocess
 import logging
 import time
+import yt_dlp
 
 
 logger = logging.getLogger(__name__)
 
-YT_TOKEN_FILE = './yt_token.json'
-
-WORKING_DIR = '/tmp/workspace/app/transcribe'
 AUTH_PARAMS = {
     'user_id': os.environ['CONTAINER_ID'],
     'auth_code': os.environ['API_PASSWORD'],
 }
+
+
+def download_audio(vid_id):
+    """
+    Downloads a video using yt-dlp with specific options.
+    """
+    info_dict = {}
+    filename = ""
+
+    def progress_hook(d):
+        nonlocal info_dict
+        nonlocal filename
+        if d['status'] == 'finished':
+            filename = d['filename']
+            info_dict = d['info_dict']
+
+    ydl_opts = {
+        'format': 'bestaudio',
+        'outtmpl': '/workspace/tmp/%(id)s.%(ext)s',  # Output filename template
+        'progress_hooks': [progress_hook],
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([vid_id])
+    logger.info(f"Downloaded to {filename}")
+    return (filename, info_dict)
 
 
 def make_endpoint_url(endpoint):
@@ -51,21 +71,14 @@ def get_vid_list():
     return response.json()['data']
 
 
-def write_token_file(refresh_token):
-    token_data = {
-        "access_token": "dummy",
-        "refresh_token": refresh_token,
-        "expires": 0,
-        "visitorData": None,
-        "po_token": None}
-
-    with open(YT_TOKEN_FILE, "w") as f:
-        json.dump(token_data, f)
+def get_publish_date(vid_info):
+    upload_date = vid_info.get('upload_date', '')
+    if upload_date:
+        return datetime.datetime.strptime(upload_date, "%Y%m%d").isoformat()
+    return datetime.now().isoformat()
 
 
 def process_vids(vid_list, args):
-    # Setup the token file
-    write_token_file(args.yt_token)
     transcription_error_count = 0
 
     for category, video_id in vid_list:
@@ -96,23 +109,12 @@ def process_vids(vid_list, args):
             logger.info(f"Leased {category} {video_id}. Downloading audio")
 
             # Download the audio file.
-            outfile_name = f"{video_id}.mp4"
-            video = YouTube(f"https://www.youtube.com/watch?v={video_id}",
-                            use_oauth=True, allow_oauth_cache=True,
-                            token_file=YT_TOKEN_FILE)
-
-            audio_streams = video.streams.filter(
-                only_audio=True).order_by('abr')
-            audio_streams.first().download(
-                output_path=str(args.workdir),
-                filename=outfile_name,
-                max_retries=5,
-                skip_existing=args.cache)
+            (audio_filename, vid_info) = download_audio(video_id)
 
             # Run whisper for transcription
             if not (args.cache and os.path.exists(whisper_out_filename)):
                 start = time.time()
-                logger.info(f"Starting Whisper at {start} on {outfile_name} "
+                logger.info(f"Starting Whisper at {start} on {audio_filename} "
                             f"writing to {args.workdir}")
                 subprocess.run([
                     "whisperx",
@@ -126,7 +128,7 @@ def process_vids(vid_list, args):
                     "--output_format=json",
                     f"--output_dir={str(args.workdir)}",
                     "--",
-                    str(args.workdir.joinpath(outfile_name))])
+                    audio_filename])
                 end = time.time()
                 logger.info("Whisper took: %d seconds" % (end - start))
 
@@ -140,7 +142,14 @@ def process_vids(vid_list, args):
                 'category': category,
                 'transcripts': {transcript_obj["language"]:
                                 transcript_obj},
-                'video_id': video_id
+                'video_id': video_id,
+                'metadata': {
+                    'title': vid_info.get('title', 'missing title'),
+                    'video_id': video_id,
+                    'description': vid_info.get('description', ''),
+                    'channel_id': vid_info.get('channel_id', ''),
+                    'publish_date': get_publish_date(vid_info),
+                }
             })
             response = requests.put(
                 make_endpoint_url("transcript"),
@@ -167,9 +176,9 @@ def process_vids(vid_list, args):
         except Exception:
             transcription_error_count += 1
             logger.exception("Transcribe failed for " + video_id)
-            jitter_s = randint(2, 10)
+            jitter_s = random.randint(2, 10)
             logger.info(f"Jittering by {jitter_s} seconds")
-            sleep(jitter_s)
+            time.sleep(jitter_s)
 
 
 def process_category(category, videos, args):
@@ -201,10 +210,6 @@ def main():
     parser.add_argument('-x', '--hf_token', dest='hf_token',
                         metavar="HF_TOKEN", type=str,
                         help='Hugging Face token',
-                        required=True)
-    parser.add_argument('-y', '--yt_token', dest='yt_token',
-                        metavar="YT_TOKEN", type=str,
-                        help='Youtube Oauth Refresh Token',
                         required=True)
     parser.add_argument('-m', '--model', dest='model', metavar="MODEL",
                         type=str, help='Downloads whisper MODEL',
