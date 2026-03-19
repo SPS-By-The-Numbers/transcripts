@@ -68,7 +68,7 @@ async function uploadTrancript(req, res) {
   }
 
   console.log("Getting metadata");
-  const metadata = await ensureMetadata(req, videoId);
+  const metadata = req.body.metadata ?? await ensureMetadata(req, videoId);
 
   console.log("Setting metadata");
   if (!(await setMetadata(req.body.category, metadata))) {
