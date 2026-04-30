@@ -40,7 +40,7 @@
     "lzma-native": "^8.0.6",
     "sentence-splitter": "^5.0.0",
     "source-map-support": "^0.5.21",
-    "youtubei.js": "^16.0.1"
+    "youtubei.js": "^17.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -5,8 +5,8 @@ steps:
   secretEnv: ['USERNAME', 'PASSWORD']
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker buildx build -t $$USERNAME/${_REPOSITORY}:${_TAG} .']
-  secretEnv: ['USERNAME']
+  args: ['-c', 'docker buildx build --secret id=HF_TOKEN,src=<(echo $$HF_TOKEN) -t $$USERNAME/${_REPOSITORY}:${_TAG} .']
+  secretEnv: ['USERNAME', 'HF_TOKEN']
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args: ['-c', 'docker push $$USERNAME/${_REPOSITORY}:${_TAG}']
@@ -22,3 +22,5 @@ availableSecrets:
     env: 'PASSWORD'
   - versionName: projects/sps-by-the-numbers/secrets/docker_username/versions/latest
     env: 'USERNAME'
+  - versionName: projects/sps-by-the-numbers/secrets/huggingface/versions/latest
+    env: 'HF_TOKEN'

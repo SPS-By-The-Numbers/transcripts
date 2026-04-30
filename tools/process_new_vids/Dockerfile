@@ -17,25 +17,27 @@ EOF
 
 RUN <<EOF
   python -m venv /workspace/venv/whisperx
-  source /workspace/whisperx/bin/activate
+  . /workspace/venv/whisperx/bin/activate
   pip install whisperx==3.8.2
+EOF
 
 # Download models into image.
 # Use int8 compute type just to make whisperx always complete at this step.
 RUN --mount=type=secret,id=HF_TOKEN <<EOF
-  source /workspace/venv/whisperx/bin/activate
-  whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token=$(cat /run/secrets/HF_TOKEN) --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
+  . /workspace/venv/whisperx/bin/activate
+  export HF_TOKEN=$(cat /run/secrets/HF_TOKEN)
+  whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token="${HF_TOKEN}" --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 
 RUN <<EOF
   python -m venv /workspace/venv/vast
-  source /workspace/venv/vast/bin/activate
+  . /workspace/venv/vast/bin/activate
   pip install vastai==0.5.0
 EOF
 
 COPY requirements.txt /workspace/app/
 RUN <<EOF
-  source /workspace/venv/whisperx/bin/activate
+  . /workspace/venv/whisperx/bin/activate
   pip install -r requirements.txt
 EOF
 
