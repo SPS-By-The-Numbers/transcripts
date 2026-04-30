@@ -36,7 +36,7 @@ def start_transcribe(
         event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
     """Start the vast.ai instance which queries the new videos"""
 
-    logger.info("start_transcribe event", event)
+    logger.info(f"start_transcribe event {event!r}")
 
     # See if there are videos
     num_new_videos = 0
@@ -144,9 +144,9 @@ def stop_transcribe_instance(
     but this can be overrided with the stale_s parameter in the message.
     """
     params = event.data.message.json
-    logger.info("stop_transcript_instance event", event)
+    logger.info(f"stop_transcript_instance event {event!r}")
     instances_to_remove = {i for i in params["instance_ids"]}
-    logger.info("request contained instances to remove:", instances_to_remove)
+    logger.info("request contained instances to remove:", sorted(instances_to_remove))
 
     vast = VastAI(
         _access_secret_version('sps-by-the-numbers', 'vast_api_key'),
