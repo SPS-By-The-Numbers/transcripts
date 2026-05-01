@@ -12,14 +12,6 @@ import type { Iso6393Code, VideoId } from 'common/params';
 
 const LANGUAGES = new Set<Iso6393Code>(["eng"]);
 
-async function ensureMetadata(req, videoId) {
-  // If there is a manually constructed metadata, just send it.
-  if (req.body.metadata) {
-    return req.body.metadata;
-  }
-  return await scrapeMetadata(videoId);
-}
-
 async function uploadTrancript(req, res) {
   console.log("Verifying auth");
   const authCodeErrors = validateObj(req.body, 'authCodeParam');
@@ -68,7 +60,7 @@ async function uploadTrancript(req, res) {
   }
 
   console.log("Getting metadata");
-  const metadata = req.body.metadata ?? await ensureMetadata(req, videoId);
+  const metadata = req.body.metadata ?? await scrapeMetadata(videoId);
 
   console.log("Setting metadata");
   if (!(await setMetadata(req.body.category, metadata))) {

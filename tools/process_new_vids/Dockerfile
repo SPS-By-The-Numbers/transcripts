@@ -15,6 +15,14 @@ RUN <<EOF
   mkdir -p /workspace/tmp
 EOF
 
+# Install deno so yt-dlp has a JS runtime for YouTube extraction.
+RUN <<EOF
+  curl -fsSL https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip -o /tmp/deno.zip
+  unzip /tmp/deno.zip -d /usr/local/bin/
+  rm /tmp/deno.zip
+  chmod 755 /usr/local/bin/deno
+EOF
+
 RUN <<EOF
   python -m venv /workspace/venv/whisperx
   . /workspace/venv/whisperx/bin/activate

@@ -136,6 +136,15 @@ def process_vids(vid_list, args):
             with open(args.workdir.joinpath(f"{video_id}.json")) as f:
                 transcript_obj = json.load(f)
 
+            metadata = {
+                'video_id': video_id,
+                'channel_id': vid_info.get('uploader_url',
+                                           vid_info.get('channel_url', '')),
+                'title': vid_info.get('title', 'missing title'),
+                'description': vid_info.get('description', ''),
+                'publish_date': get_publish_date(vid_info),
+            }
+
             logger.info("Uploading transcript")
             logger.debug({
                 **AUTH_PARAMS,
@@ -143,13 +152,7 @@ def process_vids(vid_list, args):
                 'transcripts': {transcript_obj["language"]:
                                 transcript_obj},
                 'video_id': video_id,
-                'metadata': {
-                    'title': vid_info.get('title', 'missing title'),
-                    'video_id': video_id,
-                    'description': vid_info.get('description', ''),
-                    'channel_id': vid_info.get('channel_id', ''),
-                    'publish_date': get_publish_date(vid_info),
-                }
+                'metadata': metadata,
             })
             response = requests.put(
                 make_endpoint_url("transcript"),
@@ -158,7 +161,8 @@ def process_vids(vid_list, args):
                     'category': category,
                     'transcripts': {transcript_obj["language"]:
                                     transcript_obj},
-                    'video_id': video_id
+                    'video_id': video_id,
+                    'metadata': metadata,
                 })
 
             if response.status_code != 200:
