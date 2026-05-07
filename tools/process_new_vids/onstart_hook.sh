@@ -11,6 +11,6 @@ cd /workspace/app
 pip install yt-dlp --upgrade
 
 # Do transcription
-python transcribe_worker.py -w /tmp/transcribe -t "${1:-4}" -x "$2" -m large-v3 -c -s
+python transcribe_worker.py -w /tmp/transcribe -t "${1:-4}" -x "$2" -m large-v3-turbo -c -s
 
 ./lysine_protocol.sh "${5:-10}"

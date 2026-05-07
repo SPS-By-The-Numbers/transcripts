@@ -34,7 +34,7 @@ EOF
 RUN --mount=type=secret,id=HF_TOKEN <<EOF
   . /workspace/venv/whisperx/bin/activate
   export HF_TOKEN=$(cat /run/secrets/HF_TOKEN)
-  whisperx --model=large-v3 --language=en --thread=4 --hf_token="${HF_TOKEN}" --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
+  whisperx --model=large-v3-turbo --language=en --thread=4 --hf_token="${HF_TOKEN}" --diarize --output_form=json --compute_type=int8 --output_dir=/tmp -- prime_model.mp4
 EOF
 
 RUN <<EOF
