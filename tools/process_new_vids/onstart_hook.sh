@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /workspace/venv/whisperx/bin/activate
+
 cd /workspace/app
 
 # Default to giving 10 mins on failure.

@@ -26,7 +26,7 @@ EOF
 RUN <<EOF
   python -m venv /workspace/venv/whisperx
   . /workspace/venv/whisperx/bin/activate
-  pip install whisperx==3.8.2
+  pip install whisperx==3.8.2 torchcodec==0.7.0
 EOF
 
 # Download models into image.
