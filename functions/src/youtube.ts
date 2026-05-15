@@ -4,15 +4,16 @@ import { Innertube } from 'youtubei.js';
 import type { YTNodes } from 'youtubei.js';
 import type { VideoId } from "common/params";
 
-let global_youtube : Innertube | null;
+let global_youtube_promise : Promise<Innertube> | null;
 
 type Video = YTNodes.CompactVideo | YTNodes.GridVideo | YTNodes.PlaylistPanelVideo | YTNodes.PlaylistVideo | YTNodes.ReelItem | YTNodes.Video | YTNodes.WatchCardCompactVideo | YTNodes.ShortsLockupView;
 
 async function getYoutube() {
-  if (!global_youtube) {
-    global_youtube = await Innertube.create({generate_session_locally: true});
+  if (!global_youtube_promise) {
+    global_youtube_promise = Innertube.create({generate_session_locally: true})
+      .catch(err => { global_youtube_promise = null; throw err; });
   }
-  return global_youtube;
+  return global_youtube_promise;
 }
 
 export async function getVideo(videoId : VideoId) {
