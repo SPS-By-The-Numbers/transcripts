@@ -92,7 +92,8 @@ function buildQueryAndFilter(rawQuery: string) {
     const included = parsed[key];
     if (included !== undefined) {
       const values = (Array.isArray(included) ? included : [included]) as string[];
-      const clause = values.map((v) => `${key} = "${escapeFilterValue(v)}"`).join(' OR ');
+      // CONTAINS gives case-insensitive substring matching (experimental Meili feature).
+      const clause = values.map((v) => `${key} CONTAINS "${escapeFilterValue(v)}"`).join(' OR ');
       filter.push(values.length > 1 ? `(${clause})` : clause);
     }
 
@@ -100,7 +101,7 @@ function buildQueryAndFilter(rawQuery: string) {
     if (excluded !== undefined) {
       const values = (Array.isArray(excluded) ? excluded : [excluded]) as string[];
       for (const v of values) {
-        filter.push(`${key} != "${escapeFilterValue(v)}"`);
+        filter.push(`NOT ${key} CONTAINS "${escapeFilterValue(v)}"`);
       }
     }
   }
@@ -293,8 +294,9 @@ function SearchControls({category, setResults, setErrorMessage} : SearchControls
   return (
     <Stack component="search" direction="column" spacing={1.5}>
       <Typography variant="caption" color="text.secondary">
-        Filter prefixes: <code>speaker:</code>, <code>tags:</code> — quote multi-word values
-        (e.g. <code>budget speaker:&quot;Jane Doe&quot;</code>); prefix with <code>-</code> to exclude.
+        Filter prefixes: <code>speaker:</code>, <code>tags:</code> — case-insensitive partial match;
+        quote multi-word values (e.g. <code>budget speaker:&quot;Jane Doe&quot;</code>);
+        prefix with <code>-</code> to exclude.
       </Typography>
       <Stack direction="row" spacing={1}>
         <FormControl
