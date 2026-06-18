@@ -40,7 +40,7 @@ async function indexBatch(accessor: FirebaseWebClientStorageAccessor,
     try {
       const transcript = await DiarizedTranscript.fromStorage(accessor, category, videoId, [categoryLang]);
       
-      const speakerInfo = await getSpeakerControlInfo(category, videoId).speakerInfo;
+      const speakerInfo = (await getSpeakerControlInfo(category, videoId)).speakerInfo;
       const speakerBubble = transcript.groupSentenceInfoBySpeaker();
       const sentences = transcript.languageToSentenceTable[categoryLang];
 
