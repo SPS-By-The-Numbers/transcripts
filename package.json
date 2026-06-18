@@ -59,6 +59,7 @@
     "react-select": "^5.8.0",
     "react-youtube": "^10.1.0",
     "sass": "^1.77.2",
+    "search-query-parser": "^1.6.0",
     "sentence-splitter": "^5.0.0",
     "typescript": "^5.4.5"
   },

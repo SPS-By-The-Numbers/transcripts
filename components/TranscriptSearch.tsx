@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import SearchResult from 'components/SearchResult';
 
 import { MeiliSearch } from 'meilisearch';
+import { parse as parseSearchQuery } from 'search-query-parser';
 import { getVideoPath } from 'common/paths';
 import { parseISO } from 'date-fns';
 import { styled } from '@mui/material/styles';
@@ -68,12 +69,56 @@ function isValidSort(sortType: string) {
       || sortType === 'publishDate:desc');
 }
 
+// Filterable attributes a user can target with a `prefix:value` token in the
+// search box (see `filterableAttributes` in tools/search/setup.mts).
+const FILTER_KEYWORDS = ['speaker', 'tags'];
+
+function escapeFilterValue(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+// Parses Google-style `prefix:value` tokens out of the raw query, turning them
+// into a MeiliSearch `filter` and leaving the rest as the full-text query.
+function buildQueryAndFilter(rawQuery: string) {
+  const parsed = parseSearchQuery(rawQuery, { keywords: FILTER_KEYWORDS });
+
+  // search-query-parser returns the original string when no keyword matched.
+  if (typeof parsed === 'string') {
+    return { searchText: parsed, filter: undefined as string[] | undefined };
+  }
+
+  const filter: string[] = [];
+  for (const key of FILTER_KEYWORDS) {
+    const included = parsed[key];
+    if (included !== undefined) {
+      const values = (Array.isArray(included) ? included : [included]) as string[];
+      const clause = values.map((v) => `${key} = "${escapeFilterValue(v)}"`).join(' OR ');
+      filter.push(values.length > 1 ? `(${clause})` : clause);
+    }
+
+    const excluded = parsed.exclude?.[key];
+    if (excluded !== undefined) {
+      const values = (Array.isArray(excluded) ? excluded : [excluded]) as string[];
+      for (const v of values) {
+        filter.push(`${key} != "${escapeFilterValue(v)}"`);
+      }
+    }
+  }
+
+  const text = parsed.text;
+  const searchText = Array.isArray(text) ? text.join(' ') : (text ?? '');
+
+  return { searchText, filter: filter.length > 0 ? filter : undefined };
+}
+
 async function doSearch(category : string,
                         query : string,
                         sortType : string,
                         groupType: string) {
   const indexName = `${category}-${Constants.CATEGORY_CHANNEL_MAP[category].language}`;
   const index = searchClient.index(indexName);
+
+  const { searchText, filter } = buildQueryAndFilter(query);
 
   const sort = isValidSort(sortType) ? [ sortType ] : undefined;
   const queryOptions = {
@@ -82,6 +127,7 @@ async function doSearch(category : string,
       attributesToCrop: [ 'text' ],
       showMatchesPosition: true,
       sort,
+      filter,
       cropLength: 256,
       hitsPerPage: 1000, // Force exact for now.
       limit: 1000,
@@ -98,7 +144,7 @@ async function doSearch(category : string,
     }
   }
 
-  return await index.search(query, queryOptions);
+  return await index.search(searchText, queryOptions);
 }
 
 function Snippet({ text, position }: { text: string, position: Array<Position> | undefined } ) {
@@ -246,6 +292,10 @@ function SearchControls({category, setResults, setErrorMessage} : SearchControls
 
   return (
     <Stack component="search" direction="column" spacing={1.5}>
+      <Typography variant="caption" color="text.secondary">
+        Filter prefixes: <code>speaker:</code>, <code>tags:</code> — quote multi-word values
+        (e.g. <code>budget speaker:&quot;Jane Doe&quot;</code>); prefix with <code>-</code> to exclude.
+      </Typography>
       <Stack direction="row" spacing={1}>
         <FormControl
           sx={{
