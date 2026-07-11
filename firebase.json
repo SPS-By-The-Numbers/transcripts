@@ -1,7 +1,7 @@
 {
   "functions": [
     {
-      "runtime": "nodejs20",
+      "runtime": "nodejs24",
       "source": "functions",
       "codebase": "functions",
       "predeploy": [

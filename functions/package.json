@@ -40,9 +40,10 @@
     "lzma-native": "^8.0.6",
     "sentence-splitter": "^5.0.0",
     "source-map-support": "^0.5.21",
-    "youtubei.js": "^17.0.1"
+    "youtubei.js": "^17.2.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.101.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^24.0.0",

@@ -46,13 +46,13 @@ async function findNewVideos(req, res) {
       const metadata_snapshot = await metadata_ref.once("value");
       const new_video_ids = {};
 
-      for (const vid of await getVideosForCategory(category)) {
+      for (const video_id of await getVideosForCategory(category)) {
         if (req.body?.limit && ++limit > req.body.limit) {
           break;
         }
 
-        if ('id' in vid && (!metadata_snapshot.exists() || !metadata_snapshot.child(vid.id).exists())) {
-          new_video_ids[vid.id] = {add: add_ts, lease_expires: "", vast_instance: ""};
+        if (!metadata_snapshot.exists() || !metadata_snapshot.child(video_id).exists()) {
+          new_video_ids[video_id] = {add: add_ts, lease_expires: "", vast_instance: ""};
         }
       }
 
