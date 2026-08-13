@@ -16,8 +16,8 @@ import yt_dlp
 logger = logging.getLogger(__name__)
 
 AUTH_PARAMS = {
-    'user_id': os.environ['CONTAINER_ID'],
-    'auth_code': os.environ['API_PASSWORD'],
+    'user_id': os.environ.get('CONTAINER_ID', 'container_id_unset'),
+    'auth_code': os.environ.get('API_PASSWORD', 'api_password_unset'),
 }
 
 
